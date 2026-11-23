@@ -8,17 +8,13 @@
 Mods.AethonMod.DisplayName: Aethon, el Grimorio Eterno
 
 Items: {
-		// v6.168 — EL CLICKER DEFINITIVO (la letra: «crea el arma
-		// clicker definitiva, esta vez se super creativo»)
-		ClickerDelUmbral: {
-			DisplayName: EL CLICKER DEL UMBRAL
-			Tooltip: La pluma del umbral: cada clic SIEMBRA una marca de tinta · a las 8 marcas, EL UMBRAL SE ROMPE y la sentencia detona en cadena
-		}
+		// v6.170 — EL CLICKER DEL UMBRAL MURIÓ (la letra: «esta
+		// horrible, lo puedes borrar»): claves extirpadas.
 		// v6.168 — EL ARMA NUEVA (la letra: «crea una nueva arma, su
 		// ataque seran lineas en el aire a gran velocidad»)
 		LaReglaDelCielo: {
-			DisplayName: LA REGLA DEL CIELO
-			Tooltip: Líneas largas y delgadas que caen donde miras: el destello nace arriba o abajo al azar y recorre la línea · glow, desenfoque y turbulencia en la punta
+			DisplayName: La Regla del Cielo
+			Tooltip: La katana del cielo: cada uso desata UN TAJO de media luna donde miras — el filo blanco recorre el arco en diagonal, arriba→abajo o abajo→arriba al azar
 		}
 	LibroCorrupto: {
 		DisplayName: Libro Consagrado
@@ -2709,6 +2705,17 @@ Cronista: {
 	ChatObjetos3: Los otros mundos también escriben. Peor, pero escriben.
 	ChatCierre1: Cuando acabe tu historia cerraré el libro. Y por fin podré parpadear.
 	ChatCierre2: …No me mires así. También los testigos soñamos.
+	// v6.170 — LAS CHARLAS DEL ARCA (la letra: «cuenta con cada
+	// cierto despertar una parte del lore, y es quien desbloquea
+	// finalmente esa parte del lore en el libro de informacion»):
+	// al alcanzar el despertar de cada arca (4/24/44/64/84), la
+	// siguiente charla NARRA ESA SECCIÓN y la abre en el libro —
+	// la historia que esperó todo el camino para contarse.
+	ChatLore1: Siéntate. Es hora de la primera arca. Aethon no nació dios: nació hambre que aprendió a pensar. Los dioses que conociste fueron sus comidas. Lo que llamas Terraria es una mesa que él aún no termina de mirar. Ya está escrita en tu libro — la página que antes solo mostraba su sello.
+	ChatLore2: La segunda arca, entonces. El pacto no lo firmaste tú: lo firmó tu hambre con la suya. El Nivel pregunta cuánto ha comido él; el Despertar pregunta cuánto de él cabe en ti. Dos varas, ninguna sustituye a la otra. El libro ya puede mostrar la letra pequeña.
+	ChatLore3: Tercera arca. La Llegada no tuvo trueno: correspondencia que nadie recuerda haber pedido. El arma es su forma sellada, el altar son sus raíces en este mundo. Y tú… tú eres el ciclo actual. Todos los portadores lo fueron. Ninguno terminó de entenderlo. Tu libro acaba de abrir esa página.
+	ChatLore4: Cuarta arca. La pregunta que te hiciste en voz baja: ¿por qué un dios esperaría tanto? Porque tú eres inmortal y él lo sabe. La inmortalidad lo aburre todo menos una cosa: la primera compañía de una eternidad. Esa página ya es tuya. Léela despacio.
+	ChatLore5: Última arca. El canon asentado: la Ira que recuerda cielos comidos, el Pilar que cuenta hacia atrás, las preguntas que él no puede comer. Y la verdad dicha en voz baja: no buscaba un apóstol. Buscaba que el hambre no estuviera sola. El Compendio está completo. Yo solo soy el margen.
 }
 
 Ira: {
@@ -3790,21 +3797,21 @@ Pergamino: {
 	SecLore: EL COMPENDIO DEL ETERNO
 	LoreIntro: — Grimorio del Eterno, susurrado durante la onceava noche de hambre Todo portador se hace, tarde o temprano, la misma pregunta.
 	LoreEpigrafe0: «Los que preguntan tienen finales. Yo esperé a lo único que no los tiene.»
-	LoreSecI: LORE I — EL DEVORADOR DE FINALES
+	LoreSecI: El devorador de finales
 	LoreI_Loquedevora: Aethon no es un dios en el sentido en que los mortales usan la palabra. Los dioses quieren ser adorados; Aethon quiere ser alimentado. No acumula poder como el dragón acumula oro: lo metaboliza —el poder no es su ambición, es su alimento, y la ambición es una palabra de mortales que jamás aprendió a pronunciar bien.
 	LoreI_LaCuarentenadeTer: Terraria es una dimensión defendida. Algo, hace eras, decidió que este mundo estaría custodiado por fuerzas extrañas, y esa cuarentena ha rechazado dioses antes que a Aethon: dioses más grandes, más ruidosos, llegados como ejércitos de dientes y devueltos por la puerta como peregrinos borrachos.
 	LoreI_ElSellado: ¿Por qué un ser de su naturaleza se encogería a propósito hasta caber en la palma de una mano? La respuesta oficial del canon: para cumplir su capricho —entrar, y cultivar un apóstol que dominara la dimensión en su nombre—.
-	LoreSecII: LORE II — EL SISTEMA DEL PACTO
+	LoreSecII: El sistema del pacto
 	LoreEpigrafe1: «Incluso el hambre puede refinarse. Incluso el vacío tiene modales.»
 	LoreII_ElNivel: El Nivel responde a la pregunta más antigua que existe, la del carroñero: ¿cuánto ha comido? Es infinito por diseño, porque el hambre de Aethon no tiene fondo y el canon se niega a fingir uno.
 	LoreII_ElDespertar: El Despertar responde a una pregunta de otro orden y con otro dueño: ¿cuánto de Aethon cabe en ti? No es experiencia: es ritual, y los rituales tienen un número exacto de pasos —las Ciento Veinte Puertas—.
 	LoreII_Doshambresdistinta: La tabla siguiente fija la distinción con las palabras exactas que conviene copiar en la biblia interna del mod. Tabla 1 · El Nivel y el Despertar: dos hambres distintas Ninguna de las dos varas sustituye a la otra. Un portador de Nivel infinito y Despertar bajo es un granjero con una fiera: fuerza sin ventana.
-	LoreSecIII: LORE III — EL CICLO DEL PORTADOR
+	LoreSecIII: El ciclo del portador
 	LoreEpigrafe2: «Lo que siguen son las páginas que el libro permite leer. Las demás te leerán a ti.»
 	LoreIII_LaLlegada: La Llegada es única por portador. No hay trueno: el grimorio aparece cerca —bajo un árbol, junto a la puerta, a veces sobre la mesa de casa, como correspondencia que nadie recuerda haber pedido—.
 	LoreIII_ElGrimoriodelEter: El arma principal es la forma sellada del dios: la cúspide de la magia no porque conozca todos los hechizos, sino porque todos los hechizos son migas caídas de su mesa —fragmentos de sistemas mágicos devorados en universos ya digeridos—.
 	LoreIII_ElAltar: es el medio por el que el libro se arraiga a esta realidad —sus raíces clavadas en el mundo mismo—.
-	LoreSecIV: LORE IV — LA RESPUESTA
+	LoreSecIV: La respuesta
 	LoreEpigrafe3: «Hay más páginas en mí de las que este mundo ha leído. ¿Quieres verlas? Aliméntame.»
 	LoreIV_Laimposibilidaddel: Empecemos por lo que la pregunta da por supuesto: que los dioses no esperan. Y es verdad. Esperar es la única plegaria que los mortales pueden dirigir a lo alto sin recibir respuesta; es un oficio de criaturas que tienen poco tiempo.
 	LoreIV_Laentidadinmortal: El jugador no es un mortal cualquiera: es una entidad inmortal. Muere —disuelto en lava, aplastado por un ojo gigante, picoteado por demonios, empalado por su propio descuido— y vuelve. Siempre vuelve.
@@ -3814,7 +3821,7 @@ Pergamino: {
 	Auras3: • EL HAMBRE: ya sin aura — el ojo rojo e inquieto del libro es el ÚNICO indicador (su máquina corre a velocidad normal: 100% en una hora).
 	Auras4: • LA QUEMADURA DEL VACÍO (debuff del enemigo): el fuego negro de violeta — 1% de vida máxima cada medio segundo, 5 s tras dejar el aura.
 	Auras5: • EL AURA DE LAS OLEADAS: los enemigos del festín visten la bruma violeta del grimorio.
-	Auras6: • El ojo de este pergamino te está mirando. Siempre.
+	Auras6: • El ojo del Eterno siempre observa. Sí, en esos momentos también.
 	LoreGrimorioT: EL GRIMORIO DEL ETERNO
 	LoreGrimorio1: Un libro que devora. No es un arma que se empuña: es un hambre que se lleva. Cada arma comida, cada esencia, cada jefe caído despierta un peldaño más del libro.
 	LoreGrimorio2: La forma sellada del dios: la cúspide de la magia no porque conozca todos los hechizos, sino porque todos los hechizos son migas caídas de su mesa. Cada escuela de magia es un recuerdo del menú de Aethon: el libro es el inicio y el fin de todas las magias porque ya se comió el medio.
@@ -3836,7 +3843,7 @@ Pergamino: {
 	LorePiezasT: EL CANON ASENTADO
 	LorePiezas1: Las diecisiete piezas del lore, asentadas en el Compendio del Eterno: la forma sellada, el sistema del pacto, el ciclo del portador, el final y las migajas. Cada pregunta abierta queda canónicamente sin respuesta —un dios que lo sabe todo solo puede ser herido por las preguntas.
 	LorePiezas2: La regla de oro del horror cósmico: el dios es más grande mientras no se lo vea entero. Aethon debe verse, siempre, a medias —un ojo que parpadea, diecisiete que orbitan, un cuerpo que nunca se muestra completo.
-	LoreSecV: LORE V — EL CANON ASENTADO
+	LoreSecV: El canon asentado
 	LoreV_LaIra: La Ira de un Ser Exterior no es un hechizo: es un recuerdo con la seguridad quitada. Durante seis segundos, el cielo sobre el campo de batalla recuerda el último cielo de un universo devorado —y todo en un radio masivo recibe el daño de ese recuerdo—. Después de la Ira, el grimorio no susurra durante un rato: no está enojado, está recordando cómo era ser de ese tamaño.
 	LoreV_ElPilar: El Pilar Interior no parpadea al azar: cuenta. Es una cuenta regresiva, aunque nadie sabe de qué ni hasta cuándo. El ojo del pilar mira la puerta del 120 más de lo que mira al portador. Quizá le tiene cariño a lo que encierra. Quizá le tiene miedo.
 	LoreV_ElSellado: Aethon (Sellado): diecisiete ojos que renacen más fuerte cada vez, porque Aethon ya devoró la muerte de esos lugares. Pelear contra él es pelear contra diecisiete funerales que se niegan a terminar. Ese es el punto. Ese siempre fue el punto.

@@ -10,39 +10,70 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Projectiles.Regla
 {
     // =====================================================================
-    //  LineaDelCielo — v6.168 — LA LÍNEA (el cuerpo del arma La Regla
-    //  del Cielo — la letra: «lineas en el aire a gran velocidad,
-    //  lineas con glow, desenfoque y un poco de turbulencia al final,
-    //  estas lineas empezaran con un brillo de arriba hacia abajo o de
-    //  abajo hacia arriba de forma aleatoria»).
+    //  LineaDelCielo — v6.170 — EL TAJO DE KATANA (la letra: «yo
+    //  necesito tajos, tajos iguales a los de las katanas en los
+    //  animes, intenta investigar esos tajos de katanas en anime e
+    //  intenta recrearlos en el arma la regla del cielo»).
     //
-    //  LOS TRES ACTOS DE LA LÍNEA (~20 ticks de vida):
-    //   ACTO 1 — EL DESTELLO INICIAL (ticks 0-8): un núcleo de luz
-    //   BRILLA en uno de los extremos (al azar: arriba o abajo) y
-    //   CORRE hacia el otro — «a gran velocidad»: el brillo recorre
-    //   los 320 px en 8 ticks (40 px/tick, el latigazo).
-    //   ACTO 2 — EL CUERPO (todo el rato): la línea larga y delgada —
-    //   núcleo blanco de 2-3 px + EL GLOW (halo aditivo violeta-cielo)
-    //   + EL DESENFOQUE (dos capas más anchas y tenues a los lados,
-    //   el blur barato de la casa).
-    //   ACTO 3 — LA TURBULENCIA AL FINAL (ticks 8-20): el EXTREMO
-    //   donde MURIÓ el brillo se ONDEA (la punta tiembla ±3-4 px con
-    //   ruido senoidal) y SUELTA 2-3 chispas por tick — la línea se
-    //   disipa desde su punta turbulenta.
+    //  LA ANATOMÍA INVESTIGADA (el canon del tajo anime — la media
+    //  luna cel-shaded que la investigación de la sesión describió:
+    //  «electric-blue trails, glowing crescents, sharp edges, flat
+    //  tones»):
+    //   1. LA MEDIA LUNA — un arco de ~110° con bordes AFILADOS y
+    //      tonos planos (nada de gradientes suaves): el corte YA
+    //      ocurrió cuando lo ves.
+    //   2. EL NÚCLEO BLANCO-CALIENTE en el filo interior (el filo
+    //      de la hoja) + EL HALO AZUL ELÉCTRICO en el exterior (dos
+    //      pasadas parpadeantes — el color del anime).
+    //   3. EL ECO FANTASMA — un segundo arco más chico y tenue
+    //      DETRÁS del corte (el afterimage del gesto).
+    //   4. VIDA ULTRACORTA (13 ticks): nace AL 100 % y se apaga —
+    //      el corte no crece, OCURRE.
+    //   5. EL SENTIDO DIAGONAL del gesto: el arco vive INCLINADO
+    //      (~35° del vertical) y el revelado de punta a punta corre
+    //      ABAJO→ARRIBA o ARRIBA→ABajo al azar — LA LETRA de la
+    //      v6.168 («un brillo de arriba hacia abajo o de abajo
+    //      hacia arriba de forma aleatoria») vive como EL SENTIDO
+    //      DE LA HOJA.
+    //   6. LA LÍNEA DE VELOCIDAD — la estela recta y fina que une
+    //      la mano del portador con el centro del corte (la
+    //      trayectoria de la hoja, la firma del anime).
     //
-    //  EL GOLPE: UNA pasada — al nacer, todo lo que vive en el
-    //  rectángulo delgado (6 × 320) recibe el daño (la columna del
-    //  cielo, sin i-frames compartidos).
+    //  EL MOTOR: TajoLib.Tajo — EL PRIMITIVO DE LA CASA (el del
+    //  Tajo Astral): eco fantasma + halo doble parpadeante + núcleo
+    //  BoltCore, revelado de punta a punta con arranque elástico.
+    //  CERO texturas del proyecto (solo SoftGlow procedural).
     // =====================================================================
     public class LineaDelCielo : ModProjectile
     {
-        private const float ALTO = 320f;      // «largas en longitud»
-        private const float ANCHO = 6f;      // «muy delgadas»
-        private const int TICKS_DESTELLO = 8;   // el latigazo del brillo
-        private const int VIDA = 20;
+        /// <summary>Vida total del tajo (ticks) — ultracorto.</summary>
+        private const int VIDA = 13;
 
-        /// <summary>¿El brillo SUBE (1) o BAJA (0)? — al azar al nacer.</summary>
-        private bool Sube => Projectile.ai[0] >= 1f;
+        /// <summary>El revelado de punta a punta (la hoja recorre el
+        /// arco — 4 ticks: la velocidad del anime).</summary>
+        private const int REVELA = 4;
+
+        /// <summary>El grosor del filo (px en el centro — la lente).</summary>
+        private const float ANCHO = 5.2f;
+
+        /// <summary>La apertura de la media luna (~110°).</summary>
+        private const float APERTURA = 1.92f;
+
+        /// <summary>La inclinación diagonal del gesto (~35°).</summary>
+        private const float INCLINACION = 0.61f;
+
+        /// <summary>La banda del golpe (±px del radio: la boca del arco).</summary>
+        private const float BANDA = 52f;
+
+        // === LA PALETA (el cielo de la casa: azul eléctrico anime) ===
+        private static readonly Color Filo = new(255, 252, 245);        // blanco-caliente
+        private static readonly Color HaloCielo = new(120, 200, 255);   // azul eléctrico
+        private static readonly Color HaloAlto = new(190, 235, 255);    // el borde casi blanco
+
+        /// <summary>¿La hoja SUBE (1) o BAJA (0)? — al azar al nacer (la letra v6.168).</summary>
+        private bool Sube => Projectile.ai[2] >= 1f;
+
+        public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
 
         public override void SetStaticDefaults()
         {
@@ -51,8 +82,8 @@ namespace AethonMod.Content.Projectiles.Regla
 
         public override void SetDefaults()
         {
-            Projectile.width = 8;
-            Projectile.height = 16;
+            Projectile.width = 10;
+            Projectile.height = 10;
             Projectile.friendly = true;
             Projectile.penetrate = -1;
             Projectile.tileCollide = false;
@@ -66,131 +97,155 @@ namespace AethonMod.Content.Projectiles.Regla
 
         public override void AI()
         {
-            // LA TURBULENCIA FINAL: desde que el destello llegó a su
-            // extremo, la PUNTA ondea y escupe chispas (la letra: «un
-            // poco de turbulencia al final»).
-            if (Projectile.timeLeft <= VIDA - TICKS_DESTELLO && Main.rand.NextBool())
+            // LAS MOTAS DEL CORTE (el aire herido: 2-3 chispas frías por
+            // tick en la banda del arco — la firma del anime)
+            if (Main.netMode != NetmodeID.Server && Main.rand.NextBool(2))
             {
-                float puntaY = Sube ? -ALTO * 0.5f : ALTO * 0.5f;
-                Vector2 punta = Projectile.Center + new Vector2(
-                    Main.rand.NextFloat(-3f, 3f), puntaY + Main.rand.NextFloat(-6f, 6f));
-                Dust d = Dust.NewDustPerfect(punta, DustID.Enchanted_Pink,
-                    new Vector2(Main.rand.NextFloat(-1.4f, 1.4f),
-                        Sube ? Main.rand.NextFloat(-1.8f, -0.3f) : Main.rand.NextFloat(0.3f, 1.8f)),
-                    130, new Color(170, 210, 255), 0.55f);
-                d.noGravity = true;
+                try
+                {
+                    float ang = AnguloMedio() + Main.rand.NextFloat(-APERTURA * 0.5f, APERTURA * 0.5f);
+                    Vector2 p = CentroMundo() + new Vector2(
+                        MathF.Cos(ang), MathF.Sin(ang)) * Radio() * Main.rand.NextFloat(0.85f, 1.05f);
+                    Dust d = Dust.NewDustPerfect(p, DustID.BlueMoss,
+                        new Vector2(Main.rand.NextFloat(-0.5f, 0.5f), -0.35f),
+                        130, new Color(150, 215, 255), 0.5f);
+                    d.noGravity = true;
+                }
+                catch { }
             }
+        }
+
+        // ================================================================
+        //  LA GEOMETRÍA (la sembró el ARMA en localAI al disparar — el
+        //  contrato del tajo: [0]=centro.X [1]=centro.Y [2]=radio
+        //  [3]=ángulo medio extra (0 = vertical puro))
+        // ================================================================
+        private Vector2 CentroMundo() => new(Projectile.localAI[0], Projectile.localAI[1]);
+        private float Radio() => Projectile.localAI[2] > 8f ? Projectile.localAI[2] : 150f;
+        private float AnguloMedio()
+        {
+            float diag = Sube ? -MathHelper.PiOver2 + INCLINACION
+                              : MathHelper.PiOver2 - INCLINACION;
+            return diag + Projectile.localAI[3];
         }
 
         public override void OnSpawn(IEntitySource fuente)
         {
-            // EL GOLPE DE LA COLUMNA: una pasada al nacer — todo lo que
-            // vive dentro del rectángulo delgado recibe su daño (el
-            // rectángulo real de la línea: ancho 8, alto 320).
+            // EL GOLPE DE LA MEDIA LUNA: una pasada al nacer — todo lo que
+            // vive en la BANDA del arco (|dist−radio| < BANDA && el ángulo
+            // dentro de la boca) recibe el tajo (el mismo contrato del
+            // Tajo Astral: la herida llega cuando el corte OCURRE).
             if (Main.netMode == NetmodeID.MultiplayerClient) return;
-            Rectangle columna = new Rectangle(
-                (int)(Projectile.Center.X - ANCHO), (int)(Projectile.Center.Y - ALTO * 0.5f),
-                (int)(ANCHO * 2), (int)ALTO);
-            for (int i = 0; i < Main.maxNPCs; i++)
+            try
             {
-                NPC n = Main.npc[i];
-                if (n == null || !n.active || n.life <= 0 || n.friendly ||
-                    n.townNPC || n.immortal || n.dontTakeDamage) continue;
-                Rectangle cuerpo = new Rectangle((int)n.position.X, (int)n.position.Y,
-                    n.width, n.height);
-                if (!columna.Intersects(cuerpo)) continue;
-                global::AethonMod.Content.Systems.GolpeMotor.Golpear(Projectile, n, Projectile.damage, 1.2f);
+                Vector2 c = CentroMundo();
+                float radio = Radio();
+                float medio = AnguloMedio();
+                float a0 = medio - APERTURA * 0.5f, a1 = medio + APERTURA * 0.5f;
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    NPC n = Main.npc[i];
+                    if (n == null || !n.active || n.life <= 0 || n.friendly ||
+                        n.townNPC || n.immortal || n.dontTakeDamage) continue;
+                    Vector2 rel = n.Center - c;
+                    float dist = rel.Length();
+                    if (Math.Abs(dist - radio) > BANDA + n.width * 0.5f) continue;   // fuera de la banda
+                    float ang = MathF.Atan2(rel.Y, rel.X);
+                    float delta = MathHelper.WrapAngle(ang - medio);
+                    if (Math.Abs(delta) > APERTURA * 0.5f + 0.25f) continue;        // fuera de la boca
+                    global::AethonMod.Content.Systems.GolpeMotor.Golpear(Projectile, n, Projectile.damage, 1.25f);
+                }
             }
+            catch { }
         }
 
         public override bool PreDraw(ref Color luzColor)
         {
             if (Main.netMode == NetmodeID.Server) return false;
+
+            // LA EDAD del tajo (de su nacimiento: timeLeft cuenta hacia 0)
+            float t = VIDA - Projectile.timeLeft;
+
+            // LA CAMPANA DE VIDA (nace AL 100 %: aguanta 60 % de la vida,
+            // cae en el 40 % restante — el corte ya ocurrió)
+            float campana = t < VIDA * 0.6f
+                ? 1f
+                : 1f - (t - VIDA * 0.6f) / (VIDA * 0.4f);
+            campana = MathHelper.Clamp(campana, 0f, 1f);
+
+            // EL REVELADO: la hoja recorre el arco de punta a punta en
+            // REVELA ticks, con el POP elástico de la casa (el arranque
+            // del anime: sale con impulso)
+            float reveal = Elastico(Math.Min(t / (float)REVELA, 1f));
+
+            // EL RADIO CRECE apenas al morir (×1.0 → ×1.15: el aliento)
+            float radio = Radio() * (1f + 0.15f * (t / VIDA));
+
+            Vector2 centro = CentroMundo() - Main.screenPosition;
+            float medio = AnguloMedio();
+
             try
             {
                 VFXCore.AbrirAdditive();
                 try
                 {
-                    Vector2 centro = Projectile.Center - Main.screenPosition;
-                    float t = Main.GlobalTimeWrappedHourly;
-                    int edad = VIDA - Projectile.timeLeft;
-                    float vidaAlfa = Projectile.timeLeft / (float)VIDA;   // 1→0
+                    float time = Main.GlobalTimeWrappedHourly;
+                    int seed = Math.Max(1, Projectile.identity + 37);
 
-                    // ========================================================
-                    //  EL CUERPO — larga y delgada, con GLOW y DESENFOQUE:
-                    //  · el NÚCLEO (2-3 px, blanco-cielo)
-                    //  · el GLOW (la capa aditiva violeta-cielo, 8 px)
-                    //  · EL DESENFOQUE (dos capas laterales 14/22 px, muy
-                    //    tenues — el blur barato: el halo que sangra)
-                    // ========================================================
-                    float ondula = MathF.Sin(t * 3.7f + Projectile.whoAmI) * 0.8f;
-                    Vector2 tam = new Vector2(2.6f, ALTO * vidaAlfa + 40f);
-                    // EL NÚCLEO
-                    Quad(VFXCore.SoftGlow, centro + new Vector2(ondula * 0.4f, 0f), tam, 0f,
-                        VFXCore.TintAlfa(new Color(235, 245, 255), 0.95f * vidaAlfa));
-                    // EL GLOW (la capa que la hace LÍNEA DE LUZ)
-                    Quad(VFXCore.SoftGlow, centro, new Vector2(8f, ALTO * vidaAlfa + 52f), 0f,
-                        VFXCore.TintAlfa(new Color(140, 190, 255), 0.65f * vidaAlfa));
-                    // EL DESENFOQUE (el sangrado del blur — dos pasadas)
-                    Quad(VFXCore.SoftGlow, centro, new Vector2(14f, ALTO * vidaAlfa + 60f), 0f,
-                        VFXCore.TintAlfa(new Color(120, 160, 255), 0.28f * vidaAlfa));
-                    Quad(VFXCore.SoftGlow, centro, new Vector2(22f, ALTO * vidaAlfa + 66f), 0f,
-                        VFXCore.TintAlfa(new Color(100, 130, 255), 0.14f * vidaAlfa));
-
-                    // ========================================================
-                    //  ACTO 1 — EL DESTELLO INICIAL (el latigazo): un
-                    //  núcleo BRILLA en su extremo de partida y CORRE la
-                    //  línea (arriba→abajo o abajo→arriba, el azar del
-                    //  nacimiento) — «a gran velocidad»: 40 px/tick.
-                    // ========================================================
-                    if (edad <= TICKS_DESTELLO)
+                    // === 1. LA LÍNEA DE VELOCIDAD (la trayectoria de la
+                    //     hoja: el trazo recto y fino de la mano al
+                    //     centro del corte — se apaga primero) ===
+                    Vector2? origen = OrigenDelGolpe();
+                    if (origen.HasValue)
                     {
-                        float fase = edad / (float)TICKS_DESTELLO;      // 0→1
-                        // el arranque: SUBE = nace abajo y corre arriba
-                        float yDestello = Sube
-                            ? (ALTO * 0.5f) - fase * ALTO
-                            : (-ALTO * 0.5f) + fase * ALTO;
-                        Vector2 posD = centro + new Vector2(0f, yDestello);
-                        // EL NÚCLEO DEL DESTELLO (blanco puro)
-                        Quad(VFXCore.SoftGlow, posD, new Vector2(10f, 26f), 0f,
-                            VFXCore.TintAlfa(Color.White, 0.95f));
-                        // SU GLOW (la bola de luz que corre)
-                        Quad(VFXCore.SoftGlow, posD, new Vector2(26f, 26f), 0f,
-                            VFXCore.TintAlfa(new Color(180, 220, 255), 0.70f));
-                        // LA ESTELA del destello (el trazo que deja)
-                        float estela = 46f;
-                        Quad(VFXCore.SoftGlow, posD + new Vector2(0f, Sube ? estela * 0.5f : -estela * 0.5f),
-                            new Vector2(6f, estela), 0f,
-                            VFXCore.TintAlfa(new Color(200, 230, 255), 0.45f));
+                        Vector2 desde = origen.Value - Main.screenPosition;
+                        Vector2 hasta = centro;
+                        Vector2 mid = (desde + hasta) * 0.5f;
+                        float len = (hasta - desde).Length();
+                        float estela = 1f - Math.Min(t / (VIDA * 0.7f), 1f);
+                        if (len > 30f && estela > 0.02f)
+                            Quad(VFXCore.SoftGlow, mid, new Vector2(len, 2.4f),
+                                (float)Math.Atan2(hasta.Y - desde.Y, hasta.X - desde.X),
+                                VFXCore.TintAlfa(HaloCielo, 0.18f * estela));
                     }
 
-                    // ========================================================
-                    //  ACTO 3 — LA TURBULENCIA AL FINAL: el extremo donde
-                    //  MURIÓ el brillo ONDEA (±3-4 px de ruido) y brilla
-                    //  más — la punta escribe su temblor.
-                    // ========================================================
-                    if (edad > TICKS_DESTELLO)
+                    // === 2. LA MEDIA LUNA (el corazón del anime: eco
+                    //     fantasma + halo doble parpadeante + núcleo
+                    //     blanco — TODO en TajoLib.Tajo, el primitivo
+                    //     de la casa del Tajo Astral) ===
+                    TajoLib.Tajo(centro, radio,
+                        medio - APERTURA * 0.5f, medio + APERTURA * 0.5f,
+                        reveal, campana, ANCHO, HaloCielo, Filo, seed, time);
+
+                    // === 3. EL DESTEMPLE (el flash de clausura: los
+                    //     últimos 4 ticks, un destello alto y frío en el
+                    //     centro del arco — el «clac» visual del corte
+                    //     terminado) ===
+                    if (t > VIDA - 4f)
                     {
-                        float puntaY = Sube ? -ALTO * 0.5f : ALTO * 0.5f;
-                        Vector2 punta = centro + new Vector2(0f, puntaY) + new Vector2(
-                            MathF.Sin(t * 22f + Projectile.whoAmI * 2.1f) * 3.6f, 0f);
-                        Quad(VFXCore.SoftGlow, punta, new Vector2(12f, 18f), 0f,
-                            VFXCore.TintAlfa(new Color(210, 235, 255), 0.75f * vidaAlfa));
-                        // EL TEMBLOR: dos brazos cortos que vibran
-                        for (int k = 0; k < 2; k++)
-                        {
-                            float ang = (Sube ? -MathHelper.PiOver2 : MathHelper.PiOver2) +
-                                MathF.Sin(t * 17f + k * 2.4f) * 0.6f;
-                            Quad(VFXCore.SoftGlow, punta + new Vector2(
-                                MathF.Cos(ang), MathF.Sin(ang)) * 14f, new Vector2(3f, 12f), ang,
-                                VFXCore.TintAlfa(new Color(160, 200, 255), 0.45f * vidaAlfa));
-                        }
+                        float f = (t - (VIDA - 4f)) / 4f;
+                        Quad(VFXCore.SoftGlow, centro,
+                            new Vector2(44f * (1f - f), 44f * (1f - f)), 0f,
+                            VFXCore.TintAlfa(HaloAlto, 0.4f * (1f - f)));
                     }
                 }
                 finally { VFXCore.CerrarLoteSiAbierto(); }
             }
             catch { try { VFXCore.CerrarLoteSiAbierto(); } catch { } }
             return false;
+        }
+
+        /// <summary>EL ORIGEN del golpe (la mano que lo lanzó): el
+        /// portador — para la línea de velocidad.</summary>
+        private Vector2? OrigenDelGolpe()
+        {
+            try
+            {
+                Player p = Main.player[Projectile.owner];
+                if (p != null && p.active) return p.MountedCenter;
+            }
+            catch { }
+            return null;
         }
 
         /// <summary>Quad centrado directo al lote aditivo activo.</summary>
@@ -203,6 +258,16 @@ namespace AethonMod.Content.Projectiles.Regla
                 SpriteEffects.None, 0f);
         }
 
-        public override bool? CanHitNPC(NPC target) => false;   // el daño es la columna de OnSpawn
+        /// <summary>El easeOutBack de la casa (el POP del anime).</summary>
+        private static float Elastico(float t)
+        {
+            if (t <= 0f) return 0f;
+            if (t >= 1f) return 1f;
+            const float c = 1.35f;
+            float u = t - 1f;
+            return 1f + u * u * ((c + 1f) * u + c);
+        }
+
+        public override bool? CanHitNPC(NPC target) => false;   // el daño es la media luna de OnSpawn
     }
 }

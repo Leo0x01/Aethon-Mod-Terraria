@@ -673,14 +673,31 @@ namespace AethonMod.Content.Projectiles.Nervioso
                         }
                         if (alma != null && alma.SombrasGastadas > vivasCaza)
                             alma.SombrasGastadas = vivasCaza;   // el exceso ES fuga
-                        // EL TOPE VIVO: el cap del alma (con su tope
-                        // de 10) o, sin alma, el 10 de la casa —
-                        // SIEMPRE al menos 1.
-                        int topeSombra = 10;
+                        // v6.170 — EL TOPE SIN TECHO (la letra: el
+                        // cálculo de siempre, 1 + despertar/20 +
+                        // nivel/100, SIN el 10 de la v6.168): el cap
+                        // del alma cuando vive; sin alma, EL MISMO
+                        // cálculo leído directo del despertar del
+                        // portador — SIEMPRE al menos 1.
+                        int topeSombra = 1;
+                        try
+                        {
+                            int despertarCaza = global::AethonMod.Content.Systems
+                                .DespertarGrimorio.NivelDe(dueñoCaza);
+                            int nivelCaza = 1;
+                            if (libroCaza != null && !libroCaza.IsAir)
+                            {
+                                var slCaza = libroCaza.GetGlobalItem
+                                    <global::AethonMod.Content.Globals.ShardLevelItem>();
+                                if (slCaza != null) nivelCaza = slCaza.Level;
+                            }
+                            topeSombra = 1 + despertarCaza / 20 + nivelCaza / 100;
+                        }
+                        catch { }
                         if (alma != null)
                         {
                             int capAlma = alma.SombrasCapDe(libroCaza);
-                            if (capAlma > 0 && capAlma < topeSombra) topeSombra = capAlma;
+                            if (capAlma > 0 && capAlma > topeSombra) topeSombra = capAlma;
                         }
                         if (vivasCaza < topeSombra)
                         {

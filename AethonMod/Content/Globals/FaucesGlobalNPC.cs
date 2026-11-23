@@ -439,8 +439,29 @@ namespace AethonMod.Content.Globals
             try
             {
                 var sp = portador.GetModPlayer<Players.ShardPlayer>();
-                if (sp != null && !sp.JefesDevorados.Contains(jefe.type))
-                    sp.JefesDevorados.Add(jefe.type);
+                // v6.170 — EL NOMBRE DEL JEFE, NO EL DE LA PIEZA (la
+                // letra: «el devoramundo es devorado varias veces ya
+                // que esta creado por secciones […] asegurate de que
+                // en el pilar no se repitan los jefes»): LA CAUSA — el
+                // registro guardaba el tipo del SEGMENTO que murió
+                // (cuerpo/cola del Devorador = OTRO tipo que la
+                // cabeza) y la lista sumaba una entrada POR PIEZA.
+                // LA CURA: se registra EL TIPO CANÓNICO — la cabeza
+                // del gusano si es una pieza (EaterofWorldsHead /
+                // TheDestroyer); el propio tipo si no. Con el Contains
+                // de siempre: UNA entrada por jefe, JAMÁS repetida.
+                int tipoCanonico = jefe.type;
+                if (EsSegmentoDeGusano(jefe))
+                {
+                    if (jefe.type == NPCID.EaterofWorldsBody ||
+                        jefe.type == NPCID.EaterofWorldsTail)
+                        tipoCanonico = NPCID.EaterofWorldsHead;
+                    else if (jefe.type == NPCID.TheDestroyerBody ||
+                             jefe.type == NPCID.TheDestroyerTail)
+                        tipoCanonico = NPCID.TheDestroyer;
+                }
+                if (sp != null && !sp.JefesDevorados.Contains(tipoCanonico))
+                    sp.JefesDevorados.Add(tipoCanonico);
             }
             catch { }
 

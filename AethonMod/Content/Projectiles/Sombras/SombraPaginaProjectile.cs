@@ -103,6 +103,30 @@ namespace AethonMod.Content.Projectiles.Sombras
             return dueño.MountedCenter;
         }
 
+        /// <summary>v6.170 — EL LIBRO DE LA RAÍZ (el contrato de la
+        /// sombra vieja, ahora también aquí): si un ESPÍRITU FLOTANTE
+        /// en modo caza sostiene el tipo de SU libro en ai[2], esa es
+        /// la boca que come; sin raíz, EL GRIMORIO DEL ETERNO (la
+        /// sombra nueva nace de SU caza).</summary>
+        private int TipoLibroDeLaRaiz()
+        {
+            try
+            {
+                int tipoFlotante = ModContent.ProjectileType
+                    <global::AethonMod.Content.Projectiles.Nervioso.GrimorioNerviosoFlotante>();
+                for (int i = 0; i < Main.maxProjectiles; i++)
+                {
+                    Projectile p = Main.projectile[i];
+                    if (p == null || !p.active || p.type != tipoFlotante ||
+                        p.owner != Projectile.owner) continue;
+                    if (p.ai[2] > 0f) return (int)p.ai[2];
+                }
+            }
+            catch { }
+            return ModContent.ItemType
+                <global::AethonMod.Content.Weapons.GrimoireEternal>();
+        }
+
         /// <summary>
         /// v6.50.68 — LA SOMBRA PROYECTADA del portador en el suelo (solo
         /// decorado: el charco de siempre, pero YA NO ES el origen del
@@ -306,9 +330,42 @@ namespace AethonMod.Content.Projectiles.Sombras
                                         FaucesGlobalNPC.Iniciar(dueñoPool, 3);
                                     else
                                     {
-                                        dueñoPool.life = 0;
-                                        dueñoPool.checkDead();
-                                        dueñoPool.netUpdate = true;
+                                        // v6.170 — LA CAZA ALIMENTA (la
+                                        // letra: «el grimorio deberia
+                                        // perder porcentajes de hambre
+                                        // mientras caza […] solo
+                                        // investiga porque el grimorio
+                                        // del eterno no baja su hambre
+                                        // al cazar»): LA CAUSA — este
+                                        // camino mataba la chusma con
+                                        // checkDead() SIN pasar por la
+                                        // absorción: la sombra VIEJA
+                                        // (SombraPaginaCaza) llamaba
+                                        // AbsorberPresa (la que baja el
+                                        // hambre) y la NUEVA no — desde
+                                        // la v6.161 la caza del Eterno
+                                        // comía SIN mover el medidor.
+                                        // LA CURA: el golpe mortal de
+                                        // la chusma pasa por LA
+                                        // ABSORCIÓN DEL LIBRO (come:
+                                        // baja hambre — o la ENGRE si
+                                        // es de estatua, +0,1% — y
+                                        // cobra SU XP; el festín de los
+                                        // jefes sigue en las fauces).
+                                        bool deEstatua = false;
+                                        try { deEstatua = dueñoPool.SpawnedFromStatue; } catch { }
+                                        if (!deEstatua)
+                                        {
+                                            global::AethonMod.Content.Weapons
+                                                .GrimorioHambrientoNervioso.AbsorberPresa(
+                                                    dueñoPool, dueño, TipoLibroDeLaRaiz());
+                                        }
+                                        else
+                                        {
+                                            dueñoPool.life = 0;
+                                            dueñoPool.checkDead();
+                                            dueñoPool.netUpdate = true;
+                                        }
                                     }
                                     Projectile.ai[1] = FASE_DISIPAR;
                                     Projectile.ai[2] = 0;

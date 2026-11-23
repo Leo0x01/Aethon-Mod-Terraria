@@ -105,7 +105,13 @@ namespace AethonMod.Content.Globals
         // se desbloquea IGUAL (peldaño a peldaño, por despertar y
         // nivel) pero el libro JAMÁS sostiene más de DIEZ sombras a la
         // vez — cada una cuenta y ninguna se pierde en una nube.
-        public int SombrasCap => Math.Min(10, 1 + NivelDespertar / 20 + _nivelLibroCap / 100);
+        // v6.170 — SIN TECHO (la letra: «sobre el limite de sombras
+        // hagamos algo, que el limite no sean 10, ahora son
+        // ilimitadas asi que usemos el mismo calculo (1 + despertar/20
+        // + nivel/100)»): EL MISMO cálculo de la v6.160 — sin el
+        // Math.Min(10, …) de la v6.168. A despertar 120 y nivel 100:
+        // 1 + 6 + 1 = 8… el cálculo de la letra, palabra por palabra.
+        public int SombrasCap => 1 + NivelDespertar / 20 + _nivelLibroCap / 100;
 
         /// <summary>EL NIVEL NORMAL del grimorio (ShardLevelItem.Level)
         /// — lo fijan los lectores del cap (el ítem vive con ellos).</summary>

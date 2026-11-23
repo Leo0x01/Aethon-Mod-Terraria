@@ -846,9 +846,12 @@ namespace AethonMod.Content.UI
             // despertar por capítulo, del 2 al 102) · [13] Epílogo:
             // 118 (al borde del NivelMax — el borrador infinito se lee
             // al final del camino) · [14..18] el archivo viejo:
-            // SIEMPRE abierto.
+            // v6.170 — TAMBIÉN SE GANA (la letra: «todo el lore del
+            // mod debe estar sellado hasta llegar a cierto nivel de
+            // despertar»): 4/24/44/64/84 — el Compendio de la casa
+            // abre sus cinco arcas a lo largo del camino.
             0, 0, 2, 12, 22, 32, 42, 52, 62, 72, 82, 92, 102, 118,
-            0, 0, 0, 0, 0,
+            4, 24, 44, 64, 84,
         };
 
         /// <summary>El Despertar del portador local (para el lore).</summary>
@@ -880,6 +883,24 @@ namespace AethonMod.Content.UI
             //     SIEMPRE, el cuerpo SOLO al llegar. La mecánica
             //     (página izquierda) está SIEMPRE completa.
             int despertarAhora = esIzq ? int.MaxValue : DespertarLocal();
+            // v6.170 — EL SELLO DEL CRONISTA (la letra: «es quien
+            //     desbloquea finalmente esa parte del lore en el libro
+            //     de informacion»): las CINCO ARCAS del archivo viejo
+            //     (índices 14..18) piden el despertar Y HABERLO
+            //     ESCUCHADO — el bit de ShardPlayer que el Cronista
+            //     marca al narrarlas. Sin su charla, el umbral
+            //     alcanzado NO abre: hay que ir a OÍRLO.
+            int selloCronista = 0;
+            if (!esIzq)
+            {
+                try
+                {
+                    var sp = Main.LocalPlayer.GetModPlayer
+                        <global::AethonMod.Content.Players.ShardPlayer>();
+                    if (sp != null) selloCronista = sp.LoreDesbloqueado;
+                }
+                catch { }
+            }
             foreach (var sec in secciones)
             {
                 cy += 12f;
@@ -890,6 +911,12 @@ namespace AethonMod.Content.UI
                 {
                     int umbral = idxSec < UmbralLore.Length ? UmbralLore[idxSec] : 0;
                     seccionAbierta = despertarAhora >= umbral;
+                    // v6.170 — LAS ARCAS (14..18) además piden SU bit
+                    if (seccionAbierta && idxSec >= 14 && idxSec <= 18)
+                    {
+                        int bitArca = 1 << (idxSec - 14);
+                        seccionAbierta = (selloCronista & bitArca) != 0;
+                    }
                 }
                 var medT = fuente.MeasureString(titulo);
                 if (VisibleEn(cy, medT.Y, recorte))
@@ -924,7 +951,16 @@ namespace AethonMod.Content.UI
                         cy = LineaLibro(sb, T(sec[1]), xizq, cy, maxAncho,
                             Tinta, recorte, pagina);
                     int umbralSello = idxSec < UmbralLore.Length ? UmbralLore[idxSec] : 0;
-                    string sello = "· · · ✦ sellado · se revela al Despertar " + umbralSello + " ✦ · · ·";
+                    // v6.170 — EL SELLO DE LAS ARCAS DICE LA VERDAD: el
+                    // Cronista narra y el libro abre — el resto solo
+                    // cuenta la puerta de despertar de siempre.
+                    bool esArca = idxSec >= 14 && idxSec <= 18;
+                    bool despertarYa = despertarAhora >= umbralSello;
+                    string sello = esArca
+                        ? (despertarYa
+                            ? "· · · ✦ el Cronista aún no contó esta arca — búscalo ✦ · · ·"
+                            : "· · · ✦ sellada hasta el Despertar " + umbralSello + " — y las palabras del Cronista ✦ · · ·")
+                        : "· · · ✦ sellado · se revela al Despertar " + umbralSello + " ✦ · · ·";
                     cy = LineaLibro(sb, sello, xizq, cy, maxAncho,
                         new Color(120, 104, 82), recorte, pagina);
                 }

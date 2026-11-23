@@ -66,10 +66,25 @@ namespace AethonMod.Content.UI
             _paraTrio = paraTrio;
             _titulo = titulo;
             _scroll = 0f;
+            // v6.170 — EL FRAME DE GRACIA (la letra: «esas ventanas
+            // flotantes no aparecen, bueno aparecen rapido y se
+            // quitan, no duran ni medio segundo»): LA AUTOPSIA — la
+            // ventana nace DENTRO del mismo clic que la abrió (el clic
+            // en el slot), y el «clic fuera = cerrar» del final del
+            // Dibujar la mataba EL MISMO FRAME en que nacía (nació
+            // con el botón aún apretado: al soltar, el flanco del
+            // clic YA consumido contaba como «clic fuera»). LA CURA:
+            // la ventana ignora el clic VIVO de su nacimiento — el
+            // «clic fuera» solo vale desde el frame siguiente.
+            _tickNacimiento = Main.GameUpdateCount;
             Refrescar();
         }
 
         private static string _titulo = "";
+
+        /// <summary>v6.170 — EL TICK DE NACIMIENTO (el frame de gracia:
+        /// el clic que ABRE la ventana jamás la cierra).</summary>
+        private static ulong _tickNacimiento;
 
         /// <summary>REFRESCAR la lista (el inventario vive: cada frame
         /// la ventana muestra lo que HAY, no una foto vieja).</summary>
@@ -226,8 +241,13 @@ namespace AethonMod.Content.UI
                     TintaApagado, 0.78f, 0.5f, 0.5f);
             }
 
-            // CLIC FUERA = cerrar (sin elegir nada — la ventana respeta)
-            if (clicNuevo && !r.Contains(Main.mouseX, Main.mouseY))
+            // CLIC FUERA = cerrar (sin elegir nada — la ventana
+            // respeta) — PERO NUNCA EL CLIC DE SU NACIMIENTO (el
+            // frame de gracia de la v6.170: el clic que abrió la
+            // ventana vive en _tickNacimiento; un clic «fuera» del
+            // MISMO frame de nacimiento no cuenta).
+            if (clicNuevo && !r.Contains(Main.mouseX, Main.mouseY) &&
+                Main.GameUpdateCount > _tickNacimiento)
                 Cerrar();
         }
     }

@@ -809,11 +809,20 @@ namespace AethonMod.Content.UI
         // no se funde con NADA: papel claro + tinta oscura.
         private static readonly Color TintaFondo = new(216, 200, 166);   // el papel del libro
         private static readonly Color TintaPanel = new(190, 172, 134);   // la sombra del papel
-        private static readonly Color TintaTeal = new(60, 118, 102);     // acento profundo (sobre papel)
-        private static readonly Color TintaVioleta = new(148, 72, 178);  // el violeta del libro
-        private static readonly Color TintaTexto = new(28, 20, 16);      // la tinta del libro
-        private static readonly Color TintaApagado = new(104, 84, 60);   // tinta suave (se lee en papel)
-        private static readonly Color TintaRojo = new(178, 52, 44);      // rojo tinta (errores)
+        // v6.170 — LA PALETA ÚNICA (la letra: «asegurate de que los
+        // colores de los textos sean parejos para todos, y la
+        // referencia es el libro de informacion»): LAS MISMAS cuatro
+        // tintas del LibroDelEternoUI, EXACTAS — el teal propio MURIÓ
+        // (era un verde ajeno a la familia) y el rojo es EL DEL LIBRO
+        // (140,40,40 — el de PilarDelLibro), no el escarlata viejo.
+        private static readonly Color TintaVioleta = new(148, 72, 178);  // el violeta del título (el libro)
+        private static readonly Color TintaTexto = new(28, 20, 16);      // la tinta del cuerpo (el libro)
+        private static readonly Color TintaApagado = new(118, 96, 70);   // la apagada de las pistas (el libro)
+        private static readonly Color TintaOro = new(168, 108, 44);      // el oro del capítulo (el libro)
+        private static readonly Color TintaRojo = new(140, 40, 40);      // el rojo del pilar (el libro)
+        // compatibilidad: el teal viejo apunta al oro del libro (los
+        // mensajes «buenos» del altar ahora hablan la lengua del libro)
+        private static Color TintaTeal => TintaOro;
         private static string Clave(string c) => "Mods.AethonMod.Altar." + c;
 
         // ================================================================

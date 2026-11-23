@@ -10,40 +10,39 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Weapons.Regla
 {
     // =====================================================================
-    //  LaReglaDelCielo — v6.168 — EL ARMA NUEVA (la letra: «crea una
-    //  nueva arma, su ataque seran lineas en el aire a gran velocidad,
-    //  lineas con glow, desenfoque y un poco de turbulencia al final,
-    //  estas lineas empezaran con un brillo de arriba hacia abajo o de
-    //  abajo hacia arriba de forma aleatoria y seran creadas en el
-    //  cursor, seran largas en longitud y muy delgadas»).
+    //  LaReglaDelCielo — v6.170 — LA KATANA DEL CIELO (la letra: «yo
+    //  necesito tajos, tajos iguales a los de las katanas en los
+    //  animes […] intenta recrealor en el arma la regla del cielo»).
     //
-    //  LA LECTURA DE LA LETRA, PUNTO POR PUNTO:
-    //   · «lineas en el aire a gran velocidad» — las líneas nacen YA
-    //     EN EL CURSOR (no viajan hasta él) y su VIDA es corta: el
-    //     «gran velocidad» es el LATIGAZO del brillo que las recorre.
-    //   · «empezaran con un brillo de arriba hacia abajo o de abajo
-    //     hacia arriba de forma aleatoria» — cada línea SUELTA su
-    //     destello inicial en UNO de los dos extremos (al azar) y el
-    //     brillo CORRE la línea en esa dirección antes de apagarse.
-    //   · «creadas en el cursor» — nacen en Main.MouseWorld.
-    //   · «largas en longitud y muy delgadas» — 320 px de alto por
-    //     ~6 px de ancho (la regla del cielo).
-    //   · «glow, desenfoque y un poco de turbulencia al final» — el
-    //     CUERPO: núcleo blanco + glow aditivo de la casa; EL
-    //     DESENFOQUE: dos capas de glow más ancho y más tenue; LA
-    //     TURBULENCIA: el EXTREMO FINAL de la línea (donde murió el
-    //     brillo) se ONDEA — la punta escribe un temblor de 3-4 px
-    //     antes de disiparse en chispas.
+    //  LA RECONVERSIÓN: la línea vertical de la v6.168 MUERE — el
+    //  ataque es LA MEDIA LUNA DEL KATANA DE ANIME (investigada: la
+    //  «glowing crescent» cel-shaded de bordes afilados): un arco de
+    //  ~110° que nace EN EL CURSOR, inclinado en DIAGONAL (~35°, el
+    //  gesto del espadachín), con el filo blanco-caliente y el halo
+    //  azul eléctrico, revelado de punta a punta en 4 ticks (LA
+    //  VELOCIDAD de la hoja) y una vida ultracorta de 13 ticks (el
+    //  corte OCURRE, no se desarrolla).
     //
-    //  EL DAÑO: la línea es UNA COLUMNA de golpe (como un rayo caído):
-    //  golpea TODO lo que toca su rectángulo delgado al nacer (una
-    //  pasada) — el arma es de CADENCIA (useTime 14) y maná barato.
-    //  LIBRE DE DERECHOS: sin textura del proyecto — TODO procedural
-    //  (el lote aditivo + MagicPixel), dibujado en runtime.
+    //  EL SENTIDO DE LA HOJA (la letra de la v6.168 vive): el tajo
+    //  corre ARRIBA→ABAJO o ABAJO→ARRIBA al azar — el arco se voltea
+    //  según el gesto.
+    //
+    //  EL SPRITE: LA REGLA — una katana de cielo (la hoja larga y
+    //  delgada con su guarda estelar), forjada con LA SUPERFORJA de
+    //  la casa (la letra: «siempre se te olvida usar la sforja para
+    //  creacion de pixel art»).
+    //
+    //  EL DAÑO: la media luna corta UNA VEZ al nacer — todo lo que
+    //  vive en la BANDA del arco (la boca de la luna) recibe el tajo
+    //  (GolpeMotor, el contrato del Tajo Astral).
     // =====================================================================
     public class LaReglaDelCielo : ModItem
     {
-        public override string Texture => "AethonMod/Content/Weapons/Clicker/ClickerCasa";   // fantasma (procedural)
+        /// <summary>El radio de la media luna (px — «largas en
+        /// longitud» viva como el ALCANCE del arco).</summary>
+        private const float RADIO = 150f;
+
+        public override string Texture => "AethonMod/Content/Weapons/Regla/LaReglaDelCielo";
 
         public override void SetDefaults()
         {
@@ -66,16 +65,61 @@ namespace AethonMod.Content.Weapons.Regla
         public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo fuente,
             Vector2 posicion, Vector2 velocidad, int tipo, int dano, float retroceso)
         {
-            // LA LÍNEA NACE EN EL CURSOR (la letra exacta) — con su
-            // dirección de brillo AL AZAR (arriba→abajo o abajo→arriba).
+            // ============================================================
+            //  LA SIEMBRA DE LA MEDIA LUNA: el tajo nace EN EL CURSOR
+            //  (la letra v6.168 vive) con su geometría completa:
+            //   · ai[2] = el SENTIDO de la hoja (0 baja · 1 sube — al azar)
+            //   · localAI[0..1] = el CENTRO del arco (el cursor)
+            //   · localAI[2] = el RADIO
+            //   · localAI[3] = la inclinación EXTRA hacia la presa (si
+            //     hay un enemigo cerca del cursor, el arco se ABRE
+            //     hacia él: la media luna lo abraza)
+            // ============================================================
+            bool sube = Main.rand.NextBool();
             int idx = Projectile.NewProjectile(fuente, Main.MouseWorld, Vector2.Zero,
-                tipo, dano, 0f, player.whoAmI,
-                Main.rand.NextBool() ? 0f : 1f);   // ai[0]: 0 = baja, 1 = sube
-            if (idx >= 0 && Main.projectile[idx].active)
-                Main.projectile[idx].originalDamage = Item.damage;
-            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item72.WithPitchOffset(0.4f)
-                .WithVolumeScale(0.30f), player.Center);
+                tipo, dano, 0f, player.whoAmI, 0f, 0f, sube ? 1f : 0f);
+            if (idx >= 0 && idx < Main.maxProjectiles && Main.projectile[idx].active)
+            {
+                Projectile p = Main.projectile[idx];
+                p.localAI[0] = Main.MouseWorld.X;
+                p.localAI[1] = Main.MouseWorld.Y;
+                p.localAI[2] = RADIO;
+                // LA ABRAZADA A LA PRESA: un blanco cerca del cursor
+                // inclina el arco hacia él (±0.5 rad máximo)
+                NPC presa = PresaCerca(Main.MouseWorld, RADIO);
+                if (presa != null)
+                {
+                    Vector2 rel = presa.Center - Main.MouseWorld;
+                    if (rel.Length() > 24f)
+                        p.localAI[3] = MathHelper.Clamp(
+                            MathF.Atan2(rel.Y, rel.X) -
+                            (sube ? -MathHelper.PiOver2 : MathHelper.PiOver2),
+                            -0.5f, 0.5f);
+                }
+                p.originalDamage = Item.damage;
+                p.netUpdate = true;
+            }
+            // EL SONIDO DEL DESEMBRAINE (el silbido corto de la hoja)
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item72.WithPitchOffset(0.55f)
+                .WithVolumeScale(0.28f), player.Center);
             return false;
+        }
+
+        /// <summary>El enemigo más cercano al punto (dentro del radio
+        /// del arco) — para la abrazada de la media luna.</summary>
+        private static NPC PresaCerca(Vector2 punto, float radio)
+        {
+            NPC mejor = null;
+            float mejorD = radio * radio;
+            for (int i = 0; i < Main.maxNPCs; i++)
+            {
+                NPC n = Main.npc[i];
+                if (n == null || !n.active || n.life <= 0 || n.friendly ||
+                    n.townNPC || n.immortal || n.dontTakeDamage) continue;
+                float d = Vector2.DistanceSquared(n.Center, punto);
+                if (d < mejorD) { mejorD = d; mejor = n; }
+            }
+            return mejor;
         }
 
         public override void AddRecipes()
@@ -88,46 +132,6 @@ namespace AethonMod.Content.Weapons.Regla
                 .AddTile(ModContent.TileType
                     <global::AethonMod.Content.Tiles.AltarOfrendasTile>())
                 .Register();
-        }
-
-        // EL DIBUJO PROCEDURAL DEL ÍTEM: LA REGLA — una barra larga y
-        // delgada con sus marcas de medición y el brilla del cielo.
-        public override bool PreDrawInWorld(SpriteBatch sb, Color luz, Color alfa,
-            ref float rot, ref float esc, int whoAmI)
-        {
-            DibujarLaRegla(sb, Item.position - Main.screenPosition +
-                new Vector2(Item.width / 2f, Item.height / 2f + 8f), luz, rot, esc);
-            return false;
-        }
-
-        public override bool PreDrawInInventory(SpriteBatch sb, Vector2 pos, Rectangle rec,
-            Color luz, Color alfa, Vector2 origen, float esc)
-        {
-            DibujarLaRegla(sb, pos + new Vector2(0f, rec.Height * 0.10f), luz, 0f, esc * 0.55f);
-            return false;
-        }
-
-        private static void DibujarLaRegla(SpriteBatch sb, Vector2 centro, Color luz,
-            float rot, float esc)
-        {
-            try
-            {
-                Texture2D pixel = Terraria.GameContent.TextureAssets.MagicPixel.Value;
-                Texture2D glow = VFXCore.SoftGlow;
-                float l = Math.Max(0.35f, (luz.R + luz.G + luz.B) / (3f * 255f));
-                void Barra(Vector2 pos, Vector2 tam, Color c)
-                    => sb.Draw(pixel, pos, null, c * l, rot, tam * 0.5f, esc, SpriteEffects.None, 0f);
-                // EL CUERPO: la regla larga y delgada (blanco-cielo)
-                Barra(centro, new Vector2(3f, 34f), new Color(190, 230, 255));
-                // LAS MARCAS de medición (los travesaños de la regla)
-                for (int k = -2; k <= 2; k++)
-                    Barra(centro + new Vector2(0f, k * 7f), new Vector2(k % 2 == 0 ? 7f : 5f, 1.6f),
-                        new Color(120, 190, 240));
-                // EL BRILLO del cielo (la línea viva)
-                sb.Draw(glow, centro, null, VFXCore.TintAlfa(new Color(140, 210, 255), 0.40f * l),
-                    rot, glow.Size() * 0.5f, 0.30f * esc, SpriteEffects.None, 0f);
-            }
-            catch { }
         }
     }
 }

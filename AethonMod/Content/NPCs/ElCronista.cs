@@ -8,6 +8,7 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.DataStructures;
+using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.NPCs
 {
@@ -235,6 +236,38 @@ namespace AethonMod.Content.NPCs
                 if (despertar >= 120)
                     return Language.GetTextValue("Mods.AethonMod.Cronista.ChatUltimaPuerta");
 
+                // ============================================================
+                //  v6.170 — EL NARRADOR DE LAS ARCAS (la letra: «cuenta
+                //  con cada cierto despertar una parte del lore, y es
+                //  quien desbloquea finalmente esa parte del lore en el
+                //  libro de informacion»): al ALCANZAR un despertar de
+                //  arca (4/24/44/64/84 — las mismas puertas del
+                //  Compendio), SU siguiente charla NARRA ESA ARCA y
+                //  marca el sello — el libro la abre DESDE ENTONCES.
+                //  La charla del arca tiene PRIORIDAD: es la historia
+                //  que esperó TODO ese camino para contarse.
+                // ============================================================
+                try
+                {
+                    var spYo = Main.LocalPlayer.GetModPlayer
+                        <global::AethonMod.Content.Players.ShardPlayer>();
+                    if (spYo != null)
+                    {
+                        int[] puertasArca = { 4, 24, 44, 64, 84 };
+                        for (int a = puertasArca.Length - 1; a >= 0; a--)
+                        {
+                            if (despertar >= puertasArca[a] &&
+                                (spYo.LoreDesbloqueado & (1 << a)) == 0)
+                            {
+                                spYo.LoreDesbloqueado |= (1 << a);
+                                return Language.GetTextValue(
+                                    "Mods.AethonMod.Cronista.ChatLore" + (a + 1));
+                            }
+                        }
+                    }
+                }
+                catch { }
+
                 // LA ROTACIÓN: el dado de la casa sobre las 4 familias
                 // (genéricas 5 · portador 5 · oleadas 3 · despertar 1 ·
                 // sellado 2 · objetos 3 · cierre 2 — la letra completa)
@@ -280,51 +313,9 @@ namespace AethonMod.Content.NPCs
                         if (Main.npc[i] != null && Main.npc[i].active &&
                             Main.npc[i].type == tipo) { idxCronista = i; break; }
 
-                    // v6.158 — EL NPC TEST SE CHEQUEA SIEMPRE (la
-                    // letra: «otra cosa, el NPC Test no aparece»): la
-                    // v6.157 tenía el chequeo del test DENTRO del flujo
-                    // del nacimiento del Cronista — el `return` de «ya
-                    // vive» MATABA todo el bloque: en un mundo con el
-                    // Cronista YA PRESENTE (de una sesión anterior) el
-                    // test JAMÁS se chequeaba, y en el nacimiento solo
-                    // se chequeaba UNA VEZ. LA CURA: el test se
-                    //-chequea CADA MINUTO, INDEPENDIENTE — si no vive
-                    // y el Cronista sí, RENACE A SU LADO.
-                    int tipoTest = ModContent.NPCType<NPCTest>();
-                    bool testVive = false;
-                    for (int i = 0; i < Main.maxNPCs; i++)
-                        if (Main.npc[i] != null && Main.npc[i].active &&
-                            Main.npc[i].type == tipoTest) { testVive = true; break; }
-                    if (!testVive && idxCronista >= 0)
-                    {
-                        NPC cronista = Main.npc[idxCronista];
-                        int txT = cronista.homeTileX + 2;
-                        int sueloT = -1;
-                        for (int y = cronista.homeTileY - 8; y < cronista.homeTileY + 16 &&
-                             y < Main.maxTilesY - 4; y++)
-                            if (WorldGen.SolidTile(txT, y)) { sueloT = y; break; }
-                        Vector2 posT = sueloT >= 0
-                            ? new Vector2(txT * 16f + 8f, sueloT * 16f)
-                            : cronista.Bottom;
-                        int idxT = NPC.NewNPC(cronista.GetSource_FromAI(),
-                            (int)posT.X, (int)posT.Y, tipoTest, 0, 0f, 255);
-                        if (idxT >= 0 && idxT < Main.maxNPCs && Main.npc[idxT].active)
-                        {
-                            Main.npc[idxT].homeTileX = (int)(posT.X / 16f);
-                            Main.npc[idxT].homeTileY = (int)(posT.Y / 16f);
-                            Main.npc[idxT].netUpdate = true;
-                            if (!Main.dedServ)
-                                for (int k = 0; k < 10; k++)
-                                {
-                                    var d = Dust.NewDustPerfect(Main.npc[idxT].Center,
-                                        DustID.Shadowflame,
-                                        new Vector2(Main.rand.NextFloat(-1.5f, 1.5f),
-                                            Main.rand.NextFloat(-2.5f, -0.5f)),
-                                        100, new Color(110, 60, 180), 1.0f);
-                                    d.noGravity = true;
-                                }
-                        }
-                    }
+                    // v6.170 — EL NPC TEST MURIÓ (la letra: «el NPC
+                    // test lo puedes borrar ya no es necesario»): el
+                    // spawner del doble de pruebas se extirpó entero.
 
                     // ¿El Cronista YA vive? El flujo de nacimiento termina
                     // aquí (el test ya se cuidó arriba).
@@ -442,6 +433,42 @@ namespace AethonMod.Content.NPCs
                 }
                 catch { }
             }
+
+            // ============================================================
+            //  v6.170 — LA CORONA RÚNICA ESTELAR (la letra: «quiero que
+            //  al NPC de el cronista le coloques el accesorio Corona
+            //  Runica Estelar, solo hacerlo por codigo»): el arco de
+            //  los OCHO GLIFOS de la casa (RuneCrownRenderer — el
+            //  MISMO motor del accesorio) flotando sobre su cabeza,
+            //  cosido AQUÍ, en el PreDraw del NPC — sin item, sin
+            //  hueco de accesorio: la corona es SUYA porque él es el
+            //  escriba del Eterno. Coordenadas de MUNDO (el contrato
+            //  del renderer: anchor = el centro de la cabeza) — el
+            //  lote aditivo de VFXCore pinta tras el dibujo vanilla.
+            // ============================================================
+            try
+            {
+                if (!Main.dedServ)
+                {
+                    // EL PATRÓN DE LA CASA (el del halo del espíritu): el
+                    // lote aditivo vive ENTRE CerrarLoteSiAbierto y
+                    // ReabrirLoteVanilla — coords de MUNDO, sin tocar el
+                    // lote de vanilla que está dibujando la tira.
+                    VFXCore.CerrarLoteSiAbierto();
+                    Vector2 cabeza = NPC.Center + new Vector2(0f, -NPC.height * 0.52f);
+                    float escala = Math.Max(0.85f, NPC.height / 42f);
+                    VFXCore.Begin();
+                    global::AethonMod.Content.VFX.RuneCrownRenderer.ComputeQuads(
+                        cabeza, escala, Main.GlobalTimeWrappedHourly, 1f);
+                    VFXCore.FlushAdditive();
+                }
+            }
+            catch { VFXCore.CerrarLoteSiAbierto(); }
+            finally
+            {
+                try { VFXCore.ReabrirLoteVanilla(); } catch { }
+            }
+
             return true;    // LA TIRA PROPIA — vanilla la dibuja y la anima
         }
 

@@ -69,6 +69,16 @@ namespace AethonMod.Content.Players
         /// </summary>
         public System.Collections.Generic.List<int> JefesDevorados = new System.Collections.Generic.List<int>();
 
+        /// <summary>v6.170 — LAS ARCAS DEL CRONISTA (la letra: «es
+        /// quien desbloquea finalmente esa parte del lore en el libro
+        /// de informacion»): bits 0..4 = las cinco secciones del
+        /// archivo viejo (El devorador de finales · El sistema del
+        /// pacto · El ciclo del portador · La respuesta · El canon
+        /// asentado) que el Cronista YA contó a ESTE portador. El
+        /// despertar ALCANZADO no basta: hay que ESCUCHARLO — él
+        /// narra, el libro abre.</summary>
+        public int LoreDesbloqueado;
+
         /// <summary>v6.137 — LA CUENTA DE LA ARENA: cuántas veces mató
         /// el portador a CADA jefe DENTRO del mundo interior (pares
         /// tipo→kills — el poder del jefe interior crece +25% por cada
@@ -1599,13 +1609,10 @@ namespace AethonMod.Content.Players
                 // la definitiva — todas hechas con LAS HERRAMIENTAS de
                 // la casa): también en la Bolsa de las Investigaciones,
                 // pero la regla es la regla — DIRECTO.
-                // v6.168 — LOS CLICKERS VIEJOS MURIERON (la letra:
-                // «borra la bolsa de clicker […] crea el arma clicker
-                // definitiva»): SelloDeTinta y ParpadeoDelEterno YA NO
-                // EXISTEN — en su lugar, EL CLICKER DEL UMBRAL (la
-                // entrega de la casa, también con las esencias).
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Weapons.Clicker.ClickerDelUmbral>());
+                // v6.170 — EL CLICKER DEL UMBRAL MURIÓ (la letra:
+                // «el arma que creaste el clicker umbral esta horrible,
+                // lo puedes borrar») — sin clickers otra vez: la casa
+                // no insiste con lo que el dueño no quiere.
                 // v6.168 — EL ARMA NUEVA (la letra: «crea una nueva
                 // arma, su ataque seran lineas en el aire a gran
                 // velocidad»): La Regla del Cielo — también DIRECTO
@@ -1804,6 +1811,8 @@ namespace AethonMod.Content.Players
                 // v6.51.0 — EL DESPERTAR (el nivel y la mascota del 20).
                 tag["nivelDespertar"] = NivelDespertar;
                 tag["petDespertar"] = PetDelDespertar;
+                // v6.170 — LAS ARCAS DEL CRONISTA (lo que ya narró)
+                tag["loreDesbloqueado"] = LoreDesbloqueado;
             }
             catch { }
         }
@@ -1831,6 +1840,9 @@ namespace AethonMod.Content.Players
                     FuriaNivel = Math.Max(1, Math.Min(10, tag.GetInt("furiaNivel")));
                 // v6.50.110 — LA PRIMERA CENA: los jefes ya devorados
                 JefesDevorados = new System.Collections.Generic.List<int>(tag.GetList<int>("jefesDevorados"));
+                // v6.170 — LAS ARCAS DEL CRONISTA (ausente = 0: el
+                // guardado viejo escucha al Cronista desde cero)
+                LoreDesbloqueado = tag.GetInt("loreDesbloqueado");
                 MuertesInteriorTipos = new System.Collections.Generic.List<int>(tag.GetList<int>("muertesInteriorTipos"));
                 MuertesInteriorCuenta = new System.Collections.Generic.List<int>(tag.GetList<int>("muertesInteriorCuenta"));
                 // v6.50.115 — EL FESTÍN DEL GUARDIÁN (ausente = false: aún

@@ -951,10 +951,8 @@ namespace AethonMod.Content.Items.Bolsas
         protected override List<(int tipo, int pila)> Contenido()
         {
             var l = new List<(int, int)>();
-            // v6.168 — LOS CLICKERS VIEJOS MURIERON (la letra: «borra
-            // la bolsa de clicker»): Compás Rúnico y Furia Solar YA NO
-            // EXISTEN — vive UNO SOLO, EL CLICKER DEL UMBRAL:
-            l.Add((ModContent.ItemType<Weapons.Clicker.ClickerDelUmbral>(), 1));
+            // v6.170 — EL CLICKER DEL UMBRAL MURIÓ TAMBIÉN (la
+            // letra: «lo puedes borrar»): sin clickers en la lista.
             // v6.85 — LOS FRUTOS DE LAS INVESTIGACIONES:
             // R8 — LA MIRADA (el rayo de energía; v6.93: recreada 100 %
             // de la casa sobre HazLib — La Mirada del Eterno).
