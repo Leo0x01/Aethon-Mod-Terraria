@@ -418,5 +418,27 @@ namespace AethonMod.Content.VFX
                 (byte)(c.G * f + 0.5f),
                 (byte)(c.B * f + 0.5f), 255);
         }
+
+        // ==================================================================
+        //  v6.174 — EL CONDUCTO CONTINUO (la letra: «creo que tenemos una
+        //  librería de rayos concentrados, investiga si tenemos y
+        //  mejórala de ser posible»): la entrada NUEVA de la librería de
+        //  haces — UN trazo por puntos arbitrarios dibujado con LA MALLA
+        //  CONTINUA de TajoLib (una tira de triángulos, cero empalmes):
+        //  el conducto del Faro del Eclipse. Las capas se EMBEBEN
+        //  llamándola varias veces con semiancho decreciente.
+        // ==================================================================
+
+        private static float[] _alfaConducto = new float[256];
+
+        /// <summary>UN trazo continuo de haz (de pts[0] a pts[n-1]), con
+        /// semiancho por punto e intensidad constante.</summary>
+        public static void Conducto(Vector2[] pts, float[] semiancho, Color color, float intensidad)
+        {
+            if (pts == null || semiancho == null || pts.Length < 2 || pts.Length > _alfaConducto.Length
+                || semiancho.Length < pts.Length || intensidad <= 0.001f) return;
+            for (int i = 0; i < pts.Length; i++) _alfaConducto[i] = intensidad;
+            TajoLib.Cinta(pts, semiancho, color, _alfaConducto);
+        }
     }
 }

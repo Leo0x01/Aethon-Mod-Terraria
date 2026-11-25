@@ -8,6 +8,10 @@
 Mods.AethonMod.DisplayName: Aethon, el Grimorio Eterno
 
 Items: {
+	FaroDelEclipse: {
+		DisplayName: Eclipse Lighthouse
+		Tooltip: Hold the use button — half a second of charge, then the beam follows the cursor up to 900 px
+	}
 		// v6.170 — THE THRESHOLD CLICKER DIED (la letra: «esta
 		// horrible, lo puedes borrar»): claves extirpadas.
 		// v6.168 — THE NEW WEAPON (the vertical lines)

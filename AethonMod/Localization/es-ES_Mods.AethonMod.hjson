@@ -8,6 +8,10 @@
 Mods.AethonMod.DisplayName: Aethon, el Grimorio Eterno
 
 Items: {
+	FaroDelEclipse: {
+		DisplayName: Faro del Eclipse
+		Tooltip: Mantén apretado el botón de uso — medio segundo de carga y el conducto sigue al cursor hasta 900 px
+	}
 		// v6.170 — EL CLICKER DEL UMBRAL MURIÓ (la letra: «esta
 		// horrible, lo puedes borrar»): claves extirpadas.
 		// v6.168 — EL ARMA NUEVA (la letra: «crea una nueva arma, su
