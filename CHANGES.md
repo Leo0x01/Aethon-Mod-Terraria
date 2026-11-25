@@ -1,3 +1,17 @@
+## v6.174 — LA INTERFAZ QUE RESPONDE, LA LUNA DE UNA PIEZA Y EL FARO DEL ECLIPSE — la letra del usuario (sesión 27, once puntos)
+
+1. **LOS BOTONES (puntos 1 y 2)**: el «frame de gracia» de la v6.173 medía con el reloj del juego, que vuelve a cero al cargar un mundo, y ningún clic pasaba. Ahora: flanco simple, clic completado en finally, selector dueño único de su clic, ESC gastado, flancos reiniciados al abrir.
+2. **LAS TINTAS (punto 1)**: altar y pilar con la paleta exacta del libro (148,72,178 · 168,108,44 · 118,96,70 · 140,40,40).
+3. **CONSAGRAR SIN DUPLICAR (punto 3)**: nada sale del inventario hasta pulsar CONSAGRAR; la pila paga una unidad y la unidad sellada vuelve.
+4. **LAS RANURAS DEL TRÍO (punto 4)**: el arma entra en la ranura clicada; el pilar pasa a motor puro; la ofrenda física se guarda solo en el mundo.
+5. **EL TRÍO DISPARA (punto 5)**: cada arma pasa por el cañón real de vanilla (ItemCheck_Shoot); sin escribir en los ai de proyectiles ajenos. Albedrío por ranura (Original / Presa / Cursor) con su palomita, en dos bits de red.
+6. **LA LUNA DE UNA PIEZA (punto 6)**: la causa real era la collera de 32 rectángulos con solape aditivo; TajoLib se reescribe sobre la malla continua de RayoStrip y nace TajoLib.Cinta.
+7. **EL FARO DEL ECLIPSE (punto 10)**: arma original de rayo concentrado, 26 capas, 5 madera en el banco de trabajo; sprite, receta, bolsa y dos idiomas.
+8. **LA LIBRERÍA DE HACES (punto 8)**: HazLib.Conducto.
+9. **AUDITORÍAS (puntos 9 y 11)**: audfx_v6174.py y audita_v6174.py; el informe va aparte (Auditoria_AethonMod_v6.174.docx).
+
+**GATES**: build 0 errores / 0 avisos · claves de las pantallas 0 faltantes · .tmod 21861448 bytes md5 834b3c221ac80ae4921f664a48d0f7cd · headless v6.174 hasta «Server started» con 0 excepciones.
+
 ## v6.172 — EL ARMA QUE NO LLEGABA, LA LIBRERÍA DE TAJOS REFORJADA Y UNA SOLA TINTA — la letra del usuario: «en el altar al poner el arma al slot para armas esta desaparece por completo del inventario, pero no llega al slot, el slot queda vacio» + «la libreria de tajos esta super obsoleta […] necesito que hagas una investigacion profunda en todo internet, en busca de mods y codigos […] hazle tantas mejoras como puedas» + «todavia el color de los textos en el altar y en el pilar estan mal, revisa los colores de la tipografia y has que los colores sean los mismos que la del libro de informacion» + «el cronista se ve bien, ahora en el mapa su cabeza tambien debe tener bruma o ser de bruma»
 
 1. **EL ARMA DESAPARECIDA**: `ClicEnCandidato` hacía `TurnToAir()` sobre `elegido` (la MISMA referencia que `inventory[k]`) y DESPUÉS lo clonaba → clonaba aire → la ranura del trío quedaba vacía. La cura: el clon nace PRIMERO, el original muere después.
