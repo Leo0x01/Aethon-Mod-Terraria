@@ -66,20 +66,6 @@ namespace AethonMod.Content.UI
         //  cambia (los tiles llaman).
         // ============================================================
 
-        /// <summary>v6.173 — LA MARCA DEL FRAME DE GRACIA: el
-        /// selector flotante la llama al elegir — la página no
-        /// procesa clics hasta el frame siguiente (la cura del clic
-        /// fantasma que vaciaba las ranuras del trío).</summary>
-        /// <summary>v6.173 — EL RELOJ DE GRACIA ESTÁTICO (compartido
-        /// con LibroEstado — el marco de gracia vive en la clase
-        /// externa porque el selector lo siembra DESDE FUERA).</summary>
-        internal static ulong TickGracia;
-
-        internal static void MarcoDeGracia()
-        {
-            TickGracia = Main.GameUpdateCount;
-        }
-
         /// <summary>La pestaña viva: 0 = Índice · 1 = Altar · 2 = Pilar.</summary>
         internal static int Pestana;
 
@@ -96,7 +82,9 @@ namespace AethonMod.Content.UI
             Pestana = pestana;
             if (_estado == null) _estado = new LibroEstado();
             _estado.Visible = true;
+            SelectorFlotante.Cerrar();      // v6.174: nada de la sesión anterior flota sobre el libro
             _estado.ReiniciarScroll();
+            _estado.ReiniciarFlancos();    // v6.174: el clic (o la tecla) que abrió el libro no dispara nada
             _iface.SetState(_estado);
             Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuOpen);
         }
@@ -110,6 +98,15 @@ namespace AethonMod.Content.UI
             _iface = new UserInterface();
         }
 
+        public override void Unload()
+        {
+            // v6.174 — el selector flotante no sobrevive a la descarga
+            // (ni su lista de ítems de un jugador que ya no existe).
+            SelectorFlotante.Descargar();
+            _iface = null;
+            _estado = null;
+        }
+
         public static void Abrir()
         {
             // v6.164 — LAS VENTANAS SEPARADAS: el icono y la tecla P
@@ -119,17 +116,22 @@ namespace AethonMod.Content.UI
             Pestana = 0;
             if (_estado == null) _estado = new LibroEstado();
             _estado.Visible = true;
+            SelectorFlotante.Cerrar();      // v6.174: nada de la sesión anterior flota sobre el libro
             _estado.ReiniciarScroll();
+            _estado.ReiniciarFlancos();    // v6.174: el clic (o la tecla) que abrió el libro no dispara nada
             _iface.SetState(_estado);
             Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuOpen);
         }
 
         public static void Cerrar()
         {
+            // v6.174 — EL SELECTOR MUERE CON EL LIBRO (antes quedaba vivo
+            // huérfano: su ventana flotaba sobre el mundo ya cerrado).
+            SelectorFlotante.Cerrar();
             // v6.164 — EL CIERRE SINCRONIZADO: si el libro muere (ESC, X)
             // mientras muestra el ALTAR o el PILAR, los motores sueltan
-            // SU estado también (el arma del altar vuelve al cursor —
-            // el cierre limpio de siempre).
+            // SU estado también (v6.174: la ofrenda PRESTADA se olvida —
+            // nunca salió del inventario; la física se queda en el altar).
             try
             {
                 if (Pestana == 1 && AltarOfrendasUI.Abierta) AltarOfrendasUI.ForzarCierre();
@@ -357,22 +359,19 @@ namespace AethonMod.Content.UI
         /// propio flanco.</summary>
         private bool _ultimoClicDer;
 
-        /// <summary>v6.173 — EL FRAME DE GRACIA DE LA PÁGINA (la letra:
-        /// «a veces colocas un arma en un slot, pero al colocar una
-        /// segunda el primer slot se desequipa solo»): LA AUTOPSIA —
-        /// al elegir un candidato, la ventana flotante SE CIERRA el
-        /// MISMO frame y el clic sigue apretado; al frame siguiente
-        /// el cursor cae sobre LO QUE QUEDÓ DEBAJO (la casilla «3» o
-        /// el botón «Desequipar todo») y el flanco del soltar dispara
-        /// EL CONTROL DE ABAJO — el fantasma que vaciaba las ranuras.
-        /// LA CURA — la página ENTIENDE un frame de gracia tras
-        /// cualquier acción del selector: los clics mueren por un
-        /// frame (el reloj vive ESTÁTICO en LibroDelEternoUI — el
-        /// selector lo siembra desde fuera).</summary>
-
         /// <summary>v6.163 — al cambiar de pestaña el scroll vuelve
         /// arriba (cada pestaña es un mundo nuevo).</summary>
         public void ReiniciarScroll() { _scrollIzq = 0f; _scrollDer = 0f; }
+
+        /// <summary>v6.174 — LOS FLANCOS SE SIEMBRAN AL ABRIR: el clic (o
+        /// la tecla) que abrió el libro sigue apretado en ese mismo
+        /// frame — sin esto, el primer dibujo veía un clic «nuevo».
+        /// Se llama cuando el libro se abre y cuando cambia de pestaña.</summary>
+        public void ReiniciarFlancos()
+        {
+            _ultimoClicIzq = Main.mouseLeft;
+            _ultimoClicDer = Main.mouseRight;
+        }
 
         // v6.149 — LA LEGIBILIDAD DE VERDAD (la letra: «todos los textos
         // estan desentrados y el color de los textos los hace
@@ -442,6 +441,13 @@ namespace AethonMod.Content.UI
             //  'ScrollWheelDelta = 0' no bastaba: vanilla lee su
             //  ScrollWheelValue directo — SOLO esta lista lo frena.)
             // ============================================================
+            // v6.174 — LA RUEDA DE LA VITRINA DEL PILAR Y DEL SELECTOR: los
+            // dos leen SU rueda en el DIBUJO (que corre después de este
+            // Update) — si aquí se la comíamos, nunca les llegaba. Sobre
+            // ellos el libro no se mueve, pero el cerrojo de vanilla sigue.
+            bool ruedaDelSelector = SelectorFlotante.Abierta &&
+                                     SelectorFlotante.UltimoRect.Contains(Main.mouseX, Main.mouseY);
+            bool ruedaDelPilar = LibroDelEternoUI.Pestana == 2 && PilarDelLibro.CursorEnVitrina();
             bool cursorEnLibro = GeoPagIzq.Contains(Main.mouseX, Main.mouseY) ||
                                  GeoPagDer.Contains(Main.mouseX, Main.mouseY);
             if (cursorEnLibro)
@@ -450,6 +456,8 @@ namespace AethonMod.Content.UI
             // v6.144 — EL SCROLL INDEPENDIENTE: la rueda SOLO mueve LA
             // PÁGINA bajo el cursor (fuera de ambas: nada).
             int delta = Terraria.GameInput.PlayerInput.ScrollWheelDelta;
+            if (delta != 0 && (ruedaDelSelector || ruedaDelPilar))
+                delta = 0;                      // v6.174: la rueda es de la vitrina — el libro no se mueve
             if (delta != 0)
             {
                 Rectangle mitIzq = new Rectangle(0, 0, Main.screenWidth / 2, Main.screenHeight);
@@ -460,14 +468,18 @@ namespace AethonMod.Content.UI
                 Terraria.GameInput.PlayerInput.ScrollWheelDelta = 0;   // la rueda es del libro
             }
 
-            if (Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Escape))
+            // v6.168 — ESC CIERRA PRIMERO AL SELECTOR FLOTANTE (la
+            // ventanita de elegir es lo más joven de la pila).
+            // v6.174 — LA PULSACIÓN SE GASTA en la ventana que cerró:
+            // mientras la tecla siga apretada no baja al libro (un ESC
+            // no se come las dos ventanas); al soltarla vuelve a valer.
+            bool escVivo = Main.keyState.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.Escape);
+            if (escVivo)
             {
-                // v6.168 — ESC CIERRA PRIMERO AL SELECTOR FLOTANTE (la
-                // ventanita de elegir es lo más joven de la pila: un ESC
-                // con ella abierta la cierra, NO al libro entero).
-                if (SelectorFlotante.Abierta) SelectorFlotante.Cerrar();
-                else LibroDelEternoUI.Cerrar();
+                if (SelectorFlotante.Abierta) SelectorFlotante.CerrarPorEsc();
+                else if (!SelectorFlotante.EscConsumido) LibroDelEternoUI.Cerrar();
             }
+            SelectorFlotante.FilarEsc(escVivo);
 
             // (v6.164 — el motor de clics SE MUDÓ al dibujo de las
             //  páginas: el flanco de la casa vive donde viven las
@@ -484,6 +496,14 @@ namespace AethonMod.Content.UI
 
         public override void Draw(SpriteBatch sb)
         {
+            // v6.174 — EL ESTADO DEL CLIC SE LEE UNA VEZ, ANTES DEL try, y
+            // los flancos se completan en el finally. Antes el flanco se
+            // completaba al final del try: si una página lanzaba (y el
+            // catch se lo tragaba), el clic quedaba «nuevo» CADA frame
+            // mientras el botón estaba apretado — el mismo botón se
+            // disparaba en cadena.
+            bool clicAhora = Main.mouseLeft;
+            bool clicDerAhora = Main.mouseRight;
             try
             {
                 Main.LocalPlayer.mouseInterface = true;
@@ -598,21 +618,31 @@ namespace AethonMod.Content.UI
                             TintaTitulo, 0.92f, 0.5f, 0.4f);
                 }
 
-                // EL MOTOR DE CLIC DE LA CASA (v6.164 — la cura de los
-                // botones muertos del pilar): el FLANCO de siempre
-                // (mouseLeft && !_ultimoClicIzq — el patrón del árbol y
-                // de los paneles viejos que FUNCIONABAN), procesado
-                // AQUÍ en el dibujo — donde viven las geometrías.
-                bool clicAhora = Main.mouseLeft &&
-                    !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
-                bool clicNuevo = clicAhora && !_ultimoClicIzq &&
-                    Main.GameUpdateCount > LibroDelEternoUI.TickGracia;   // v6.173: el frame de gracia
-
-                // v6.173 — EL FLANCO DERECHO (la extracción de las
-                // ranuras del trío — la letra del clic derecho).
-                bool clicDerAhora = Main.mouseRight &&
-                    !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
+                // EL MOTOR DE CLIC DE LA CASA (v6.164): el FLANCO de
+                // siempre (mouseLeft && !_ultimoClicIzq — el patrón del
+                // árbol y de los paneles viejos que FUNCIONABAN),
+                // procesado AQUÍ en el dibujo — donde viven las geometrías.
+                // v6.174 — LA AUTOPSIA DE LOS BOTONES MUERTOS (la letra:
+                // «en el mundo interior, al usar el pilar los botones no
+                // hacen nada» · «en el altar tampoco funcionan, funcionaron
+                // la primera vez pero ahora no»): la v6.173 coló DOS
+                // filtros encima del flanco — IgnoreMouseInterface (la
+                // bandera TRANSITORIA de vanilla, que se enciende con el
+                // inventario abierto y con mil cosas más) y un «frame de
+                // gracia» medido con el reloj de vanilla, un reloj que
+                // VUELVE A CERO al cargar el mundo o al entrar al mundo
+                // interior (la marca de gracia se quedaba por delante para
+                // siempre: ningún clic volvía a pasar). Los dos mueren.
+                bool clicNuevo = clicAhora && !_ultimoClicIzq;
                 bool clicDerNuevo = clicDerAhora && !_ultimoClicDer;
+
+                // v6.174 — EL SELECTOR ES EL DUEÑO ÚNICO DEL CLIC:
+                // mientras su ventana vive, las páginas de abajo NO oyen
+                // (el fantasma que vaciaba las ranuras al elegir ya no
+                // tiene dónde caer).
+                bool selectorVivo = SelectorFlotante.Abierta;
+                bool clicPagina = clicNuevo && !selectorVivo;
+                bool clicDerPagina = clicDerNuevo && !selectorVivo;
 
                 // el cuerpo arranca DEBAJO del rótulo de la página —
                 // nunca debajo del titular (que ya vive en el cuero)
@@ -747,27 +777,22 @@ namespace AethonMod.Content.UI
                     // EL ALTAR DEL LIBRO: página fija, sin rueda.
                     float sinScroll = 0f;
                     _maxIzq = 0f; _maxDer = 0f;
-                    AltarDelLibro.Izquierda(sb, pagIzq, recIzq, ref sinScroll, clicNuevo);
-                    AltarDelLibro.Derecha(sb, pagDer, recDer, ref sinScroll, clicNuevo, clicDerNuevo);
+                    AltarDelLibro.Izquierda(sb, pagIzq, recIzq, ref sinScroll, clicPagina, clicDerPagina);
+                    AltarDelLibro.Derecha(sb, pagDer, recDer, ref sinScroll, clicPagina, clicDerPagina);
                 }
                 else if (LibroDelEternoUI.Pestana == 2)
                 {
                     // EL PILAR DEL LIBRO: página fija, sin rueda.
                     float sinScroll = 0f;
                     _maxIzq = 0f; _maxDer = 0f;
-                    PilarDelLibro.Izquierda(sb, pagIzq, recIzq, ref sinScroll, clicNuevo);
-                    PilarDelLibro.Derecha(sb, pagDer, recDer, ref sinScroll, clicNuevo);
+                    PilarDelLibro.Izquierda(sb, pagIzq, recIzq, ref sinScroll, clicPagina);
+                    PilarDelLibro.Derecha(sb, pagDer, recDer, ref sinScroll, clicPagina);
                 }
                 else
                 {
                     _maxIzq = DibujarColumna(sb, columnas[0], pagIzq, recIzq, ref _scrollIzq, true);
                     _maxDer = DibujarColumna(sb, columnas[1], pagDer, recDer, ref _scrollDer, false);
                 }
-
-                // EL FLANCO SE COMPLETA AQUÍ (el clic se consumió en el
-                // dibujo de las páginas — el mismo lugar que lo leyó).
-                _ultimoClicIzq = clicAhora;
-                _ultimoClicDer = clicDerAhora;
 
                 // ============================================================
                 //  v6.154 — LA X VIVE CON LAS PÁGINAS (la cura de «la X
@@ -820,7 +845,7 @@ namespace AethonMod.Content.UI
                     new Vector2(rectX.Center.X, rectX.Center.Y + 1f) - midX,
                     hoverX ? new Color(255, 210, 210) : new Color(235, 225, 205), 0f,
                     Vector2.Zero, 1.1f, SpriteEffects.None, 0f);
-                if (hoverX && Main.mouseLeft && Main.mouseLeftRelease)
+                if (hoverX && clicPagina)
                     LibroDelEternoUI.Cerrar();
 
                 // ============================================================
@@ -833,7 +858,7 @@ namespace AethonMod.Content.UI
                 //  primero — la ventanita es lo más joven de la pila.
                 // ============================================================
                 bool ruedaSelector = Terraria.GameInput.PlayerInput.ScrollWheelDelta != 0;
-                SelectorFlotante.Dibujar(sb, clicNuevo, ruedaSelector);
+                SelectorFlotante.Dibujar(sb, clicNuevo, clicDerNuevo, ruedaSelector);
 
                 sb.End();
                 sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
@@ -859,6 +884,13 @@ namespace AethonMod.Content.UI
                 // ============================================================
             }
             catch { }
+            finally
+            {
+                // v6.174 — EL FLANCO SE COMPLETA SIEMPRE (con o sin
+                // excepción): un clic vale UN frame, el que lo leyó.
+                _ultimoClicIzq = clicAhora;
+                _ultimoClicDer = clicDerAhora;
+            }
         }
 
         /// <summary>Una columna de secciones (medir y dibujar con recorte).
@@ -1149,264 +1181,240 @@ namespace AethonMod.Content.UI
         }
     }
     // ====================================================================
-    //  v6.164 — EL ALTAR DEL LIBRO, LA PÁGINA FIJA (la letra: «la
-    //  ventana del altar no necesita scroll por lo tanto elimina eso
-    //  de la seccion del altar nada de scroll, entonces ahora como
-    //  usa la misma ventana que el libro de informacion hay mucho
-    //  espacio para poner lo importante en el grimorio, asi que
-    //  aprovecha poniendo lo necesario»). DOS PÁGINAS ESTÁTICAS que
-    //  aprovechan el libro GRANDE: IZQUIERDA = la ofrenda (el slot +
-    //  el sello con su precio + consagrar + GANA + CÓMO CONSEGUIR
-    //  ESENCIAS + la puerta al interior). DERECHA = EL TRÍO en
-    //  grande con su guía honesta (v6.164: el clic derecho del arma
-    //  YA NO ELIGE — la elección vive AQUÍ). LOS CLICS viven en el
-    //  dibujo (flanco de la casa) y los ejecuta el motor de verdad
-    //  (AltarOfrendasUI). El altar físico manda: sin él cerca, la
-    //  ventana se cierra.
+    //  v6.163 — EL ALTAR DEL LIBRO. IZQUIERDA = LA OFRENDA (el hueco, el
+    //  precio A LA VISTA, el botón CONSAGRAR, cómo ganar esencias y la
+    //  puerta al interior). DERECHA = EL TRÍO con sus tres ranuras, la
+    //  casilla «las tres a la vez», «Desequipar todo» y EL ALBEDRÍO.
+    //  v6.174 — REESCRITA (la letra: «al poner la tercera las dos
+    //  iniciales se desequipan y solo queda la tercera», «un selector a
+    //  modo de checklist», «hay letras demasiado oscuras»):
+    //   · LOS CLICS: la página recibe el flanco SOLO cuando el selector
+    //     flotante no vive (el libro decide — un solo dueño por clic).
+    //   · EL SELECTOR NACE DEBAJO DE TODO: anclado bajo el botón
+    //     CONSAGRAR (ofrenda) o bajo la última fila del albedrío (trío)
+    //     — su ventana JAMÁS cubre un control que el clic pueda tocar.
+    //   · EL ALBEDRÍO: tres casillas por ranura (Original · A enemigos ·
+    //     Al cursor) con SU palomita.
+    //   · LA TINTA: LibroLineas.Texto (contorno blanco + los colores del
+    //     índice).
     // ====================================================================
     internal static class AltarDelLibro
     {
-        // LA TINTA UNIFICADA DEL LIBRO (la letra: «el color de los
-        // textos algunos muy oscuros y otros muy claros»): UNA sola
-        // familia — la tinta del papel (cuerpo), el violeta del
-        // título, el oro del capítulo y el apagado de las pistas. Ni
-        // blancos cegadores ni negros invisibles.
-        // v6.168 — LA PALETA ES LA DEL LIBRO DE INFORMACIÓN, EXACTA
-        // (la letra: «tenias que usar el color de la tipografia en el
-        // libro de informacion para darle color al altar y al pilar»):
-        // cuerpo 28,20,16 · título 148,72,178 · capítulo 168,108,44 ·
-        // apagado 118,96,70 · papel 216,200,166 — LOS MISMOS valores
-        // de la clase principal (arriba). Ni una tinta propia.
+        // LA PALETA DEL LIBRO DE INFORMACIÓN, EXACTA (la de LibroEstado)
         private static readonly Color Tinta = new(28, 20, 16);
         private static readonly Color TintaVioleta = new(148, 72, 178);
         private static readonly Color TintaOro = new(168, 108, 44);
         private static readonly Color TintaApagado = new(118, 96, 70);
-        private static readonly Color PapelSombra = new(216, 200, 166);
+        private static readonly Color TintaRojo = new(140, 40, 40);
+        private static readonly Color PapelSombra = new(190, 172, 134);
 
-        // LA GEOMETRÍA VIVA (el clic del dibujo las lee).
+        // LA GEOMETRÍA VIVA
         internal static Rectangle GeoSlot, GeoConsagrar, GeoPuerta;
         internal static readonly Rectangle[] GeoTrio = new Rectangle[3];
         internal static Rectangle GeoMarcaTres;
-        internal static Rectangle GeoDesequiparTodo;   // v6.167 — el botón que vacía las tres ranuras
+        internal static Rectangle GeoDesequiparTodo;
+        internal static readonly Rectangle[,] GeoAlbedrio = new Rectangle[3, 3];
 
-        /// <summary>El título de sección cosido (centrado, con sus
-        /// filetes a los lados — el estilo del índice).</summary>
-        private static void Titulo(SpriteBatch sb, string t, Rectangle pag, float cy, out float cyOut)
+        private const string A = "Mods.AethonMod.Altar.";
+        private static string At(string c) => Language.GetTextValue(A + c);
+
+        /// <summary>¿El bloque nace DENTRO del cuerpo de la página?</summary>
+        private static bool Cabe(float cy, float alto, Rectangle rec) => cy + alto <= rec.Bottom;
+
+        /// <summary>El título de sección cosido (centrado, con sus filetes).</summary>
+        private static void Titulo(SpriteBatch sb, string t, Rectangle pag, float cy, out float cyOut, float esc = 0.95f)
         {
             var fuente = FontAssets.MouseText.Value;
-            var m = fuente.MeasureString(t);
-            float xT = pag.X + (pag.Width - m.X * 0.95f) * 0.5f;
-            Utils.DrawBorderString(sb, t, new Vector2(xT, cy), TintaVioleta, 0.95f);
-            float yL = cy + m.Y * 0.95f + 3f;
+            t = t ?? "";
+            esc = LibroLineas.EscalaQueCabe(t, esc, pag.Width - 80f);
+            var m = fuente.MeasureString(t) * esc;
+            float xT = pag.X + (pag.Width - m.X) * 0.5f;
+            LibroLineas.Texto(sb, t, new Vector2(xT, cy), TintaVioleta, esc);
+            float yL = cy + m.Y + 3f;
             sb.Draw(TextureAssets.MagicPixel.Value,
                 new Rectangle((int)(pag.X + 16), (int)yL, (int)Math.Max(4f, xT - 18f - pag.X - 16), 2), TintaOro * 0.55f);
             sb.Draw(TextureAssets.MagicPixel.Value,
-                new Rectangle((int)(xT + m.X * 0.95f + 18f), (int)yL,
-                    (int)Math.Max(4f, pag.Right - 16 - (xT + m.X * 0.95f + 18f)), 2), TintaOro * 0.55f);
-            cyOut = cy + m.Y * 0.95f + 12f;
+                new Rectangle((int)(xT + m.X + 18f), (int)yL,
+                    (int)Math.Max(4f, pag.Right - 16 - (xT + m.X + 18f)), 2), TintaOro * 0.55f);
+            cyOut = cy + m.Y + 12f;
         }
 
-        /// <summary>El botón cosido del libro (texto MEDIDO para caber
-        /// — la cura del desborde del pilar).</summary>
-        private static float Boton(SpriteBatch sb, Rectangle pag, float cy, string t,
+        /// <summary>El botón cosido del libro (texto MEDIDO para caber). Un
+        /// botón que no cabe en la página queda SIN hitbox (geo vacío).</summary>
+        private static float Boton(SpriteBatch sb, Rectangle pag, Rectangle rec, float cy, string t,
             Color cBase, out Rectangle geo, bool clicNuevo, System.Action alClic,
             bool apagado = false)
         {
             var fuente = FontAssets.MouseText.Value;
-            // EL TEXTO SE MIDE: si no cabe en 220px, la escala baja.
-            float esc = 0.88f;
-            var mT = fuente.MeasureString(t) * esc;
-            if (mT.X > 208f && mT.X > 0f) esc *= 208f / mT.X;
+            float esc = LibroLineas.EscalaQueCabe(t ?? "", 0.88f, 208f);
             Rectangle b = new Rectangle((int)(pag.X + pag.Width / 2f - 110f), (int)cy, 220, 40);
-            geo = b;
-            bool hov = b.Contains(Main.mouseX, Main.mouseY) &&
-                !Terraria.GameInput.PlayerInput.IgnoreMouseInterface && !apagado;
+            bool vivo = Cabe(cy, 40f, rec);
+            geo = vivo ? b : Rectangle.Empty;
+            bool hov = vivo && !apagado && b.Contains(Main.mouseX, Main.mouseY);
             sb.Draw(TextureAssets.MagicPixel.Value, b,
                 (hov ? cBase : new Color(cBase.R * 2 / 3, cBase.G * 2 / 3, cBase.B * 2 / 3)) * (hov ? 0.30f : 0.15f));
             LibroMarco.Marco(sb, b, apagado ? TintaApagado * 0.5f : (hov ? cBase : cBase * 0.55f));
-            Utils.DrawBorderString(sb, t, new Vector2(b.Center.X, b.Center.Y),
+            LibroLineas.Texto(sb, t ?? "", new Vector2(b.Center.X, b.Center.Y),
                 apagado ? TintaApagado : Tinta, esc, 0.5f, 0.5f);
-            if (hov && clicNuevo) { alClic?.Invoke(); }
+            if (hov && clicNuevo) alClic?.Invoke();
             return cy + 48f;
         }
 
         /// <summary>LA PÁGINA IZQUIERDA: la ofrenda y su mundo.</summary>
         public static float Izquierda(SpriteBatch sb, Rectangle pag, Rectangle rec,
-            ref float scroll, bool clicNuevo)
+            ref float scroll, bool clicNuevo, bool clicDerNuevo)
         {
-            var fuente = FontAssets.MouseText.Value;
             float cy = rec.Y + 6f;                       // página FIJA: sin scroll
-            float xizq = pag.X + 18f;
             float maxAncho = pag.Width - 36f;
             float Linea(string t, float y, float esc, Color c)
-                => LibroLineas.Linea(sb, t, xizq, y, maxAncho, esc, c, rec, pag);
-
+                => LibroLineas.Linea(sb, t ?? "", pag.X + 18f, y, maxAncho, esc, c, rec, pag);
+            GeoSlot = Rectangle.Empty; GeoConsagrar = Rectangle.Empty; GeoPuerta = Rectangle.Empty;
             if (!AltarOfrendasUI.Abierta) return 0f;
 
             Item arma = AltarOfrendasUI.Ofrenda;
+            bool hayArma = arma != null && !arma.IsAir;
             bool lista = AltarOfrendasUI.EsOfrendaConsagriblePublica(arma);
-            bool esEsencias = lista && arma != null && !arma.IsAir && arma.type ==
+            bool esEsencias = lista && hayArma && arma.type ==
                 ModContent.ItemType<global::AethonMod.Content.Items.Altar.ItemCorrupto>();
+            bool abrirSelector = false;
+            Rectangle ancla = new Rectangle(pag.X + pag.Width / 2 - 141, (int)cy, 282, 1);
 
             // ── LA OFRENDA (el slot + su guía) ──
-            Titulo(sb, Language.GetTextValue("Mods.AethonMod.Altar.Titulo"), pag, cy, out cy);
+            Titulo(sb, At("Titulo"), pag, cy, out cy);
             Rectangle slot = new Rectangle((int)(pag.X + pag.Width / 2f - 26f), (int)cy, 52, 52);
             GeoSlot = slot;
-            bool hoverSlot = slot.Contains(Main.mouseX, Main.mouseY) &&
-                !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
+            bool hoverSlot = slot.Contains(Main.mouseX, Main.mouseY);
             sb.Draw(TextureAssets.MagicPixel.Value, slot, PapelSombra * 0.9f);
             LibroMarco.Marco(sb, slot, hoverSlot ? TintaVioleta : TintaVioleta * 0.45f);
-            if (arma != null && !arma.IsAir)
+            if (hayArma)
             {
                 Texture2D tex = TextureAssets.Item[arma.type].Value;
                 float esc = Math.Min(44f / tex.Width, 44f / tex.Height);
                 sb.Draw(tex, slot.Center.ToVector2(), null, Color.White, 0f,
                     tex.Size() * 0.5f, esc, SpriteEffects.None, 0f);
                 if (arma.stack > 1)
-                    Utils.DrawBorderString(sb, arma.stack.ToString(),
+                    LibroLineas.Texto(sb, arma.stack.ToString(),
                         new Vector2(slot.Right - 6f, slot.Bottom - 8f), Tinta, 0.85f, 1f, 0.85f);
             }
             else
-                Utils.DrawBorderString(sb, Language.GetTextValue("Mods.AethonMod.Altar.SlotVacio"),
-                    new Vector2(slot.Center.X, slot.Center.Y), TintaApagado, 0.7f, 0.5f, 0.5f);
-            // ============================================================
-            //  v6.168 — LA BANDEJA MURIÓ, LA VENTANA FLOTANTE VIVE (la
-            //  letra: «seria mejor que para seleccionar las ofrendas y
-            //  las armas […] se haga con una ventana flotante, una
-            //  pequeña ventana que muestre los items disponibles»): el
-            //  slot con cursor vacío ABRE EL SELECTOR FLOTANTE anclado
-            //  al slot (la lista COMPLETA con SU rueda — SelectorFlotante,
-            //  dibujado al final del libro). NADA se incrusta aquí: la
-            //  página no salta.
-            // ============================================================
-            if (hoverSlot && clicNuevo) AltarOfrendasUI.ClicEnSlot();
-            if (AltarOfrendasUI.SelectorAbierto != null &&
-                AltarOfrendasUI.SelectorAbierto.Value.ranura == -2 &&
-                !SelectorFlotante.Abierta)
+                LibroLineas.Texto(sb, At("SlotVacio"), slot.Center.ToVector2(), TintaApagado, 0.7f, 0.5f, 0.5f);
+
+            if (hoverSlot && clicDerNuevo) AltarOfrendasUI.ClicDerechoSlot();
+            else if (hoverSlot && clicNuevo)
             {
-                // el slot abrió el selector: la ventanita nace anclada
-                // (v6.171: con SU RANURA DESTINO −2 — la ofrenda)
-                SelectorFlotante.Abrir(slot, false,
-                    Language.GetTextValue("Mods.AethonMod.Altar.SelectorTitulo"), -2);
-                AltarOfrendasUI.SelectorAbierto = null;
+                if (Main.mouseItem.IsAir && !hayArma) abrirSelector = true;   // el hueco vacío: elegir
+                else AltarOfrendasUI.ClicEnSlot();                           // dejar / retirar / devorar
             }
             cy += 58f;
-            cy = Linea(Language.GetTextValue("Mods.AethonMod.Altar.EtiquetaArma"), cy, 0.82f, Tinta);
-            cy = Linea(Language.GetTextValue("Mods.AethonMod.Altar.FiltroArma"), cy, 0.68f, TintaApagado);
-
-            // ============================================================
-            //  v6.168 — LA BANDEJA DE LA OFRENDA MURIÓ: la selección
-            //  vive en LA VENTANA FLOTANTE (SelectorFlotante — la
-            //  letra: «se haga con una ventana flotante, una pequeña
-            //  ventana que muestre los items disponibles»). La lista
-            //  COMPLETA con SU rueda, anclada al slot — la página ya
-            //  no se estira ni corta a los 8 de siempre.
-            // ============================================================
+            cy = Linea(At("EtiquetaArma"), cy, 0.82f, Tinta);
+            cy = Linea(At("FiltroArma"), cy, 0.72f, TintaApagado);
+            if (AltarOfrendasUI.OfrendaPrestada && Cabe(cy, 44f, rec))
+                cy = Linea(At("OfrendaPrestada"), cy, 0.72f, TintaOro);
 
             // ── EL SELLO (el precio A LA VISTA + consagrar) ──
             cy += 6f;
-            Titulo(sb, Language.GetTextValue("Mods.AethonMod.Altar.SelloTitulo"), pag, cy, out cy);
-            if (lista && arma != null && !arma.IsAir)
+            Titulo(sb, At("SelloTitulo"), pag, cy, out cy);
+            if (lista && hayArma)
             {
                 if (esEsencias)
                 {
-                    cy = Linea(Language.GetTextValue("Mods.AethonMod.Altar.DevoraLinea",
-                        arma.stack,
+                    cy = Linea(Language.GetTextValue(A + "DevoraLinea", arma.stack,
                         global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas,
-                        global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta), cy, 0.74f, Tinta);
+                        global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta), cy, 0.78f, Tinta);
                 }
                 else
                 {
                     int coste = global::AethonMod.Content.Globals.CorruptoGlobalItem.CosteCorrupcion(arma);
                     int llevadas = global::AethonMod.Content.Globals.CorruptoGlobalItem
                         .EsenciasEnLaBolsa(Main.LocalPlayer);
-                    cy = Linea(Language.GetTextValue("Mods.AethonMod.Altar.SelloCuesta", coste), cy, 0.8f, Tinta);
-                    cy = Linea(Language.GetTextValue("Mods.AethonMod.Altar.SelloLlevas", llevadas), cy, 0.74f, TintaApagado);
+                    cy = Linea(Language.GetTextValue(A + "SelloCuesta", coste), cy, 0.8f, Tinta);
+                    cy = Linea(Language.GetTextValue(A + "SelloLlevas", llevadas), cy, 0.78f, TintaApagado);
                     if (llevadas < coste)
-                        cy = Linea(Language.GetTextValue("Mods.AethonMod.Altar.SelloFalta", coste - llevadas), cy, 0.74f, new Color(140, 40, 40));
+                        cy = Linea(Language.GetTextValue(A + "SelloFalta", coste - llevadas), cy, 0.78f, TintaRojo);
                 }
             }
             else
-                cy = Linea(Language.GetTextValue("Mods.AethonMod.Altar.SelloSinOfrenda"), cy, 0.75f, TintaApagado);
-            cy = Boton(sb, pag, cy + 4f, Language.GetTextValue("Mods.AethonMod.Altar.BotonConsagrar"),
-                TintaVioleta, out GeoConsagrar, clicNuevo,
-                () => AltarOfrendasUI.ClicEnConsagrar(), apagado: arma == null || arma.IsAir);
+                cy = Linea(At("SelloSinOfrenda"), cy, 0.78f, TintaApagado);
+            float cyBoton = cy + 4f;
+            cy = Boton(sb, pag, rec, cyBoton, At("BotonConsagrar"), TintaVioleta, out GeoConsagrar, clicNuevo,
+                () => AltarOfrendasUI.ClicEnConsagrar(), apagado: !hayArma);
+            if (GeoConsagrar.Width > 0)
+                ancla = new Rectangle(GeoConsagrar.X, GeoConsagrar.Bottom + 1, GeoConsagrar.Width, 1);
 
-            // ── GANA + CÓMO CONSEGUIR ESENCIAS (la letra: aprovechar
-            //   el espacio con lo necesario) ──
+            // ── GANA + CÓMO CONSEGUIR ESENCIAS ──
             cy += 4f;
-            Titulo(sb, Language.GetTextValue("Mods.AethonMod.Altar.GanaTitulo"), pag, cy, out cy);
-            cy = Linea(Language.GetTextValue("Mods.AethonMod.Altar.GanaEsencias",
-                global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta), cy, 0.72f, Tinta);
-            cy = Linea(Language.GetTextValue("Mods.AethonMod.Altar.GanaConsagrada"), cy, 0.72f, Tinta);
-            cy += 4f;
-            Titulo(sb, Language.GetTextValue("Mods.AethonMod.Altar.ComoTitulo"), pag, cy, out cy);
-            cy = Linea(Language.GetTextValue("Mods.AethonMod.Altar.ComoCriaturas"), cy, 0.7f, TintaApagado);
-            cy = Linea(Language.GetTextValue("Mods.AethonMod.Altar.ComoJefes"), cy, 0.7f, TintaApagado);
-            cy = Linea(Language.GetTextValue("Mods.AethonMod.Altar.ComoOleadas"), cy, 0.7f, TintaApagado);
+            if (Cabe(cy, 120f, rec))
+            {
+                Titulo(sb, At("GanaTitulo"), pag, cy, out cy);
+                cy = Linea(Language.GetTextValue(A + "GanaEsencias",
+                    global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta), cy, 0.76f, Tinta);
+                cy = Linea(At("GanaConsagrada"), cy, 0.76f, Tinta);
+                cy += 4f;
+            }
+            if (Cabe(cy, 120f, rec))
+            {
+                Titulo(sb, At("ComoTitulo"), pag, cy, out cy);
+                cy = Linea(At("ComoCriaturas"), cy, 0.74f, TintaApagado);
+                cy = Linea(At("ComoJefes"), cy, 0.74f, TintaApagado);
+                cy = Linea(At("ComoOleadas"), cy, 0.74f, TintaApagado);
+            }
 
             // ── EL MUNDO INTERIOR (la puerta cuando las mil están) ──
             cy += 6f;
-            Titulo(sb, Language.GetTextValue("Mods.AethonMod.Altar.MundoTitulo"), pag, cy, out cy);
-            if (global::AethonMod.Content.Systems.SubmundoGrimorio.PuertaAbierta)
+            if (Cabe(cy, 60f, rec))
             {
-                cy = Boton(sb, pag, cy, Language.GetTextValue("Mods.AethonMod.Altar.MundoPuerta"),
-                    TintaOro, out GeoPuerta, clicNuevo, () => AltarOfrendasUI.ClicEnPuerta());
+                Titulo(sb, At("MundoTitulo"), pag, cy, out cy);
+                if (global::AethonMod.Content.Systems.SubmundoGrimorio.PuertaAbierta)
+                    cy = Boton(sb, pag, rec, cy, At("MundoPuerta"), TintaOro, out GeoPuerta, clicNuevo,
+                        () => AltarOfrendasUI.ClicEnPuerta());
+                else
+                    cy = Linea(Language.GetTextValue(A + "MundoProgreso",
+                        global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas,
+                        global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta), cy, 0.78f, Tinta);
             }
-            else
-            {
-                cy = Linea(Language.GetTextValue("Mods.AethonMod.Altar.MundoProgreso",
-                    global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas,
-                    global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta), cy, 0.74f, Tinta);
-                GeoPuerta = Rectangle.Empty;
-            }
+
+            // ── EL SELECTOR DE LA OFRENDA: nace DEBAJO del botón CONSAGRAR ──
+            if (abrirSelector)
+                SelectorFlotante.Abrir(ancla, false, At("SelectorTitulo"), -2);
             return 0f;
         }
 
-        /// <summary>LA PÁGINA DERECHA: EL TRÍO DEL ETERNO en grande.
-        /// v6.173 — RECIBE EL FLANCO DERECHO (el clic derecho sobre
-        /// una ranura desequipa su arma — la letra).</summary>
+        /// <summary>LA PÁGINA DERECHA: EL TRÍO DEL ETERNO en grande.</summary>
         public static float Derecha(SpriteBatch sb, Rectangle pag, Rectangle rec,
             ref float scroll, bool clicNuevo, bool clicDerNuevo = false)
         {
             var fuente = FontAssets.MouseText.Value;
             float cy = rec.Y + 6f;
-            float xizq = pag.X + 18f;
             float maxAncho = pag.Width - 36f;
             float Linea(string t, float y, float esc, Color c)
-                => LibroLineas.Linea(sb, t, xizq, y, maxAncho, esc, c, rec, pag);
-
+                => LibroLineas.Linea(sb, t ?? "", pag.X + 18f, y, maxAncho, esc, c, rec, pag);
+            for (int i = 0; i < 3; i++) { GeoTrio[i] = Rectangle.Empty; for (int j = 0; j < 3; j++) GeoAlbedrio[i, j] = Rectangle.Empty; }
+            GeoMarcaTres = Rectangle.Empty; GeoDesequiparTodo = Rectangle.Empty;
             if (!AltarOfrendasUI.Abierta) return 0f;
 
-            Titulo(sb, Language.GetTextValue("Mods.AethonMod.Altar.TrioTitulo"), pag, cy, out cy);
-
+            Titulo(sb, At("TrioTitulo"), pag, cy, out cy);
             var trio = global::AethonMod.Content.Weapons.Investigaciones.TrioDelEterno.Del(Main.LocalPlayer);
             if (trio == null)
             {
-                cy = Linea(Language.GetTextValue("Mods.AethonMod.Altar.TrioSinTrio"), cy, 0.8f, TintaApagado);
+                Linea(At("TrioSinTrio"), cy, 0.82f, TintaApagado);
                 return 0f;
             }
+            bool selectorVivo = SelectorFlotante.Abierta;    // el libro ya no nos da clics: cinturón y tirantes
+            cy = Linea(At("TrioPista"), cy, 0.76f, Tinta);
+            cy += 12f;
 
-            // LA GUÍA HONESTA (v6.164 — la letra: «todavia dice que el
-            // click derecho hace cambiar entres las 3 eso ya no es
-            // cierto»): el clic derecho MURIÓ en el arma — todo vive
-            // aquí, en el altar del libro.
-            cy = Linea(Language.GetTextValue("Mods.AethonMod.Altar.TrioPista"), cy, 0.74f, Tinta);
-            cy += 14f;
-
-            // ── LAS TRES RANURAS COSIDAS AL PAPEL (grandes: 62 px) ──
+            // ── LAS TRES RANURAS COSIDAS AL PAPEL ──
+            int abrirPara = int.MinValue;
             for (int i = 0; i < 3; i++)
             {
-                Rectangle s = new Rectangle(pag.X + pag.Width / 2 - 3 * 66 / 2 + i * 66, (int)cy, 62, 62);
+                Rectangle s = new Rectangle(pag.X + pag.Width / 2 - 99 + i * 66, (int)cy, 62, 62);
                 GeoTrio[i] = s;
-                bool hov = s.Contains(Main.mouseX, Main.mouseY) &&
-                    !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
-                bool elegida = trio.ModoDisparo == i;
-                sb.Draw(TextureAssets.MagicPixel.Value, s, PapelSombra * (elegida ? 1.35f : 0.9f));
-                LibroMarco.Marco(sb, s, elegida ? TintaVioleta
-                    : hov ? TintaOro : TintaOro * 0.4f);
+                bool hov = s.Contains(Main.mouseX, Main.mouseY);
                 Item ra = trio.Ranuras != null && i < trio.Ranuras.Length ? trio.Ranuras[i] : null;
-                if (ra != null && !ra.IsAir)
+                bool llena = ra != null && !ra.IsAir;
+                sb.Draw(TextureAssets.MagicPixel.Value, s, llena ? PapelSombra * 1.25f : PapelSombra * 0.9f);
+                LibroMarco.Marco(sb, s, hov ? TintaVioleta : llena ? TintaOro : TintaOro * 0.4f);
+                if (llena)
                 {
                     Texture2D tex = TextureAssets.Item[ra.type].Value;
                     float esc = Math.Min(50f / tex.Width, 50f / tex.Height);
@@ -1414,130 +1422,122 @@ namespace AethonMod.Content.UI
                         tex.Size() * 0.5f, esc, SpriteEffects.None, 0f);
                 }
                 else
-                    Utils.DrawBorderString(sb, (i + 1).ToString(),
-                        new Vector2(s.Center.X, s.Center.Y), TintaApagado * 0.8f, 0.85f, 0.5f, 0.5f);
-                // LA LEYENDA de la ranura (el nombre del arma, medido)
-                string nombreR = ra != null && !ra.IsAir ? ra.Name
-                    : Language.GetTextValue("Mods.AethonMod.Items.TrioLibre");
-                float escN = 0.62f;
-                var mN = fuente.MeasureString(nombreR) * escN;
-                if (mN.X > 64f && mN.X > 0f) escN *= 64f / mN.X;
-                Utils.DrawBorderString(sb, nombreR, new Vector2(s.Center.X, s.Bottom + 9f),
-                    elegida ? TintaVioleta : TintaApagado, escN, 0.5f, 0.5f);
-                // v6.173 — EL FRAME DE GRACIA (la cura de las
-                // desequipadas): la ranura que abre SU selector SIEMBRA
-                // el clic que lo abre — la página no procesa OTRO clic
-                // hasta el frame siguiente (el fantasma que clicaba el
-                // botón de abajo murió).
-                if (hov && clicNuevo)
+                    LibroLineas.Texto(sb, (i + 1).ToString(), s.Center.ToVector2(), TintaApagado, 0.9f, 0.5f, 0.5f);
+
+                // EL GESTO: izquierdo con el cursor vacío = ELEGIR · con un arma al cursor = DEJARLA · derecho = DEVOLVER
+                if (hov && !selectorVivo)
                 {
-                    AltarOfrendasUI.ClicEnRanura(i);
-                    LibroDelEternoUI.TickGracia = Main.GameUpdateCount;
-                }
-                // v6.173 — EL CLIC DERECHO DESEQUIPA (la letra: «el
-                // click derecho sobre un slot debe desequipar el arma»):
-                // el arma de la ranura vuelve al inventario — SU flanco,
-                // SU gesto (el izquierdo elige; el derecho desequipa).
-                if (hov && clicDerNuevo)
-                    AltarOfrendasUI.DesequiparRanura(i);
-                // v6.168 — la ranura que abrió SU selector: la ventanita
-                // nace ANCLADA a la ranura (el flotante de la casa).
-                if (AltarOfrendasUI.SelectorAbierto != null &&
-                    AltarOfrendasUI.SelectorAbierto.Value.ranura == i &&
-                    !SelectorFlotante.Abierta)
-                {
-                    // v6.171: con SU RANURA DESTINO (i — la ranura del
-                    // trío que pidió la ventana)
-                    SelectorFlotante.Abrir(s, true,
-                        Language.GetTextValue("Mods.AethonMod.Altar.SelectorTrioTitulo"), i);
-                    AltarOfrendasUI.SelectorAbierto = null;
+                    if (clicDerNuevo) AltarOfrendasUI.DesequiparRanura(i);
+                    else if (clicNuevo)
+                    {
+                        if (Main.mouseItem.IsAir) abrirPara = i;
+                        else AltarOfrendasUI.ClicEnRanura(i);
+                    }
                 }
             }
-            // ============================================================
-            //  v6.168 — LA CURA DEL SOLAPAMIENTO (la letra: «los botones
-            //  se solapan entre si»): el bucle de las ranuras NUNCA
-            //  avanzaba cy — la casilla de las tres, el botón
-            //  «Desequipar todo» y la leyenda nacían ENCIMA de las
-            //  ranuras. Ahora la página FLUYE: cada bloque reserva SU
-            //  altura (ranuras 84 px con leyenda, casilla 34, botón
-            //  40, leyenda final) y el siguiente nace DEBAJO. Además
-            //  la bandeja de candidatos ya NO se incrusta aquí — vive
-            //  en SU VENTANA FLOTANTE (SelectorFlotante, abajo).
-            // ============================================================
-            cy += 84f;   // las tres ranuras (62 px) + su leyenda medida
+            cy += 72f;
 
-            // ============================================================
-            //  v6.167 — LA CASILLA DEBAJO DE LOS SLOTS (la letra: «el
-            //  checklist de disparar las 3 armas deberia estar debajo
-            //  de los slot y decir, permite usar todas al mismo
-            //  tiempo»): la marca «3» lateral muere — la casilla vive
-            //  BAJO las tres ranuras, con SU texto al lado.
-            // ============================================================
+            // ── LA CASILLA «LAS TRES A LA VEZ» ──
             Rectangle marca = new Rectangle(pag.X + pag.Width / 2 - 150, (int)cy, 22, 22);
             GeoMarcaTres = marca;
             bool marcada = trio.ModoDisparo >= 3;
-            bool hovM = marca.Contains(Main.mouseX, Main.mouseY) &&
-                !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
-            sb.Draw(TextureAssets.MagicPixel.Value, marca,
-                marcada ? TintaVioleta * 0.35f : PapelSombra * 0.9f);
-            LibroMarco.Marco(sb, marca, marcada ? TintaVioleta : TintaApagado * 0.6f);
-            if (marcada)
-            {
-                // LA PALOMITA (el trazo de la casa: dos barras)
-                sb.Draw(TextureAssets.MagicPixel.Value,
-                    new Rectangle(marca.X + 4, marca.Center.Y - 1, 6, 2), TintaVioleta);
-                sb.Draw(TextureAssets.MagicPixel.Value,
-                    new Rectangle(marca.X + 9, marca.Center.Y - 4, 2, 8), TintaVioleta);
-                sb.Draw(TextureAssets.MagicPixel.Value,
-                    new Rectangle(marca.X + 6, marca.Y + 13, 2, 6), TintaVioleta);
-            }
-            // EL TEXTO DE LA LETRA (tal cual): «permite usar todas al
-            // mismo tiempo» — clic en texto o casilla, lo mismo
-            Rectangle txtMarca = new Rectangle(marca.Right + 8, marca.Y - 2, 280, 26);
-            bool hovTxt = txtMarca.Contains(Main.mouseX, Main.mouseY) &&
-                !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
-            Utils.DrawBorderString(sb,
-                Language.GetTextValue("Mods.AethonMod.Altar.TrioMarcaTexto"),
-                new Vector2(marca.Right + 8, marca.Center.Y),
-                marcada ? TintaVioleta : hovTxt ? Tinta : TintaApagado,
-                0.78f, 0f, 0.5f);
-            if ((hovM || hovTxt) && clicNuevo) AltarOfrendasUI.ClicEnMarcaTres();
+            bool hovM = marca.Contains(Main.mouseX, Main.mouseY);
+            Rectangle txtMarca = new Rectangle(marca.Right + 8, marca.Y - 3, 282, 28);
+            bool hovTxt = txtMarca.Contains(Main.mouseX, Main.mouseY);
+            sb.Draw(TextureAssets.MagicPixel.Value, marca, marcada ? TintaVioleta * 0.30f : PapelSombra * 0.9f);
+            LibroMarco.Marco(sb, marca, marcada || hovM ? TintaVioleta : TintaApagado * 0.6f);
+            if (marcada) LibroMarco.Palomita(sb, marca, TintaVioleta);
+            LibroLineas.Texto(sb, At("TrioMarcaTexto"), new Vector2(marca.Right + 8, marca.Center.Y),
+                marcada ? TintaVioleta : hovTxt ? Tinta : TintaApagado, 0.82f, 0f, 0.5f);
+            if ((hovM || hovTxt) && (clicNuevo || clicDerNuevo) && !selectorVivo)
+                AltarOfrendasUI.ClicEnMarcaTres();
             cy += 34f;
 
-            // ============================================================
-            //  v6.167 — EL BOTÓN «DESEQUIPAR TODO» (la letra: «que haya
-            //  un boton que permita desequiparlo todo»): todas las
-            //  ranuras llenas DEVUELVEN sus armas al inventario.
-            // ============================================================
-            Rectangle btnTodo = new Rectangle(
-                pag.X + pag.Width / 2 - 78, (int)cy, 156, 28);
+            // ── EL BOTÓN «DESEQUIPAR TODO» ──
+            Rectangle btnTodo = new Rectangle(pag.X + pag.Width / 2 - 78, (int)cy, 156, 28);
             GeoDesequiparTodo = btnTodo;
-            bool hovTodo = btnTodo.Contains(Main.mouseX, Main.mouseY) &&
-                !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
-            sb.Draw(TextureAssets.MagicPixel.Value, btnTodo,
-                hovTodo ? TintaOro * 0.30f : PapelSombra * 0.9f);
+            bool hovTodo = btnTodo.Contains(Main.mouseX, Main.mouseY);
+            sb.Draw(TextureAssets.MagicPixel.Value, btnTodo, hovTodo ? TintaOro * 0.30f : PapelSombra * 0.9f);
             LibroMarco.Marco(sb, btnTodo, hovTodo ? TintaOro : TintaApagado * 0.6f);
-            Utils.DrawBorderString(sb,
-                Language.GetTextValue("Mods.AethonMod.Altar.TrioDesequiparTodo"),
-                new Vector2(btnTodo.Center.X, btnTodo.Center.Y),
-                hovTodo ? Tinta : TintaApagado, 0.78f, 0.5f, 0.5f);
-            if (hovTodo && clicNuevo) AltarOfrendasUI.ClicEnDesequiparTodo();
+            LibroLineas.Texto(sb, At("TrioDesequiparTodo"), btnTodo.Center.ToVector2(),
+                hovTodo ? Tinta : TintaApagado, 0.82f, 0.5f, 0.5f);
+            if (hovTodo && clicNuevo && !selectorVivo) AltarOfrendasUI.ClicEnDesequiparTodo();
             cy += 40f;
 
+            // ================================================================
+            //  v6.174 — EL ALBEDRÍO DE CADA ARMA (la letra: «un selector a
+            //  modo de checklist para darte cierta inteligencia a los
+            //  proyectiles: perseguir al enemigo, al cursor, o dejarlos
+            //  como son originalmente»): por cada ranura, TRES casillas —
+            //  Original (el proyectil tal cual nació) · A enemigos (gira
+            //  hacia la presa más cercana) · Al cursor (persigue el ratón).
+            //  La viva lleva SU palomita; tocarla la devuelve a Original.
+            // ================================================================
+            cy += 4f;
+            Titulo(sb, At("TrioAlbedrioTitulo"), pag, cy, out cy, 0.8f);
+            cy = Linea(At("TrioAlbedrioPista"), cy, 0.72f, TintaApagado);
 
-            // LA LEYENDA DE LA MARCA (qué dispara el trío AHORA)
-            cy = Linea(Language.GetTextValue("Mods.AethonMod.Altar.TrioMarca",
-                trio.ModoDisparo >= 3 ? 1 : 0), cy + 2f, 0.72f, TintaApagado);
+            float anchoEtiqueta = 78f;
+            float anchoChip = (maxAncho - anchoEtiqueta - 12f) / 3f;
+            for (int i = 0; i < 3 && Cabe(cy, 28f, rec); i++)
+            {
+                Item ra = trio.Ranuras != null && i < trio.Ranuras.Length ? trio.Ranuras[i] : null;
+                bool llena = ra != null && !ra.IsAir;
+                float x0 = pag.X + 18f;
+                string et = Language.GetTextValue(A + "TrioRanuraEtiqueta", i + 1);
+                LibroLineas.Texto(sb, et, new Vector2(x0, cy + 13f), llena ? Tinta : TintaApagado, 0.76f, 0f, 0.5f);
+                for (int j = 0; j < 3; j++)
+                {
+                    Rectangle chip = new Rectangle((int)(x0 + anchoEtiqueta + j * (anchoChip + 6f)), (int)cy,
+                        (int)anchoChip, 26);
+                    GeoAlbedrio[i, j] = chip;
+                    bool viva = llena && trio.Inteligencia != null && i < trio.Inteligencia.Length &&
+                        trio.Inteligencia[i] == j;
+                    bool hovC = llena && chip.Contains(Main.mouseX, Main.mouseY);
+                    sb.Draw(TextureAssets.MagicPixel.Value, chip, viva ? TintaVioleta * 0.22f : PapelSombra * 0.7f);
+                    LibroMarco.Marco(sb, chip, !llena ? TintaApagado * 0.35f : viva || hovC ? TintaVioleta : TintaOro * 0.45f);
+                    Rectangle casilla = new Rectangle(chip.X + 5, chip.Y + 5, 16, 16);
+                    sb.Draw(TextureAssets.MagicPixel.Value, casilla, PapelSombra * 0.6f);
+                    LibroMarco.Marco(sb, casilla, viva ? TintaVioleta : TintaApagado * 0.7f);
+                    if (viva) LibroMarco.Palomita(sb, casilla, TintaVioleta);
+                    string txt = Language.GetTextValue("Mods.AethonMod.Items.TrioAlbedrio" + j);
+                    float escT = LibroLineas.EscalaQueCabe(txt, 0.76f, chip.Width - 30f);
+                    LibroLineas.Texto(sb, txt, new Vector2(casilla.Right + 6f, chip.Center.Y),
+                        !llena ? TintaApagado : viva ? TintaVioleta : Tinta, escT, 0f, 0.5f);
+                    if (hovC && (clicNuevo || clicDerNuevo) && !selectorVivo)
+                        AltarOfrendasUI.ClicEnAlbedrio(i, j);
+                }
+                cy += 32f;
+            }
 
+            // ── EL SELECTOR DEL TRÍO: nace DEBAJO de todo ──
+            if (abrirPara != int.MinValue)
+                SelectorFlotante.Abrir(new Rectangle(pag.X + pag.Width / 2 - 141, (int)cy + 4, 282, 1), true,
+                    At("SelectorTrioTitulo"), abrirPara, 3);
             return 0f;
         }
     }
-    // ====================================================================
-    //  v6.163 — LOS APOYOS DEL LIBRO: la línea con recorte y centrado
-    //  óptico (el mismo pase doble del índice) y el marco cosido.
-    // ====================================================================
+
     internal static class LibroLineas
     {
+        // ================================================================
+        //  v6.174 — LA TIPOGRAFÍA DEL LIBRO (la letra: «cambia el color de
+        //  la tipografia de la ventana del pilar y la ventana del altar,
+        //  ambos deben tener los colores de la ventana del libro de
+        //  informacion» + «cuando pongas letras oscuras deben tener bordes
+        //  blancos para poder verlas»). LA AUTOPSIA: el pilar y el altar
+        //  pintaban SUS cadenas con Utils.DrawBorderString — que dibuja
+        //  el texto CUATRO veces en NEGRO puro alrededor y una vez en la
+        //  tinta: a las escalas pequeñas de los controles (0.62–0.78) el
+        //  borde negro SE COME el glifo y toda la letra lee NEGRA sobre el
+        //  papel — «hay letras demasiado oscuras y no se ven nada».
+        //  LA CURA: UNA sola función para TODO el libro — el contorno es
+        //  BLANCO cálido (el halo que separa la tinta del papel) y la
+        //  tinta encima es LA DEL ÍNDICE (cuerpo 28,20,16 · título
+        //  148,72,178 · capítulo 168,108,44).
+        // ================================================================
+
+        /// <summary>La línea con recorte y centrado óptico (el pase doble del índice).</summary>
         public static float Linea(SpriteBatch sb, string texto, float x, float cy,
             float maxAncho, float esc, Color c, Rectangle recorte, Rectangle pagina)
         {
@@ -1550,13 +1550,7 @@ namespace AethonMod.Content.UI
                 if (!(y < recorte.Y + recorte.Height && y + alto > recorte.Y)) return;
                 float ancho = fuente.MeasureString(linea.ToString()).X * esc;
                 float xc = pagina.X + (pagina.Width - ancho) * 0.5f;
-                var pos = new Vector2(xc, y);
-                const float o = 1.1f;
-                sb.DrawString(fuente, linea.ToString(), pos + new Vector2(o, 0f), Color.White, 0f, Vector2.Zero, esc, SpriteEffects.None, 0f);
-                sb.DrawString(fuente, linea.ToString(), pos + new Vector2(-o, 0f), Color.White, 0f, Vector2.Zero, esc, SpriteEffects.None, 0f);
-                sb.DrawString(fuente, linea.ToString(), pos + new Vector2(0f, o), Color.White, 0f, Vector2.Zero, esc, SpriteEffects.None, 0f);
-                sb.DrawString(fuente, linea.ToString(), pos + new Vector2(0f, -o), Color.White, 0f, Vector2.Zero, esc, SpriteEffects.None, 0f);
-                sb.DrawString(fuente, linea.ToString(), pos, c, 0f, Vector2.Zero, esc, SpriteEffects.None, 0f);
+                Texto(sb, linea.ToString(), new Vector2(xc, y), c, esc);
             }
             foreach (string pal in palabras)
             {
@@ -1576,10 +1570,39 @@ namespace AethonMod.Content.UI
             }
             return cy + 3f;
         }
+
+        /// <summary>EL TEXTO DEL LIBRO: contorno BLANCO cálido en cuatro
+        /// direcciones y la tinta encima. Misma firma que el DrawBorderString
+        /// de vanilla (escala + anclaje) para que los botones no cambien.</summary>
+        public static Vector2 Texto(SpriteBatch sb, string texto, Vector2 pos, Color tinta,
+            float esc = 1f, float ax = 0f, float ay = 0f)
+        {
+            var fuente = FontAssets.MouseText.Value;
+            if (string.IsNullOrEmpty(texto)) return Vector2.Zero;
+            Vector2 origen = fuente.MeasureString(texto) * new Vector2(ax, ay);
+            Vector2 p = pos - origen;
+            Color halo = new Color(255, 250, 236);
+            const float o = 1.1f;
+            sb.DrawString(fuente, texto, p + new Vector2(o, 0f), halo, 0f, Vector2.Zero, esc, SpriteEffects.None, 0f);
+            sb.DrawString(fuente, texto, p + new Vector2(-o, 0f), halo, 0f, Vector2.Zero, esc, SpriteEffects.None, 0f);
+            sb.DrawString(fuente, texto, p + new Vector2(0f, o), halo, 0f, Vector2.Zero, esc, SpriteEffects.None, 0f);
+            sb.DrawString(fuente, texto, p + new Vector2(0f, -o), halo, 0f, Vector2.Zero, esc, SpriteEffects.None, 0f);
+            sb.DrawString(fuente, texto, p, tinta, 0f, Vector2.Zero, esc, SpriteEffects.None, 0f);
+            return fuente.MeasureString(texto) * esc;
+        }
+
+        /// <summary>La escala más grande (≤ esc) con la que el texto cabe en maxAncho.</summary>
+        public static float EscalaQueCabe(string texto, float esc, float maxAncho)
+        {
+            if (maxAncho <= 0f) return esc;
+            float ancho = FontAssets.MouseText.Value.MeasureString(texto).X * esc;
+            if (ancho > maxAncho && ancho > 0f) esc *= maxAncho / ancho;
+            return esc;
+        }
     }
 
     /// <summary>El marco cosido del libro (doble línea — el borde de
-    /// las páginas vivas de las pestañas nuevas).</summary>
+    /// las páginas vivas de las pestañas nuevas) y la palomita de la casa.</summary>
     internal static class LibroMarco
     {
         public static void Marco(SpriteBatch sb, Rectangle r, Color c)
@@ -1590,34 +1613,50 @@ namespace AethonMod.Content.UI
             sb.Draw(px, new Rectangle(r.X, r.Y, 2, r.Height), c);
             sb.Draw(px, new Rectangle(r.X + r.Width - 2, r.Y, 2, r.Height), c);
         }
+
+        /// <summary>v6.174 — EL SÍMBOLO DEL CHECKLIST (la letra: «en el
+        /// checklist debe ponerse el símbolo ese que siempre va en los
+        /// checklist si es que está seleccionado»): UNA palomita de
+        /// verdad — dos trazos diagonales gruesos, no tres barritas.</summary>
+        public static void Palomita(SpriteBatch sb, Rectangle caja, Color tinta)
+        {
+            var px = TextureAssets.MagicPixel.Value;
+            Vector2 c = new Vector2(caja.X + caja.Width / 2f, caja.Y + caja.Height / 2f);
+            Vector2 a = c + new Vector2(-0.36f, 0.04f) * caja.Width;
+            Vector2 b = c + new Vector2(-0.10f, 0.32f) * caja.Width;
+            Vector2 d = c + new Vector2(0.40f, -0.34f) * caja.Width;
+            float g = Math.Max(2f, caja.Width * 0.17f);
+            Trazo(sb, px, a, b, g, tinta);
+            Trazo(sb, px, b, d, g, tinta);
+            sb.Draw(px, new Rectangle((int)(b.X - g / 2f), (int)(b.Y - g / 2f), (int)Math.Round(g), (int)Math.Round(g)), tinta);
+        }
+
+        private static void Trazo(SpriteBatch sb, Texture2D px, Vector2 a, Vector2 b, float grosor, Color c)
+        {
+            Vector2 d = b - a;
+            float len = d.Length();
+            if (len < 0.5f) return;
+            sb.Draw(px, a, null, c, d.ToRotation(), new Vector2(0f, 0.5f),
+                new Vector2(len, grosor), SpriteEffects.None, 0f);
+        }
     }
 
-
     // ====================================================================
-    //  v6.164 — EL PILAR DEL LIBRO, LA PÁGINA FIJA (la letra: «el
-    //  color del texto es muy raro, algunos son muy claros y otros
-    //  son muy oscuros, ademas los textos en botones estan
-    //  desbordados, y el scroll en la ventana pilar es innecesario,
-    //  ni el lado izquierdo ni el derecho necesitan el scroll, ademas
-    //  ninguno de los botones funciona»). LA TRIPLE CURA:
-    //  · LOS BOTONES: el motor v6.163 exigía 'mouseLeft &&
-    //    mouseLeftRelease' en el MISMO frame — una condición que
-    //    jamás coincide: NINGÚN clic llegaba a los motores. Ahora el
-    //    clic es EL FLANCO DE LA CASA (mouseLeft && !_ultimo, el
-    //    patrón del árbol/altar/prisma viejos) y vive EN EL DIBUJO de
-    //    la página, junto a las geometrías.
-    //  · LOS TEXTOS: cada botón y fila mide su texto y AJUSTA LA
-    //    ESCALA para caber (la cura del altar v6.92) — jamás desborda.
-    //  · LA TINTA: UNA familia de color (la del papel del libro):
-    //    cuerpo (52,36,24) · título violeta · oro · pistas apagadas.
-    //  · SIN SCROLL: página fija — la lista de jefes muestra hasta 6
-    //    y el resto lo cuenta una línea.
+    //  v6.164 — EL PILAR DEL LIBRO, LA PÁGINA FIJA: la salida y las
+    //  invocaciones a la izquierda; la oleada de hambre y la vitrina de
+    //  los jefes devorados a la derecha. SIN scroll de página: solo la
+    //  vitrina tiene SU rueda.
+    //  v6.174 — LA TIPOGRAFÍA Y EL CLIC (la letra: «en el mundo interior,
+    //  al usar el pilar los botones no hacen nada […] hay letras demasiado
+    //  oscuras y no se ven nada»): toda cadena pasa por LibroLineas.Texto
+    //  (contorno BLANCO + los colores del índice); el filtro
+    //  IgnoreMouseInterface muere; y LA RUEDA DE LA VITRINA por fin
+    //  llega (el Update del libro se la comía antes de que la vitrina
+    //  pudiera leerla).
     // ====================================================================
     internal static class PilarDelLibro
     {
-        // v6.168 — LA PALETA DEL LIBRO DE INFORMACIÓN, EXACTA (la
-        // letra: «usa el color de la tipografia en el libro de
-        // informacion para darle color al altar y al pilar»).
+        // LA PALETA DEL LIBRO DE INFORMACIÓN, EXACTA
         private static readonly Color Tinta = new(28, 20, 16);
         private static readonly Color TintaVioleta = new(148, 72, 178);
         private static readonly Color TintaOro = new(168, 108, 44);
@@ -1631,44 +1670,50 @@ namespace AethonMod.Content.UI
         internal static int HoverJefe = -1;
         internal static int NivelElegido = 1;
 
-        // v6.168 — EL SCROLL DE LA VITRINA DE DEVORADOS (la letra: «si
-        // necesitara un scroll solo en esa seccion»): el desplazamiento
-        // INTERNO de la lista de jefes devorados — SOLO esa sección se
-        // mueve; el resto de la página sigue FIJO.
+        // EL SCROLL DE LA VITRINA DE DEVORADOS: el desplazamiento INTERNO
+        // de la lista — SOLO esa sección se mueve; el resto sigue FIJO.
         private static float _scrollJefes;
+
+        /// <summary>La vitrina dibujada el último frame (el Update del libro
+        /// la consulta para NO comerse su rueda).</summary>
+        internal static Rectangle GeoVitrina;
+
+        internal static bool CursorEnVitrina()
+            => GeoVitrina.Width > 0 && GeoVitrina.Contains(Main.mouseX, Main.mouseY);
 
         private static void Titulo(SpriteBatch sb, string t, Rectangle pag, float cy, out float cyOut)
         {
             var fuente = FontAssets.MouseText.Value;
-            var m = fuente.MeasureString(t);
-            float xT = pag.X + (pag.Width - m.X * 0.95f) * 0.5f;
-            Utils.DrawBorderString(sb, t, new Vector2(xT, cy), TintaVioleta, 0.95f);
-            float yL = cy + m.Y * 0.95f + 3f;
+            t = t ?? "";
+            float esc = LibroLineas.EscalaQueCabe(t, 0.95f, pag.Width - 80f);
+            var m = fuente.MeasureString(t) * esc;
+            float xT = pag.X + (pag.Width - m.X) * 0.5f;
+            LibroLineas.Texto(sb, t, new Vector2(xT, cy), TintaVioleta, esc);
+            float yL = cy + m.Y + 3f;
             sb.Draw(TextureAssets.MagicPixel.Value,
                 new Rectangle((int)(pag.X + 16), (int)yL, (int)Math.Max(4f, xT - 18f - pag.X - 16), 2), TintaOro * 0.55f);
             sb.Draw(TextureAssets.MagicPixel.Value,
-                new Rectangle((int)(xT + m.X * 0.95f + 18f), (int)yL,
-                    (int)Math.Max(4f, pag.Right - 16 - (xT + m.X * 0.95f + 18f)), 2), TintaOro * 0.55f);
-            cyOut = cy + m.Y * 0.95f + 12f;
+                new Rectangle((int)(xT + m.X + 18f), (int)yL,
+                    (int)Math.Max(4f, pag.Right - 16 - (xT + m.X + 18f)), 2), TintaOro * 0.55f);
+            cyOut = cy + m.Y + 12f;
         }
 
-        /// <summary>El botón cosido (texto medido — jamás desborda).</summary>
-        private static float Boton(SpriteBatch sb, Rectangle pag, float cy, string t,
+        /// <summary>El botón cosido (texto medido — jamás desborda). Lo que
+        /// no cabe en la página queda SIN hitbox.</summary>
+        private static float Boton(SpriteBatch sb, Rectangle pag, Rectangle rec, float cy, string t,
             Color cBase, out Rectangle geo, bool clicNuevo, System.Action alClic,
             bool apagado = false)
         {
-            var fuente = FontAssets.MouseText.Value;
-            float esc = 0.88f;
-            var mT = fuente.MeasureString(t) * esc;
-            if (mT.X > 208f && mT.X > 0f) esc *= 208f / mT.X;
+            string txt = t ?? "";
+            float esc = LibroLineas.EscalaQueCabe(txt, 0.88f, 208f);
             Rectangle b = new Rectangle((int)(pag.X + pag.Width / 2f - 110f), (int)cy, 220, 40);
-            geo = b;
-            bool hov = b.Contains(Main.mouseX, Main.mouseY) &&
-                !Terraria.GameInput.PlayerInput.IgnoreMouseInterface && !apagado;
+            bool vivo = cy + 40f <= rec.Bottom;
+            geo = vivo ? b : Rectangle.Empty;
+            bool hov = vivo && !apagado && b.Contains(Main.mouseX, Main.mouseY);
             sb.Draw(TextureAssets.MagicPixel.Value, b,
                 (hov ? cBase : new Color(cBase.R * 2 / 3, cBase.G * 2 / 3, cBase.B * 2 / 3)) * (hov ? 0.30f : 0.15f));
             LibroMarco.Marco(sb, b, apagado ? TintaApagado * 0.5f : (hov ? cBase : cBase * 0.55f));
-            Utils.DrawBorderString(sb, t, new Vector2(b.Center.X, b.Center.Y),
+            LibroLineas.Texto(sb, txt, new Vector2(b.Center.X, b.Center.Y),
                 apagado ? TintaApagado : Tinta, esc, 0.5f, 0.5f);
             if (hov && clicNuevo) alClic?.Invoke();
             return cy + 48f;
@@ -1679,17 +1724,17 @@ namespace AethonMod.Content.UI
             ref float scroll, bool clicNuevo)
         {
             float cy = rec.Y + 6f;                       // página FIJA: sin scroll
-            float xizq = pag.X + 18f;
             float maxAncho = pag.Width - 36f;
             float Linea(string t, float y, float esc, Color c)
-                => LibroLineas.Linea(sb, t, xizq, y, maxAncho, esc, c, rec, pag);
+                => LibroLineas.Linea(sb, t ?? "", pag.X + 18f, y, maxAncho, esc, c, rec, pag);
 
+            GeoVolver = Rectangle.Empty; GeoInvocar = Rectangle.Empty; GeoSellado = Rectangle.Empty;
             if (!PrismaInteriorUI.Abierta) return 0f;
 
             Titulo(sb, Language.GetTextValue("Mods.AethonMod.PrismaInterior.Titulo"), pag, cy, out cy);
 
             // EL BOTÓN VOLVER (el oro de la salida)
-            cy = Boton(sb, pag, cy, Language.GetTextValue(
+            cy = Boton(sb, pag, rec, cy, Language.GetTextValue(
                 "Mods.AethonMod.PrismaInterior.BotonVolver"), TintaOro, out GeoVolver,
                 clicNuevo, () => PrismaInteriorUI.ClicEnVolver());
             cy += 8f;
@@ -1709,19 +1754,19 @@ namespace AethonMod.Content.UI
                 }
             }
             catch { }
-            cy = Boton(sb, pag, cy, yaVive
+            cy = Boton(sb, pag, rec, cy, yaVive
                 ? Language.GetTextValue("Mods.AethonMod.PrismaInterior.YaVive")
                 : Language.GetTextValue("Mods.AethonMod.PrismaInterior.BotonInvocar"),
                 TintaVioleta, out GeoInvocar, clicNuevo,
                 () => { if (!yaVive) PrismaInteriorUI.ClicEnInvocar(); }, yaVive);
-            cy = Linea(Language.GetTextValue("Mods.AethonMod.PrismaInterior.InvocarPista"), cy, 0.7f, TintaApagado);
+            cy = Linea(Language.GetTextValue("Mods.AethonMod.PrismaInterior.InvocarPista"), cy, 0.76f, TintaApagado);
 
-            // EL SELLADO (con Shift — la vía del dios completo)
+            // EL SELLADO (la vía del dios completo)
             cy += 8f;
             Titulo(sb, Language.GetTextValue("Mods.AethonMod.PrismaInterior.SelladoTitulo"), pag, cy, out cy);
-            cy = Boton(sb, pag, cy, Language.GetTextValue("Mods.AethonMod.PrismaInterior.BotonSellado"),
+            cy = Boton(sb, pag, rec, cy, Language.GetTextValue("Mods.AethonMod.PrismaInterior.BotonSellado"),
                 TintaRojo, out GeoSellado, clicNuevo, () => PrismaInteriorUI.ClicEnSellado());
-            cy = Linea(Language.GetTextValue("Mods.AethonMod.PrismaInterior.SelladoPista"), cy, 0.7f, TintaApagado);
+            cy = Linea(Language.GetTextValue("Mods.AethonMod.PrismaInterior.SelladoPista"), cy, 0.76f, TintaApagado);
             return 0f;
         }
 
@@ -1734,8 +1779,12 @@ namespace AethonMod.Content.UI
             float xizq = pag.X + 18f;
             float maxAncho = pag.Width - 36f;
             float Linea(string t, float y, float esc, Color c)
-                => LibroLineas.Linea(sb, t, xizq, y, maxAncho, esc, c, rec, pag);
+                => LibroLineas.Linea(sb, t ?? "", xizq, y, maxAncho, esc, c, rec, pag);
 
+            GeoMenos = Rectangle.Empty; GeoMas = Rectangle.Empty; GeoLanzar = Rectangle.Empty;
+            GeoVitrina = Rectangle.Empty;
+            GeoJefes.Clear();
+            HoverJefe = -1;
             if (!PrismaInteriorUI.Abierta) return 0f;
 
             var sp = Main.LocalPlayer.GetModPlayer<Players.ShardPlayer>();
@@ -1751,59 +1800,45 @@ namespace AethonMod.Content.UI
             GeoMenos = new Rectangle(sel.X, sel.Y, 36, 32);
             GeoMas = new Rectangle(sel.Right - 36, sel.Y, 36, 32);
             bool bloqueado = maxNivel <= 1;
-            bool hovMenos = GeoMenos.Contains(Main.mouseX, Main.mouseY) && !bloqueado;
-            bool hovMas = GeoMas.Contains(Main.mouseX, Main.mouseY) && !bloqueado && NivelElegido < maxNivel;
+            bool hovMenos = !bloqueado && GeoMenos.Contains(Main.mouseX, Main.mouseY);
+            bool hovMas = !bloqueado && NivelElegido < maxNivel && GeoMas.Contains(Main.mouseX, Main.mouseY);
             sb.Draw(TextureAssets.MagicPixel.Value, sel, PapelSombra * 0.5f);
             LibroMarco.Marco(sb, sel, TintaOro * 0.4f);
-            Utils.DrawBorderString(sb, "−", new Vector2(GeoMenos.Center.X, GeoMenos.Center.Y),
-                hovMenos ? TintaOro : TintaApagado, 1.1f, 0.5f, 0.5f);
-            Utils.DrawBorderString(sb, "+", new Vector2(GeoMas.Center.X, GeoMas.Center.Y),
-                hovMas ? TintaOro : TintaApagado, 1.1f, 0.5f, 0.5f);
+            LibroLineas.Texto(sb, "-", new Vector2(GeoMenos.Center.X, GeoMenos.Center.Y),
+                hovMenos ? TintaOro : TintaApagado, 1.15f, 0.5f, 0.5f);
+            LibroLineas.Texto(sb, "+", new Vector2(GeoMas.Center.X, GeoMas.Center.Y),
+                hovMas ? TintaOro : TintaApagado, 1.15f, 0.5f, 0.5f);
             string nivelTxt = Language.GetTextValue(
                 "Mods.AethonMod.PrismaInterior.OleadaNivel", NivelElegido, maxNivel);
-            float escN = 0.9f;
-            var mN = fuente.MeasureString(nivelTxt) * escN;
-            if (mN.X > 180f && mN.X > 0f) escN *= 180f / mN.X;
-            Utils.DrawBorderString(sb, nivelTxt, new Vector2(sel.Center.X, sel.Center.Y),
+            float escN = LibroLineas.EscalaQueCabe(nivelTxt, 0.92f, 180f);
+            LibroLineas.Texto(sb, nivelTxt, new Vector2(sel.Center.X, sel.Center.Y),
                 bloqueado ? TintaApagado : Tinta, escN, 0.5f, 0.5f);
             if (hovMenos && clicNuevo) { NivelElegido--; Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick); }
             if (hovMas && clicNuevo) { NivelElegido++; Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick); }
             cy += 40f;
             cy = Linea(Language.GetTextValue("Mods.AethonMod.PrismaInterior.OleadaPista", maxNivel),
-                cy, 0.7f, TintaApagado);
+                cy, 0.76f, TintaApagado);
 
             // EL BOTÓN LANZAR (la oleada del festín)
             bool festinVivo = false;
             try { festinVivo = Systems.GrimorioFuriaSistema.Activo; } catch { }
-            cy = Boton(sb, pag, cy + 2f, festinVivo
+            cy = Boton(sb, pag, rec, cy + 2f, festinVivo
                 ? Language.GetTextValue("Mods.AethonMod.PrismaInterior.OleadaCorre")
                 : Language.GetTextValue("Mods.AethonMod.PrismaInterior.OleadaLanzar", NivelElegido),
                 TintaRojo, out GeoLanzar, clicNuevo,
                 () => { if (!festinVivo) PrismaInteriorUI.ClicEnLanzar(NivelElegido); }, festinVivo);
             cy += 8f;
 
-            // ── LOS JEFES DEVORADOS (la arena) ──
-            // ============================================================
-            //  v6.168 — LA VITRINA CON RUEDA (la letra: «si el grimorio
-            //  devora a demasiados jefes en la seccion de arena del
-            //  pilar donde aparece la lista de jefes devorados, esta
-            //  lista sera demasiado larga y si necesitara un scroll
-            //  solo en esa seccion»): la lista de devorados vive en SU
-            //  PROPIA VITRINA — un rectángulo de altura fija (la que
-            //  queda de página) con SU scroll INTERNO: la rueda SOLO
-            //  mueve la lista cuando el cursor está DENTRO de la
-            //  vitrina; el resto de la página NO se mueve (la cura de
-            //  la v6.164 — «el scroll en la ventana pilar es
-            //  innecesario» — SIGUE VIVA para todo lo demás).
-            // ============================================================
+            // ── LA VITRINA DE LOS JEFES DEVORADOS (la arena) ──
             Titulo(sb, Language.GetTextValue("Mods.AethonMod.PrismaInterior.JefesTitulo"), pag, cy, out cy);
             var devorados = sp != null ? sp.JefesDevorados : null;
             int nJefes = devorados != null ? devorados.Count : 0;
-            GeoJefes.Clear();
-            HoverJefe = -1;
+            // LA CUENTA TOTAL (encima de la vitrina: antes nacía BAJO la página)
+            if (nJefes > 0)
+                cy = Linea(Language.GetTextValue("Mods.AethonMod.PrismaInterior.JefesCuenta", nJefes), cy, 0.76f, TintaApagado);
             if (nJefes == 0)
             {
-                cy = Linea(Language.GetTextValue("Mods.AethonMod.PrismaInterior.JefesVacio"), cy, 0.75f, TintaApagado);
+                cy = Linea(Language.GetTextValue("Mods.AethonMod.PrismaInterior.JefesVacio"), cy, 0.8f, TintaApagado);
             }
             else
             {
@@ -1812,24 +1847,22 @@ namespace AethonMod.Content.UI
                 int altoVitrina = (pag.Y + pag.Height - 14) - topVitrina;
                 if (altoVitrina < 60) altoVitrina = 60;   // mínimo legible
                 Rectangle vitrina = new Rectangle((int)xizq - 4, topVitrina, (int)maxAncho + 8, altoVitrina);
+                GeoVitrina = vitrina;
 
-                // LA RUEDA INTERNA: el máximo nace de las filas TOTALES
-                // vs las visibles; el cursor DENTRO de la vitrina la
-                // mueve (y SOLO a ella — el delta se consume aquí).
+                // LA RUEDA INTERNA: el Update del libro YA no consume la
+                // rueda sobre la vitrina — la lee AQUÍ.
                 float altoFila = 34f;
                 float altoTotal = nJefes * altoFila;
                 float maxScroll = Math.Max(0f, altoTotal - altoVitrina);
-                bool cursorEnVitrina = vitrina.Contains(Main.mouseX, Main.mouseY) &&
-                    !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
-                if (cursorEnVitrina && Terraria.GameInput.PlayerInput.ScrollWheelDelta != 0)
+                int deltaRueda = Terraria.GameInput.PlayerInput.ScrollWheelDelta;
+                if (vitrina.Contains(Main.mouseX, Main.mouseY) && deltaRueda != 0)
                 {
-                    _scrollJefes = MathHelper.Clamp(_scrollJefes -
-                        Terraria.GameInput.PlayerInput.ScrollWheelDelta * 0.45f, 0f, maxScroll);
+                    _scrollJefes = MathHelper.Clamp(_scrollJefes - deltaRueda * 0.45f, 0f, maxScroll);
                     Terraria.GameInput.PlayerInput.ScrollWheelDelta = 0;   // la rueda es de la vitrina
                 }
                 if (_scrollJefes > maxScroll) _scrollJefes = maxScroll;
 
-                // EL PAPEL DE LA VITRINA (un tonco más hundido que la página)
+                // EL PAPEL DE LA VITRINA
                 sb.Draw(TextureAssets.MagicPixel.Value, vitrina, PapelSombra * 0.45f);
                 LibroMarco.Marco(sb, vitrina, TintaOro * 0.45f);
 
@@ -1841,7 +1874,7 @@ namespace AethonMod.Content.UI
                     int tipoJefe = devorados[k];
                     Rectangle fila = new Rectangle((int)xizq, (int)yFila, (int)maxAncho, 30);
                     bool hovF = fila.Contains(Main.mouseX, Main.mouseY) &&
-                        !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
+                        vitrina.Contains(Main.mouseX, Main.mouseY);
                     if (hovF) HoverJefe = k;
                     sb.Draw(TextureAssets.MagicPixel.Value, fila,
                         (hovF ? TintaVioleta : PapelSombra) * (hovF ? 0.30f : 0.55f));
@@ -1855,24 +1888,18 @@ namespace AethonMod.Content.UI
                     // EL NOMBRE: medido para su mitad; EL PODER: para la suya.
                     string poder = Language.GetTextValue(
                         "Mods.AethonMod.PrismaInterior.JefePoder", nivelPoder, (int)(mult * 100f));
-                    float escP = 0.72f;
-                    var mP = fuente.MeasureString(poder) * escP;
-                    if (mP.X > 84f && mP.X > 0f) escP *= 84f / mP.X;
-                    float escNom = 0.82f;
-                    var mNom = fuente.MeasureString(nombreJefe) * escNom;
-                    float anchoNom = maxAncho - 96f;
-                    if (mNom.X > anchoNom && mNom.X > 0f) escNom *= anchoNom / mNom.X;
-                    Utils.DrawBorderString(sb, nombreJefe,
-                        new Vector2(fila.X + 10f, fila.Center.Y),
+                    float escP = LibroLineas.EscalaQueCabe(poder, 0.76f, 92f);
+                    float anchoNom = maxAncho - 104f;
+                    float escNom = LibroLineas.EscalaQueCabe(nombreJefe, 0.86f, anchoNom);
+                    LibroLineas.Texto(sb, nombreJefe, new Vector2(fila.X + 10f, fila.Center.Y),
                         hovF ? TintaVioleta : Tinta, escNom, 0f, 0.5f);
-                    Utils.DrawBorderString(sb, poder,
-                        new Vector2(fila.Right - 10f, fila.Center.Y),
+                    LibroLineas.Texto(sb, poder, new Vector2(fila.Right - 10f, fila.Center.Y),
                         nivelPoder >= 8 ? TintaRojo : TintaOro, escP, 1f, 0.5f);
                     if (hovF && clicNuevo) PrismaInteriorUI.ClicEnJefe(tipoJefe);
                     GeoJefes.Add(fila);
                 }
 
-                // LA BARRA DE LA VITRINA (la línea del scroll: oro apagado)
+                // LA BARRA DE LA VITRINA (la línea del scroll)
                 if (maxScroll > 0f)
                 {
                     float proporcion = altoVitrina / altoTotal;
@@ -1885,11 +1912,6 @@ namespace AethonMod.Content.UI
                     sb.Draw(TextureAssets.MagicPixel.Value,
                         new Rectangle(vitrina.Right - 8, yBarra, 5, altoBarra), TintaOro * 0.7f);
                 }
-                // LA CUENTA TOTAL (bajo la vitrina, la de siempre)
-                Utils.DrawBorderString(sb,
-                    Language.GetTextValue("Mods.AethonMod.PrismaInterior.JefesCuenta", nJefes),
-                    new Vector2(pag.Center.X, vitrina.Bottom + 12f),
-                    TintaApagado, 0.72f, 0.5f, 0.5f);
             }
             return 0f;
         }

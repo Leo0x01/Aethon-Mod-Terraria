@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Terraria;
@@ -10,32 +11,36 @@ using Terraria.ModLoader;
 namespace AethonMod.Content.UI
 {
     // ======================================================================
-    //  SelectorFlotante — v6.168 — LA VENTANA FLOTANTE DE SELECCIÓN (la
-    //  letra: «creo que seria mejor que para seleccionar las ofrendas y
-    //  las armas en el slot de armas, se haga con una ventana flotante,
-    //  una pequeña ventana que muestre los items disponibles para slot
-    //  de ofrenda y para slot de fusion respectivamente»).
+    //  SelectorFlotante — v6.168 — LA VENTANA FLOTANTE DE SELECCIÓN: la
+    //  lista completa de candidatos (las ofrendas del altar · las armas
+    //  consagradas del trío) en una cuadrícula de 6 columnas, anclada
+    //  DEBAJO del control que la abrió, con SU rueda. El mismo motor para
+    //  las dos bandejas: la ofrenda del altar (ranura −2) y las ranuras
+    //  del trío (0..2). Clic en un icono = elegir; clic fuera o ESC = se
+    //  cierra y NADA cambia.
     //
-    //  LA AUTOPSIA DE LA v6.167: la bandeja estaba INCROSTRADA en la
-    //  página del libro (una sola fila de 8 iconos) — con más de 8
-    //  ofrendas el resto ni se veía («+N» apagado), y al abrirse
-    //  EMPUJABA el contenido de la página hacia abajo. LA CURA: la
-    //  selección vive en SU PROPIA VENTANA FLOTANTE — un panel pequeño
-    //  que nace ANCLADO al slot que lo abrió, con LA LISTA COMPLETA en
-    //  una cuadrícula de 6 columnas y SU PROPIA RUEDA (el scroll es de
-    //  la ventana: el libro no se mueve). El mismo motor para las DOS
-    //  bandejas: la ofrenda del altar (ranura -2) y las ranuras del
-    //  trío (0-2). Clic en un icono = elegir; clic fuera o ESC = la
-    //  ventana se cierra y NADA cambia.
-    //
-    //  LA PALETA: la del LIBRO DE INFORMACIÓN (la letra de la v6.168:
-    //  «usa el color de la tipografia del libro de informacion») —
-    //  papel 216,200,166 · tinta 28,20,16 · violeta 148,72,178 ·
-    //  capítulo 168,108,44. Sin transparencias raras: papel sólido.
+    //  v6.174 — REESCRITA (la letra: «en el altar tampoco funcionan los
+    //  botones, funcionaron la primera vez pero ahora no» + «a veces
+    //  pone 2 y al poner la tercera las dos iniciales se desequipan y
+    //  solo queda la tercera; revisa bien todo el código de esos
+    //  botones»). TRES leyes nuevas:
+    //   · SU PROPIO RELOJ: la ventana lleva `_edad` (los frames que
+    //     lleva VIVA). El clic de su nacimiento no cuenta y el «clic
+    //     fuera» solo vale desde el segundo frame. NADA de
+    //     Main.GameUpdateCount (que vuelve a 0 en cada carga de mundo y
+    //     dejaba todos los botones muertos).
+    //   · EL DUEÑO ÚNICO DEL CLIC: mientras la ventana vive, las páginas
+    //     del libro no procesan NINGÚN clic (lo decide el libro). El
+    //     fantasma que vaciaba las ranuras al elegir ya no tiene dónde
+    //     caer.
+    //   · SIN IgnoreMouseInterface: ese filtro transitorio de vanilla
+    //     se encendía con el libro abierto y mataba el clic limpio.
+    //  LA TIPOGRAFÍA: toda cadena pasa por LibroLineas.Texto — contorno
+    //  BLANCO cálido y los colores del libro de información.
     // ======================================================================
     internal static class SelectorFlotante
     {
-        // LA PALETA DEL LIBRO (exacta — la de LibroDelEternoUI)
+        // LA PALETA DEL LIBRO (exacta — la de LibroEstado)
         private static readonly Color Papel = new(216, 200, 166);
         private static readonly Color PapelSombra = new(190, 172, 134);
         private static readonly Color Tinta = new(28, 20, 16);
@@ -43,259 +48,297 @@ namespace AethonMod.Content.UI
         private static readonly Color TintaOro = new(168, 108, 44);
         private static readonly Color TintaApagado = new(118, 96, 70);
 
-        // LA CUADRÍCULA: 6 columnas de 44 px, iconos de 40.
+        // LA CUADRÍCULA: 6 columnas de 44 px, iconos de 32.
         private const int Columnas = 6;
         private const int Celda = 44;
-        private const int FilasVisibles = 5;         // 30 candidatos a la vista
+        private const int FilasVisibles = 5;         // por defecto: 30 candidatos a la vista
         private const int AltoTitulo = 34;
+        private const int AltoPie = 22;               // la pista de la rueda (solo si hay scroll)
 
-        // EL ESTADO (cliente puro): el ancla (el slot que abrió), la
-        // lista viva y SU scroll propio.
+        // EL ESTADO (cliente puro): el ancla (el control que la abrió),
+        // la lista viva y SU scroll propio (en FILAS enteras).
         private static Rectangle _ancla = Rectangle.Empty;
-        private static float _scroll;
-        private static readonly System.Collections.Generic.List<Item> _lista = new();
+        private static int _filas;
+        private static int _filasVis = FilasVisibles;
+        private static int _scroll;
+        private static readonly List<Item> _lista = new();
         private static bool _paraTrio;
+        private static string _titulo = "";
+
+        /// <summary>LA RANURA DESTINO de la elección (−2 = el hueco de la
+        /// ofrenda · 0..2 = las ranuras del trío · int.MinValue = sin
+        /// destino). Vive AQUÍ desde el nacimiento de la ventana.</summary>
+        private static int _ranuraDestino = int.MinValue;
+
+        /// <summary>LOS FRAMES DE VIDA PROPIOS (jamás Main.GameUpdateCount):
+        /// 0 = el frame en que nació — el clic que la abrió no cuenta.</summary>
+        private static int _edad;
+
+        /// <summary>El flanco de la tecla ESC: mientras siga apretada tras
+        /// cerrar ESTA ventana, no baja al libro (se suelta y se vuelve a
+        /// pulsar — un ESC no se come las dos ventanas).</summary>
+        private static bool _escConsumido;
 
         /// <summary>¿Está abierta la ventanita?</summary>
         internal static bool Abierta => _ancla.Width > 0;
 
-        /// <summary>ABRIR: anclada al slot, con los candidatos VIVOS.</summary>
+        /// <summary>El rectángulo VIVO de la ventana (siempre calculado
+        /// del ancla y de la lista — el libro lo consulta en SU Update para
+        /// no comerse la rueda cuando el cursor vive aquí).</summary>
+        internal static Rectangle UltimoRect => Abierta ? CalcularRect(_ancla) : Rectangle.Empty;
+
+        /// <summary>¿La tecla ESC ya gastó su pulsación en esta ventana?</summary>
+        internal static bool EscConsumido => _escConsumido;
+
+        /// <summary>ABRIR: anclada bajo el control, con los candidatos
+        /// VIVOS. `filasVisibles` lo elige quien abre (el trío la abre
+        /// corta para que quepa bajo su albedrío).</summary>
         internal static void Abrir(Rectangle ancla, bool paraTrio, string titulo,
-            int ranuraDestino = int.MinValue)
+            int ranuraDestino = int.MinValue, int filasVisibles = FilasVisibles)
         {
             _ancla = ancla;
             _paraTrio = paraTrio;
-            _titulo = titulo;
-            _scroll = 0f;
-            // v6.171 — LA RANURA DESTINO (la letra: «el slot de
-            // consagrar y el slot donde se ponen las armas no se
-            // pueden usar […] no permite dejar el item ahi»): LA
-            // AUTOPSIA — el libro NULEA SelectorAbierto al abrir
-            // ESTE flotante (para no re-abrirlo al frame siguiente)
-            // y ClicEnCandidato perdía la ranura destino → el
-            // depósito moría en el guard silencioso. AHORA la
-            // ranura VIVE AQUÍ: se siembra al abrir y se entrega al
-            // elegir — el libro ya puede nular lo suyo.
+            _titulo = titulo ?? "";
+            _scroll = 0;
             _ranuraDestino = ranuraDestino;
-            // v6.170 — EL FRAME DE GRACIA (la letra: «esas ventanas
-            // flotantes no aparecen, bueno aparecen rapido y se
-            // quitan, no duran ni medio segundo»): LA AUTOPSIA — la
-            // ventana nace DENTRO del mismo clic que la abrió (el clic
-            // en el slot), y el «clic fuera = cerrar» del final del
-            // Dibujar la mataba EL MISMO FRAME en que nacía (nació
-            // con el botón aún apretado: al soltar, el flanco del
-            // clic YA consumido contaba como «clic fuera»). LA CURA:
-            // la ventana ignora el clic VIVO de su nacimiento — el
-            // «clic fuera» solo vale desde el frame siguiente.
-            _tickNacimiento = Main.GameUpdateCount;
+            _filasVis = Math.Max(1, Math.Min(FilasVisibles, filasVisibles));
+            _edad = 0;
             Refrescar();
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
         }
 
-        private static string _titulo = "";
-
-        /// <summary>v6.170 — EL TICK DE NACIMIENTO (el frame de gracia:
-        /// el clic que ABRE la ventana jamás la cierra).</summary>
-        private static ulong _tickNacimiento;
-
-        /// <summary>v6.171 — LA RANURA DESTINO de la elección (−2 = el
-        /// slot de la ofrenda · 0..2 = las ranuras del trío ·
-        /// int.MinValue = sin destino: la ventana vieja de solo mirar).
-        /// Vive AQUÍ porque el libro nula SelectorAbierto al abrir —
-        /// el destino no puede vivir en el altar.</summary>
-        private static int _ranuraDestino = int.MinValue;
-
-        /// <summary>REFRESCAR la lista (el inventario vive: cada frame
-        /// la ventana muestra lo que HAY, no una foto vieja).</summary>
+        /// <summary>REFRESCAR la lista (el inventario vive: cada frame la
+        /// ventana muestra lo que HAY, no una foto vieja).</summary>
         internal static void Refrescar()
         {
             _lista.Clear();
             _lista.AddRange(AltarOfrendasUI.CosecharCandidatos(_paraTrio));
+            _filas = (_lista.Count + Columnas - 1) / Columnas;
+            _scroll = Math.Clamp(_scroll, 0, Math.Max(0, _filas - _filasVis));
         }
 
-        /// <summary>CERRAR (elegir, clic fuera o ESC).</summary>
-        internal static void Cerrar() => _ancla = Rectangle.Empty;
-
-        /// <summary>El rectángulo VIVO de la ventana (para que el libro
-        /// sepa que la rueda es NUESTRA cuando el cursor vive aquí).</summary>
-        internal static Rectangle RectanguloVivo()
+        /// <summary>CERRAR (elegir o clic fuera). Nada queda abierto.</summary>
+        internal static void Cerrar()
         {
-            if (!Abierta) return Rectangle.Empty;
-            return CalcularRect(_ancla);
+            _ancla = Rectangle.Empty;
+            _edad = 0;
+            _scroll = 0;
+            _filasVis = FilasVisibles;
+            _lista.Clear();
         }
 
+        /// <summary>CERRAR POR ESC: marca la pulsación como gastada (el
+        /// libro no se cierra con la misma tecla aún apretada).</summary>
+        internal static void CerrarPorEsc()
+        {
+            Cerrar();
+            _escConsumido = true;
+        }
+
+        /// <summary>El flanco de la tecla ESC (lo llama el Update del libro
+        /// cada frame): al soltar la tecla, la pulsación vuelve a valer.</summary>
+        internal static void FilarEsc(bool escVivo)
+        {
+            if (!escVivo) _escConsumido = false;
+        }
+
+        /// <summary>EL CICLO DE VIDA: al salir del mundo y al descargar el
+        /// mod nada queda abierto (la ventanita zombi) ni referencias a
+        /// ítems de un jugador que ya no existe.</summary>
+        internal static void Descargar()
+        {
+            Cerrar();
+            _titulo = "";
+            _ranuraDestino = int.MinValue;
+            _escConsumido = false;
+        }
+
+        /// <summary>LA GEOMETRÍA: nace DEBAJO del ancla; si no cabe se
+        /// voltea ARRIBA; si se sale por los lados, se desliza hacia
+        /// dentro. El alto nace de las filas que hay (ventana corta para
+        /// listas cortas — nunca un hueco vacío de cinco filas).</summary>
         private static Rectangle CalcularRect(Rectangle ancla)
         {
-            // EL TAMAÑO: 6 columnas + márgenes; el alto: título + filas.
             int w = Columnas * Celda + 20;
-            int h = AltoTitulo + FilasVisibles * Celda + 12;
-            // EL ANCLAJE: la ventana nace BAJO el slot; si se sale de la
-            // pantalla, se voltea ARRIBA; si se sale por los lados, se
-            // desliza hacia dentro.
+            int filasVis = Math.Min(Math.Max(_filas, 1), _filasVis);
+            int h = AltoTitulo + filasVis * Celda + 12 + (_filas > _filasVis ? AltoPie : 0);
             int x = ancla.Center.X - w / 2;
             int y = ancla.Bottom + 6;
             if (y + h > Main.screenHeight - 8) y = ancla.Y - h - 6;
             if (y < 8) y = 8;
-            x = Math.Clamp(x, 8, Main.screenWidth - w - 8);
+            x = Math.Clamp(x, 8, Math.Max(8, Main.screenWidth - w - 8));
             return new Rectangle(x, y, w, h);
         }
 
         // ================================================================
-        //  EL DIBUJO + LA RUEDA + EL CLIC — todo en un pase (el patrón
-        //  de la casa: la geometría y el flanco viven juntos).
+        //  EL DIBUJO + LA RUEDA + EL CLIC — todo en un pase (el patrón de
+        //  la casa: la geometría y el flanco viven juntos).
         // ================================================================
-        public static void Dibujar(SpriteBatch sb, bool clicNuevo, bool ruedaNueva)
+        public static void Dibujar(SpriteBatch sb, bool clicNuevo, bool clicDerNuevo, bool ruedaNueva)
         {
             if (!Abierta) return;
-            Refrescar();   // la lista vive
-
-            Rectangle r = CalcularRect(_ancla);
-            var px = TextureAssets.MagicPixel.Value;
-            var fuente = FontAssets.MouseText.Value;
-
-            // EL PAPEL SÓLIDO (nada de transparencias: la ventana lee
-            // encima de la página sin fundirse con ella).
-            sb.Draw(px, r, Papel);
-            // LA SOMBRA del borde (el doblez del papel flotante)
-            sb.Draw(px, new Rectangle(r.X + 3, r.Y + 3, r.Width, r.Height), PapelSombra * 0.6f);
-            // EL MARCO COSIDO (el del libro)
-            LibroMarco.Marco(sb, r, TintaOro * 0.8f);
-
-            // EL TÍTULO (la letra de cada bandeja)
-            string tit = _titulo;
-            float escT = 0.8f;
-            var mT = fuente.MeasureString(tit) * escT;
-            if (mT.X > r.Width - 24f && mT.X > 0f) escT *= (r.Width - 24f) / mT.X;
-            Utils.DrawBorderString(sb, tit, new Vector2(r.Center.X, r.Y + AltoTitulo * 0.5f),
-                TintaVioleta, escT, 0.5f, 0.5f);
-            // el filete del título (el estilo del libro)
-            sb.Draw(px, new Rectangle(r.X + 10, r.Y + AltoTitulo - 6, r.Width - 20, 2),
-                TintaOro * 0.55f);
-
-            // ============================================================
-            //  LA RUEDA ES DE LA VENTANA: el máximo scroll nace de la
-            //  lista VIVA; la rueda SOLO se come si el cursor está
-            //  DENTRO de la ventanita (la página del libro no se mueve).
-            // ============================================================
-            int totalCeldas = _lista.Count;
-            int filasTotales = (totalCeldas + Columnas - 1) / Columnas;
-            float maxScroll = Math.Max(0f, (filasTotales - FilasVisibles) * Celda);
-            bool cursorDentro = r.Contains(Main.mouseX, Main.mouseY) &&
-                !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
-            if (cursorDentro && ruedaNueva)
+            bool recienNacida = _edad == 0;
+            try
             {
-                _scroll = MathHelper.Clamp(_scroll - Terraria.GameInput.PlayerInput
-                    .ScrollWheelDelta * 0.4f, 0f, maxScroll);
-                Terraria.GameInput.PlayerInput.ScrollWheelDelta = 0;   // la rueda es NUESTRA
-            }
-            // LA BARRA DE PROGRESO (la línea del scroll: oro apagado)
-            if (maxScroll > 0f)
-            {
-                float proporcion = (FilasVisibles * Celda) / (float)(filasTotales * Celda);
-                int altoBarra = Math.Max(18, (int)((AltoTitulo + FilasVisibles * Celda) * proporcion));
-                int yBarra = r.Y + AltoTitulo + (int)((_scroll / maxScroll) *
-                    (AltoTitulo + FilasVisibles * Celda - altoBarra));
-                sb.Draw(px, new Rectangle(r.Right - 6, r.Y + AltoTitulo, 4,
-                    FilasVisibles * Celda), PapelSombra * 0.8f);
-                sb.Draw(px, new Rectangle(r.Right - 6, yBarra, 4, altoBarra), TintaOro * 0.7f);
-            }
+                Refrescar();   // la lista vive
 
-            // ============================================================
-            //  LA CUADRÍCULA CON RECORTE: lo que no cabe por ARRIBA no
-            //  se dibuja (la ventana es una vitrina, no una página).
-            // ============================================================
-            int dibujadas = 0;
-            for (int i = 0; i < totalCeldas; i++)
-            {
-                int col = i % Columnas;
-                int fila = i / Columnas;
-                float yFila = r.Y + AltoTitulo + 2 + fila * Celda - _scroll;
-                // EL RECORTE: la fila que no vive en la vitrina, fuera
-                if (yFila + Celda < r.Y + AltoTitulo || yFila > r.Bottom - 10) continue;
-                Rectangle celda = new Rectangle(r.X + 10 + col * Celda, (int)yFila, Celda - 4, Celda - 4);
-                Item it = _lista[i];
-                bool hov = celda.Contains(Main.mouseX, Main.mouseY) &&
-                    !Terraria.GameInput.PlayerInput.IgnoreMouseInterface;
-                if (hov) Main.LocalPlayer.mouseInterface = true;
-                sb.Draw(px, celda, hov ? PapelSombra * 1.15f : PapelSombra * 0.7f);
-                LibroMarco.Marco(sb, celda, hov ? TintaVioleta : TintaOro * 0.35f);
-                Texture2D tex = TextureAssets.Item[it.type].Value;
-                float esc = Math.Min(32f / tex.Width, 32f / tex.Height);
-                sb.Draw(tex, celda.Center.ToVector2(), null, Color.White, 0f,
-                    tex.Size() * 0.5f, esc, SpriteEffects.None, 0f);
-                if (it.stack > 1)
-                    Utils.DrawBorderString(sb, it.stack.ToString(),
-                        new Vector2(celda.Right - 3f, celda.Bottom - 7f),
-                        Tinta, 0.68f, 1f, 0.85f);
-                // EL TOOLTIP DE LA CASA (el nombre al pasar el cursor) —
-                // v6.171 — CON SU PLACA DE PAPEL (la letra: «el color
-                // negro del texto que sale en el nombre de los items
-                // esta horrible, no se puede leer nada»): LA CAUSA —
-                // el nombre flotaba en tinta oscura SOBRE EL MUNDO
-                // (sin papel detrás: invisible). LA CURA — LA PLACA:
-                // la tinta del libro SIEMPRE viaja sobre su papel —
-                // un rectángulo Papel con el marco cosido, y la
-                // tinta encima como en el libro. Se lee SIEMPRE.
-                if (hov)
+                Rectangle r = UltimoRect;
+                var px = TextureAssets.MagicPixel.Value;
+                var fuente = FontAssets.MouseText.Value;
+                bool dentro = r.Contains(Main.mouseX, Main.mouseY);
+
+                // EL PAPEL SÓLIDO (nada de transparencias: la ventana lee
+                // encima de la página sin fundirse con ella).
+                sb.Draw(px, new Rectangle(r.X + 3, r.Y + 3, r.Width, r.Height), PapelSombra * 0.6f);
+                sb.Draw(px, r, Papel);
+                LibroMarco.Marco(sb, r, TintaOro * 0.8f);
+
+                // EL TÍTULO (la letra de cada bandeja — medido para caber)
+                float escT = LibroLineas.EscalaQueCabe(_titulo, 0.8f, r.Width - 24f);
+                LibroLineas.Texto(sb, _titulo, new Vector2(r.Center.X, r.Y + AltoTitulo * 0.5f),
+                    TintaVioleta, escT, 0.5f, 0.5f);
+                // el filete del título (el estilo del libro)
+                sb.Draw(px, new Rectangle(r.X + 10, r.Y + AltoTitulo - 6, r.Width - 20, 2),
+                    TintaOro * 0.55f);
+
+                // ============================================================
+                //  LA RUEDA ES DE LA VENTANA: el máximo scroll nace de la
+                //  lista VIVA; una muesca = una fila; SOLO se come si el
+                //  cursor está DENTRO (la página del libro no se mueve).
+                // ============================================================
+                int filasVis = Math.Min(Math.Max(_filas, 1), _filasVis);
+                int maxScroll = Math.Max(0, _filas - _filasVis);
+                if (ruedaNueva && dentro)
                 {
-                    string nombre = it.Name;
-                    float escN = 0.8f;
+                    int delta = Terraria.GameInput.PlayerInput.ScrollWheelDelta;
+                    if (delta != 0)
+                    {
+                        _scroll = Math.Clamp(_scroll + (delta > 0 ? -1 : 1), 0, maxScroll);
+                        Terraria.GameInput.PlayerInput.ScrollWheelDelta = 0;   // la rueda es NUESTRA
+                    }
+                }
+                if (dentro) Main.LocalPlayer.mouseInterface = true;
+
+                // LA VITRINA (el papel donde viven los iconos)
+                int topVitrina = r.Y + AltoTitulo;
+                int altoVitrina = filasVis * Celda;
+                Rectangle vitrina = new Rectangle(r.X + 8, topVitrina, r.Width - 16, altoVitrina);
+                sb.Draw(px, vitrina, PapelSombra * 0.45f);
+                LibroMarco.Marco(sb, vitrina, TintaOro * 0.3f);
+
+                // LA BARRA DE PROGRESO (la línea del scroll: oro apagado)
+                if (maxScroll > 0)
+                {
+                    float proporcion = altoVitrina / (float)(_filas * Celda);
+                    int altoBarra = Math.Max(18, (int)(altoVitrina * proporcion));
+                    int yBarra = vitrina.Y + 2 + (int)(_scroll / (float)maxScroll *
+                        (altoVitrina - altoBarra - 4));
+                    sb.Draw(px, new Rectangle(vitrina.Right - 6, vitrina.Y + 2, 4, altoVitrina - 4),
+                        PapelSombra * 0.9f);
+                    sb.Draw(px, new Rectangle(vitrina.Right - 6, yBarra, 4, altoBarra), TintaOro * 0.7f);
+                }
+
+                // ============================================================
+                //  LA CUADRÍCULA CON RECORTE: la fila que no vive en la
+                //  vitrina no se dibuja (la ventana es una vitrina, no una
+                //  página). El icono bajo el cursor se elige con UN clic.
+                // ============================================================
+                int hover = -1;
+                int total = _lista.Count;
+                for (int i = 0; i < total; i++)
+                {
+                    int col = i % Columnas;
+                    int fila = i / Columnas;
+                    int yFila = vitrina.Y + 2 + fila * Celda - _scroll * Celda;
+                    if (yFila + Celda < vitrina.Y || yFila > vitrina.Bottom) continue;
+                    Rectangle celda = new Rectangle(vitrina.X + 3 + col * Celda, yFila, Celda - 4, Celda - 4);
+                    bool hov = celda.Contains(Main.mouseX, Main.mouseY) && dentro;
+                    if (hov) hover = i;
+                    Item it = _lista[i];
+                    if (it == null || it.IsAir) continue;
+                    sb.Draw(px, celda, hov ? PapelSombra * 1.15f : PapelSombra * 0.7f);
+                    LibroMarco.Marco(sb, celda, hov ? TintaVioleta : TintaOro * 0.35f);
+                    Texture2D tex = TextureAssets.Item[it.type].Value;
+                    float esc = Math.Min(32f / tex.Width, 32f / tex.Height);
+                    sb.Draw(tex, celda.Center.ToVector2(), null, Color.White, 0f,
+                        tex.Size() * 0.5f, esc, SpriteEffects.None, 0f);
+                    if (it.stack > 1)
+                        LibroLineas.Texto(sb, it.stack.ToString(),
+                            new Vector2(celda.Right - 3f, celda.Bottom - 5f), Tinta, 0.68f, 1f, 0.85f);
+                }
+
+                // EL NOMBRE DEL ÍTEM bajo el cursor — CON SU PLACA DE PAPEL
+                // (la tinta del libro SIEMPRE viaja sobre su papel: se lee
+                // sobre el mundo, sobre el libro, sobre cualquier fondo).
+                if (hover >= 0)
+                {
+                    string nombre = _lista[hover].Name;
+                    float escN = LibroLineas.EscalaQueCabe(nombre, 0.8f, 260f);
                     var mN = fuente.MeasureString(nombre) * escN;
-                    if (mN.X > 260f && mN.X > 0f) escN *= 260f / mN.X;
                     Rectangle placa = new Rectangle(
-                        (int)(celda.Center.X - mN.X * 0.5f - 8f),
-                        (int)(celda.Y - 8f - mN.Y - 7f),
-                        (int)(mN.X + 16f), (int)(mN.Y + 12f));
-                    placa.X = Math.Clamp(placa.X, 6, Main.screenWidth - placa.Width - 6);
-                    if (placa.Y < 6) placa.Y = celda.Bottom + 6;
+                        (int)(r.Center.X - mN.X * 0.5f - 10f),
+                        (int)(vitrina.Y - 10f - mN.Y - 7f),
+                        (int)(mN.X + 20f), (int)(mN.Y + 12f));
+                    placa.X = Math.Clamp(placa.X, 6, Math.Max(6, Main.screenWidth - placa.Width - 6));
+                    if (placa.Y < 6) placa.Y = vitrina.Bottom + 8;
                     sb.Draw(px, placa, Papel);
-                    sb.Draw(px, new Rectangle(placa.X + 2, placa.Y + 2,
-                        placa.Width - 4, placa.Height - 4), PapelSombra * 0.35f);
+                    sb.Draw(px, new Rectangle(placa.X + 2, placa.Y + 2, placa.Width - 4, placa.Height - 4),
+                        PapelSombra * 0.35f);
                     LibroMarco.Marco(sb, placa, TintaOro * 0.8f);
-                    Utils.DrawBorderString(sb, nombre,
-                        new Vector2(placa.Center.X, placa.Y + 7f),
+                    LibroLineas.Texto(sb, nombre, new Vector2(placa.Center.X, placa.Y + 6f),
                         Tinta, escN, 0.5f, 0f);
                 }
-                if (hov && clicNuevo)
+
+                // LA LISTA VACÍA (su aviso, centrado en la vitrina)
+                if (total == 0)
                 {
-                    // LA ELECCIÓN: el índice de la lista VIVA + LA
-                    // RANURA DESTINO (v6.171: viaja AQUÍ — el índice
-                    // solo ya no basta: el altar no recuerda adónde).
-                    int destino = _ranuraDestino;
-                    Cerrar();
-                    if (destino != int.MinValue)
-                        AltarOfrendasUI.ClicEnCandidato(i, destino);
-                    // v6.173 — EL FRAME DE GRACIA DE LA ELECCIÓN (la
-                    // cura de las ranuras que se desequipaban solas):
-                    // la ventana MUERE este frame y el clic sigue
-                    // apretado; sin esta marca, el flanco del frame
-                    // siguiente caía sobre el control que quedó debajo
-                    // (la casilla «3» o «Desequipar todo») y las armas
-                    // se devolvían «solas». La página come un frame.
-                    LibroDelEternoUI.MarcoDeGracia();
-                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
+                    string vacio = Language.GetTextValue(_paraTrio
+                        ? "Mods.AethonMod.Items.TrioSinConsagradas"
+                        : "Mods.AethonMod.Items.BandejaVacia");
+                    float escV = LibroLineas.EscalaQueCabe(vacio, 0.78f, r.Width - 30f);
+                    LibroLineas.Texto(sb, vacio, new Vector2(r.Center.X, vitrina.Center.Y),
+                        TintaApagado, escV, 0.5f, 0.5f);
                 }
-                dibujadas++;
-            }
 
-            // LA LISTA VACÍA (su aviso, centrado en la vitrina)
-            if (totalCeldas == 0)
+                // EL PIE: la pista de la rueda (solo cuando hay algo que recorrer)
+                if (_filas > _filasVis)
+                {
+                    string pista = Language.GetTextValue("Mods.AethonMod.Altar.SelectorRueda");
+                    float escP = LibroLineas.EscalaQueCabe(pista, 0.66f, r.Width - 24f);
+                    LibroLineas.Texto(sb, pista, new Vector2(r.Center.X, r.Bottom - 4f),
+                        TintaApagado, escP, 0.5f, 1f);
+                }
+
+                // ============================================================
+                //  LOS CLICS — NUNCA los del frame de nacimiento: la ventana
+                //  nace DENTRO del clic que la abrió; si contara, el mismo
+                //  botón apretado la cerraría o elegiría lo que quedó
+                //  debajo. Con el flanco limpio del libro, el frame
+                //  siguiente no trae NINGÚN clic nuevo (no hace falta
+                //  ningún «frame de gracia» con reloj ajeno).
+                // ============================================================
+                if (recienNacida) return;
+
+                if (clicNuevo && hover >= 0)
+                {
+                    // LA ELECCIÓN: el índice de la lista VIVA + LA RANURA
+                    // DESTINO. La ventana MUERE primero: lo que quede
+                    // debajo no puede recibir este clic.
+                    int destino = _ranuraDestino;
+                    int indice = hover;
+                    Cerrar();
+                    AltarOfrendasUI.ClicEnCandidato(indice, destino);
+                    return;
+                }
+                if ((clicNuevo || clicDerNuevo) && !dentro) Cerrar();
+            }
+            catch { }
+            finally
             {
-                string vacio = Language.GetTextValue(_paraTrio
-                    ? "Mods.AethonMod.Items.TrioSinConsagradas"
-                    : "Mods.AethonMod.Items.BandejaVacia");
-                Utils.DrawBorderString(sb, vacio, new Vector2(r.Center.X,
-                    r.Y + AltoTitulo + FilasVisibles * Celda * 0.5f),
-                    TintaApagado, 0.78f, 0.5f, 0.5f);
+                // LA EDAD AVANZA AL FINAL DEL PASE: en el frame de
+                // nacimiento valía 0 mientras se dibujó.
+                if (Abierta) _edad++;
             }
-
-            // CLIC FUERA = cerrar (sin elegir nada — la ventana
-            // respeta) — PERO NUNCA EL CLIC DE SU NACIMIENTO (el
-            // frame de gracia de la v6.170: el clic que abrió la
-            // ventana vive en _tickNacimiento; un clic «fuera» del
-            // MISMO frame de nacimiento no cuenta).
-            if (clicNuevo && !r.Contains(Main.mouseX, Main.mouseY) &&
-                Main.GameUpdateCount > _tickNacimiento)
-                Cerrar();
         }
     }
 }

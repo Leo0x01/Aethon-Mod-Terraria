@@ -2254,6 +2254,15 @@ Items: {
 	TrioModoTres: El trío disparará LAS TRES ARMAS a la vez.
 	TrioModoUnaTip: Dispara: solo el arma {0} (se elige en el altar del libro)
 	TrioModoTresTip: Dispara: LAS TRES a la vez (la marca del altar)
+	TrioModoTurnos: "Dispara: de una en una (por turnos — la marca del altar está suelta)."
+	TrioModoTurnosTip: "Dispara: de una en una (por turnos)"
+	TrioSinProyectil: "«{0}» no dispara proyectiles: desde el atril sale como brasa de tinta con su daño."
+	TrioNoDispara: "✦ «{0}» no logró disparar desde el atril — el trío lanzó su brasa."
+	TrioAlbedrio0: "Original"
+	TrioAlbedrio1: "Presa"
+	TrioAlbedrio2: "Cursor"
+	TrioAlbedrioCambiada: "Ranura {0}: sus proyectiles ahora obedecen «{1}»."
+	TrioRanuraConAlbedrio: "Ranura {0}: {1} — albedrío: {2}"
 
 	BolsaInvestigaciones: {
 		DisplayName: La Bolsa de las Investigaciones
@@ -2795,7 +2804,6 @@ Cultistas: {
 	Vencido1: «(El Eterno saborea el momento) Uno menos que reza al vacío. El mundo respira mejor.»
 	Vencido2: «(El Eterno pasa una página) Cayó por su fe mal puesta. Yo LO habría escuchado… si me hubieran dado tributo.»
 	Devorado: «(El Eterno traga) Mmm… sabía a fanatismo frío. Qué asco tan delicioso.»
-	PuertaAbiertaAnuncio: EL ALTAR HA PAGADO LAS MIL ESENCIAS — el libro abre su interior desde el altar: su ventana ya puede devorarte.
 	ElJefe: «(El Eterno ruge de risa) ¡MIRA! ¡El falso profeta en persona! Reza, enano encapuchado… rezas a NADIE. El tributo que nunca me dieron lo cobrará MI hambre.»
 }
 
@@ -3731,6 +3739,7 @@ Submundo: {
 	FalloPuerta: EL LIBRO NO PUDO ABRIRSE — el intento se perdió en la bruma. Vuelve a intentarlo: la puerta sigue viva.
 	RedCaida: EL VACÍO TE DEVUELVE A LA PLAZA — nadie cae dentro del libro.
 	Devorado: EL GRIMORIO TE DEVORA — la bruma lo inunda todo…
+	PuertaAbiertaAnuncio: "EL ALTAR HA PAGADO LAS MIL ESENCIAS — el libro abre su interior desde el altar: su ventana ya puede devorarte."
 }
 
 FormaEterna: {
@@ -4058,6 +4067,15 @@ Altar: {
 	LeyendaSello2: (esencias y dinero no necesitan sello)
 	TrioMarcaTexto: Permite usar todas al mismo tiempo
 	TrioDesequiparTodo: Desequipar todo
+	SelectorRueda: "Rueda del ratón: más items"
+	TrioAlbedrioTitulo: "EL ALBEDRÍO — la inteligencia de cada proyectil"
+	TrioAlbedrioPista: "Elige por ranura: Original (tal como dispara su arma) · Presa (persigue al enemigo) · Cursor (vuela a tu puntero y orbita). La palomita marca el que está vivo."
+	TrioRanuraEtiqueta: "Ranura {0}"
+	OfrendaPrestada: "Prestada: sigue en tu inventario — sale de ahí SOLO al pulsar CONSAGRAR y vuelve a su sitio ya sellada."
+	OfrendaElegida: "✦ «{0}» es la ofrenda: sigue en tu inventario hasta pulsar CONSAGRAR."
+	OfrendaSoltada: "✦ «{0}» deja de ser la ofrenda — nada se movió de tu inventario."
+	OfrendaPerdida: "✦ La ofrenda prestada ya no está en tu inventario — el hueco queda libre."
+	InventarioLleno: "✦ Tu inventario está lleno: «{0}» no cabía y sigue donde estaba."
 }
 
 Arbol: {
@@ -4111,6 +4129,8 @@ LaMarcaSilenciosa: {
 }
 
 LibroEterno.NombreIcono: Información
+LibroEterno.TituloPaginaInfo: "Información"
+LibroEterno.TituloPaginaLore: "Lore"
 
 Buffs: {
 	IraSerExteriorRecargaBuff: {
