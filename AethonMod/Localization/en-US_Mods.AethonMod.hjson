@@ -2400,37 +2400,30 @@ Items: {
 
 	BolsaFormaEterna: {
 		DisplayName: Bolsa Forma Eterna
-		Tooltip: ""
 	}
 
 	BolsaMaestra: {
 		DisplayName: Bolsa Maestra
-		Tooltip: ""
 	}
 
 	CodiceHabilidades: {
 		DisplayName: Codice Habilidades
-		Tooltip: ""
 	}
 
 	MundoInteriorEternoItem: {
 		DisplayName: Mundo Interior Eterno Item
-		Tooltip: ""
 	}
 
 	ElOjoQueMira: {
 		DisplayName: El Ojo Que Mira
-		Tooltip: ""
 	}
 
 	CoroDeLosProfundos: {
 		DisplayName: Coro De Los Profundos
-		Tooltip: ""
 	}
 
 	PlumaDelEscribaSanto: {
 		DisplayName: Pluma Del Escriba Santo
-		Tooltip: ""
 	}
 
 	AlasPrismaBase.Estilo: The house's vector feathers: chained flapping, fall immunity and the prism's flight
@@ -4326,179 +4319,6 @@ Projectiles: {
 	RayoOpticoProyectado.DisplayName: Optical beam
 	RayoProyectado.DisplayName: Projected beam
 	AgujeroRunicoPuroProjectile.DisplayName: Pure Runic Black Hole
-	AuraJuicio2Ancla.DisplayName: Aura Juicio2 Ancla
-	CoronaDePlumasProjectile.DisplayName: Corona De Plumas Projectile
-	DerrameDeTintaProjectile.DisplayName: Derrame De Tinta Projectile
-	AethonMenorOscuroPet.DisplayName: Aethon Menor Oscuro Pet
-	AethonMenorPet.DisplayName: Aethon Menor Pet
-	AlasAuroraHalo.DisplayName: Alas Aurora Halo
-	AnilloRunicoDorsalHalo.DisplayName: Anillo Runico Dorsal Halo
-	AnillosSolaresHalo.DisplayName: Anillos Solares Halo
-	AnillosSolRunicoHalo.DisplayName: Anillos Sol Runico Halo
-	AuraPortadorHalo.DisplayName: Aura Portador Halo
-	BrilloSolarHalo.DisplayName: Brillo Solar Halo
-	EscupidizoProjectile.DisplayName: Escupidizo Projectile
-	GrimorioMenorPet.DisplayName: Grimorio Menor Pet
-	MiniEstallidoPet.DisplayName: Mini Estallido Pet
-	SelloGenesisHalo.DisplayName: Sello Genesis Halo
-	VastagoDelEternoPet.DisplayName: Vastago Del Eterno Pet
-	AbrazoNebulosaProjectile.DisplayName: Abrazo Nebulosa Projectile
-	AnguilaSolarProjectile.DisplayName: Anguila Solar Projectile
-	AnilloEnfriamientoProjectile.DisplayName: Anillo Enfriamiento Projectile
-	ArcoSobretensionProjectile.DisplayName: Arco Sobretension Projectile
-	BoaEclipseProjectile.DisplayName: Boa Eclipse Projectile
-	BrumaAscendidoBlackHoleProjectile.DisplayName: Bruma Ascendido Black Hole Projectile
-	BrumaBlackHoleProjectile.DisplayName: Bruma Black Hole Projectile
-	BrumaNacimientoFX.DisplayName: Bruma Nacimiento F X
-	CaravanaEspectralProjectile.DisplayName: Caravana Espectral Projectile
-	CicloEstelarProjectile.DisplayName: Ciclo Estelar Projectile
-	CienpiesRunicoProjectile.DisplayName: Cienpies Runico Projectile
-	CintaAuroraProjectile.DisplayName: Cinta Aurora Projectile
-	ColapsoMagnetarProjectile.DisplayName: Colapso Magnetar Projectile
-	CometaErranteProjectile.DisplayName: Cometa Errante Projectile
-	CorazonColapsoProjectile.DisplayName: Corazon Colapso Projectile
-	CoroEspectralProjectile.DisplayName: Coro Espectral Projectile
-	CosmicAscendidoBlackHoleProjectile.DisplayName: Cosmic Ascendido Black Hole Projectile
-	CosmicBlackHoleProjectile.DisplayName: Cosmic Black Hole Projectile
-	CosmicShockwaveProjectile.DisplayName: Cosmic Shockwave Projectile
-	CriaEstelarMinion.DisplayName: Cria Estelar Minion
-	DanzaOrbesProjectile.DisplayName: Danza Orbes Projectile
-	DeadStarProjectile.DisplayName: Dead Star Projectile
-	DecretoEclipseProjectile.DisplayName: Decreto Eclipse Projectile
-	DesgarroCuanticoProjectile.DisplayName: Desgarro Cuantico Projectile
-	DignosFXProjectile.DisplayName: Dignos F X Projectile
-	EclipsePrimordialProjectile.DisplayName: Eclipse Primordial Projectile
-	EmbestidaNovaProjectile.DisplayName: Embestida Nova Projectile
-	EminenciaAtrozProjectile.DisplayName: Eminencia Atroz Projectile
-	EnjambrePrismaticoProjectile.DisplayName: Enjambre Prismatico Projectile
-	FarolGuardianProjectile.DisplayName: Farol Guardian Projectile
-	FiloHorizonteProjectile.DisplayName: Filo Horizonte Projectile
-	FisuraDesgarroProjectile.DisplayName: Fisura Desgarro Projectile
-	FlageloEstelarProjectile.DisplayName: Flagelo Estelar Projectile
-	FolioErranteProjectile.DisplayName: Folio Errante Projectile
-	FragmentoSupernovaMinion.DisplayName: Fragmento Supernova Minion
-	GargantaVacioProjectile.DisplayName: Garganta Vacio Projectile
-	GuardiaNovaProjectile.DisplayName: Guardia Nova Projectile
-	HeridaElectricaProjectile.DisplayName: Herida Electrica Projectile
-	LagrimaSolarProjectile.DisplayName: Lagrima Solar Projectile
-	LanzaAlbaProjectile.DisplayName: Lanza Alba Projectile
-	LenguaTintaProjectile.DisplayName: Lengua Tinta Projectile
-	LenteAbismoProjectile.DisplayName: Lente Abismo Projectile
-	LeviatanEspectralProjectile.DisplayName: Leviatan Espectral Projectile
-	LivingPulsarMinion.DisplayName: Living Pulsar Minion
-	LluviaMeteorosProjectile.DisplayName: Lluvia Meteoros Projectile
-	MagnetarProjectile.DisplayName: Magnetar Projectile
-	ManadaAstralProjectile.DisplayName: Manada Astral Projectile
-	MareaChicaProjectile.DisplayName: Marea Chica Projectile
-	MareaGravitatoriaProjectile.DisplayName: Marea Gravitatoria Projectile
-	MeteoroProjectile.DisplayName: Meteoro Projectile
-	MetronomoPulsarHalo.DisplayName: Metronomo Pulsar Halo
-	NebulaJellyfishMinion.DisplayName: Nebula Jellyfish Minion
-	NebulaLightning.DisplayName: Nebula Lightning
-	NeutronStarProjectile.DisplayName: Neutron Star Projectile
-	NovaEncadenadaProjectile.DisplayName: Nova Encadenada Projectile
-	NovaParryProjectile.DisplayName: Nova Parry Projectile
-	OcasoBurstProjectile.DisplayName: Ocaso Burst Projectile
-	OcasoShardProjectile.DisplayName: Ocaso Shard Projectile
-	OjoTextoProjectile.DisplayName: Ojo Texto Projectile
-	OlvidoAscendidoBlackHoleProjectile.DisplayName: Olvido Ascendido Black Hole Projectile
-	OlvidoBlackHoleProjectile.DisplayName: Olvido Black Hole Projectile
-	OuroborosAstralProjectile.DisplayName: Ouroboros Astral Projectile
-	PenduloJuicioProjectile.DisplayName: Pendulo Juicio Projectile
-	PliegueEspacioProjectile.DisplayName: Pliegue Espacio Projectile
-	PlumaPrimordialProjectile.DisplayName: Pluma Primordial Projectile
-	PortalDimensionalProjectile.DisplayName: Portal Dimensional Projectile
-	PulsarProjectile.DisplayName: Pulsar Projectile
-	PulsoEcoProjectile.DisplayName: Pulso Eco Projectile
-	PulsoPulsarProjectile.DisplayName: Pulso Pulsar Projectile
-	RafagaNovaProjectile.DisplayName: Rafaga Nova Projectile
-	RafagaSolarProjectile.DisplayName: Rafaga Solar Projectile
-	RayoConvergenteProjectile.DisplayName: Rayo Convergente Projectile
-	RayoGammaProjectile.DisplayName: Rayo Gamma Projectile
-	RayoPrimordialProjectile.DisplayName: Rayo Primordial Projectile
-	RealityTearProjectile.DisplayName: Reality Tear Projectile
-	RedSupergiantProjectile.DisplayName: Red Supergiant Projectile
-	RelojArenaProjectile.DisplayName: Reloj Arena Projectile
-	RencorPrimordialProjectile.DisplayName: Rencor Primordial Projectile
-	RuneSunProjectile.DisplayName: Rune Sun Projectile
-	RunicLightning.DisplayName: Runic Lightning
-	SelloErranteProjectile.DisplayName: Sello Errante Projectile
-	SembradorPulsarProjectile.DisplayName: Sembrador Pulsar Projectile
-	SierpeEstelarProjectile.DisplayName: Sierpe Estelar Projectile
-	SinfoniaPrimordialProjectile.DisplayName: Sinfonia Primordial Projectile
-	SolVivoProjectile.DisplayName: Sol Vivo Projectile
-	StellarCometMinion.DisplayName: Stellar Comet Minion
-	SunProjectile.DisplayName: Sun Projectile
-	SupremoAuroraBlackHoleProjectile.DisplayName: Supremo Aurora Black Hole Projectile
-	SupremoBlackHoleProjectile.DisplayName: Supremo Black Hole Projectile
-	TajoAstralProjectile.DisplayName: Tajo Astral Projectile
-	TajoGuadanaProjectile.DisplayName: Tajo Guadana Projectile
-	TelarEstrellaProjectile.DisplayName: Telar Estrella Projectile
-	TentaculoCosmicoProjectile.DisplayName: Tentaculo Cosmico Projectile
-	TentaculoEquinoccioProjectile.DisplayName: Tentaculo Equinoccio Projectile
-	TormentaNebularProjectile.DisplayName: Tormenta Nebular Projectile
-	TruenoPerlinProjectile.DisplayName: Trueno Perlin Projectile
-	UmbralAscendidoBlackHoleProjectile.DisplayName: Umbral Ascendido Black Hole Projectile
-	UmbralBlackHoleProjectile.DisplayName: Umbral Black Hole Projectile
-	UmbralRotoProjectile.DisplayName: Umbral Roto Projectile
-	VelaSolarProjectile.DisplayName: Vela Solar Projectile
-	VenaTruenoProjectile.DisplayName: Vena Trueno Projectile
-	VerboDetonacionProjectile.DisplayName: Verbo Detonacion Projectile
-	VerboPrimordialProjectile.DisplayName: Verbo Primordial Projectile
-	VersoVivoProjectile.DisplayName: Verso Vivo Projectile
-	ViboraGenesiacaProjectile.DisplayName: Vibora Genesiaca Projectile
-	VozCuasarProjectile.DisplayName: Voz Cuasar Projectile
-	WhiteDwarfProjectile.DisplayName: White Dwarf Projectile
-	DagaEternaMinion.DisplayName: Daga Eterna Minion
-	DevoracionEterna.DisplayName: Devoracion Eterna
-	IraSerExteriorCeremoniaProjectile.DisplayName: Ira Ser Exterior Ceremonia Projectile
-	LaUltimaPalabraProjectile.DisplayName: La Ultima Palabra Projectile
-	RayoConcentradoDosProjectile.DisplayName: Rayo Concentrado Dos Projectile
-	RayosPruebaProjectile.DisplayName: Rayos Prueba Projectile
-	PalabraCortadaProjectile.DisplayName: Palabra Cortada Projectile
-	PortalTrioProjectile.DisplayName: Portal Trio Projectile
-	TrioRescoldoProjectile.DisplayName: Trio Rescoldo Projectile
-	FaroDelEclipseHaz.DisplayName: Faro Del Eclipse Haz
-	AtaqueFusionProjectile.DisplayName: Ataque Fusion Projectile
-	AtaqueJefeProjectile.DisplayName: Ataque Jefe Projectile
-	JefeInteriorVoleaProjectile.DisplayName: Jefe Interior Volea Projectile
-	JefeMiradaCieloProj.DisplayName: Jefe Mirada Cielo Proj
-	JefeMiradaProj.DisplayName: Jefe Mirada Proj
-	JefePruebaCProj.DisplayName: Jefe Prueba C Proj
-	JefeRC2Proj.DisplayName: Jefe R C2 Proj
-	JefeRenglonesProj.DisplayName: Jefe Renglones Proj
-	JefeVeredictoProj.DisplayName: Jefe Veredicto Proj
-	LlegadaBrumaProjectile.DisplayName: Llegada Bruma Projectile
-	GrimorioNerviosoFlotante.DisplayName: Grimorio Nervioso Flotante
-	SombraPaginaCaza.DisplayName: Sombra Pagina Caza
-	SombraPaginaEterno.DisplayName: Sombra Pagina Eterno
-	OjoEternoMinion.DisplayName: Ojo Eterno Minion
-	AtaqueOleadaProjectile.DisplayName: Ataque Oleada Projectile
-	PrimerTrazoFajo.DisplayName: Primer Trazo Fajo
-	PrimerTrazoHeld.DisplayName: Primer Trazo Held
-	SakugaDelCielo.DisplayName: Sakuga Del Cielo
-	AspiradoraDevoradorProjectile.DisplayName: Aspiradora Devorador Projectile
-	BocadoDelSueloProjectile.DisplayName: Bocado Del Suelo Projectile
-	CaidaDevoradaProjectile.DisplayName: Caida Devorada Projectile
-	FauceDevoradorProjectile.DisplayName: Fauce Devorador Projectile
-	GrietaDeTintaProjectile.DisplayName: Grieta De Tinta Projectile
-	ManchaDeTinta.DisplayName: Mancha De Tinta
-	PrimeraCenaProjectile.DisplayName: Primera Cena Projectile
-	SombraPaginaProjectile.DisplayName: Sombra Pagina Projectile
-	TresCasasProjectile.DisplayName: Tres Casas Projectile
-	PhoenixNovaProjectile.DisplayName: Phoenix Nova Projectile
-	PlasmaStormProjectile.DisplayName: Plasma Storm Projectile
-	QuantumSplitProjectile.DisplayName: Quantum Split Projectile
-	SupernovaProjectile.DisplayName: Supernova Projectile
-	JuicioDosSolesProj.DisplayName: Juicio Dos Soles Proj
-	RenglonCargaProj.DisplayName: Renglon Carga Proj
-	RenglonLineaProj.DisplayName: Renglon Linea Proj
-	TajoDelVacioProj.DisplayName: Tajo Del Vacio Proj
-	MiradaCargaProj.DisplayName: Mirada Carga Proj
-	MiradaRayoProj.DisplayName: Mirada Rayo Proj
-	LaMiradaProyectil.DisplayName: La Mirada Proyectil
-	LaMiradaRayo.DisplayName: La Mirada Rayo
-	ArcaneBolt.DisplayName: Arcane Bolt
 }
 
 Ciclope.Grito: AAAAH I PROJECT MYSELF!
