@@ -1,24 +1,29 @@
-# SNAPSHOT ESTABLE — v6.177 — EL PARTIDO DE LOS GIGANTES Y EL VISOR DEL PROYECTADO
+# SNAPSHOT ESTABLE — v6.178 — EL RAYO DE VERDAD, LA BRUMA PEQUEÑA Y LA NOCHE PRESTADA
 
-> **PUBLICADA — release de GitHub + CDN verificado (md5 en CHANGES.md)**
+> **PUBLICADA — release de GitHub + CDN verificado (md5 bbe8f5054d421ee0bd7024b2ae45e3a6 · release 459785886)**
 
-## LOS QUINCE PUNTOS DE LA SESIÓN 30
+## LOS ONCE PUNTOS DE LA SESIÓN 31
 
-1. **Los tres gigantes PARTIDOS** (AuraLib → perfil+motor+dibujo · AethonBoss → pelea+dibujo · AtaqueJefe → arsenal+dibujo): clases `partial`, métodos intactos byte a byte, oráculo 0/0 de garante.
-2. **La barra 1/0 MUERTA**: `ModifyInfo` devuelve TRUE — la base ya no pisa la suma del cuerpo entero (y los parámetros 4-5 son shield/shieldMax, no scale/dps).
-3. **LA ASPIRADORA UNIVERSAL**: el vigía `OnSpawn` cuenta TODAS las invocaciones del Devorador (pilar · oleadas · mundo real) y el cine espacial nace SOLO la SEGUNDA vez; las demás son pelea y muerte normal.
-4. **El cine pulido**: la vigilia espera la extensión de la oleada y el vaivén de la manada ondea EN FRECUENCIA UNA (adiós, tentáculo rezagado).
-5. **El coro NACE del libro y SE EXTIENDE** hacia el jefe antes de cubrirlo (dos tiempos limpios).
-6. **LA PURGA DE LA MESA**: al devorar, los proyectiles del jefe SE APAGAN — calla en todos los sentidos.
-7. **La puerta siempre abierta**: en el interior TODO ítem de invocación de Terraria funciona sin clima, hora ni bioma.
-8. **La escalera sin techo**: nivel 1+kills SIN tope — 8+ dash doble · 10+ volea doble · 12+ salto de sombra · 15+ combo de cuatro · 20+ furia.
-9. **Las voleas temáticas VANILLA**: cada jefe dispara SUS proyectiles de Terraria (el gusano, la llama maldita de los devoralmas).
-10. **La tumba de niebla del paisaje**: tres masas sepultan la punta de cada tentáculo de fondo en las tres capas.
-11. **La interfaz que se lee**: slot de ofrenda limpio · ventana flotante con título grande que dice ELIGE UN ARMA · escalas +0.10 · botones 1.05 y 46 px medidos con halo.
-12. **EL VISOR DEL PROYECTADO** (el arma de verdad del .tmod de Chopilas, 100 % casa): rayo continuo + la PROYECCIÓN (X) + energía 100→300 + 11 etapas + las DIEZ MEJORAS QUE DUELEN de los jefes + HUD + el visor en la cara. El arma vieja murió.
-13. **EL ECLIPSE QUE BARRE**: el ataque del Faro rediseñado — disco negro, corona picada viva y el haz del faro GIRANDO.
-14. **Los daños del grimorio VERIFICADOS** contra el decompile: el mágico por ModifyWeaponDamage; el de invocación recalculado por vanilla cada tick (GetTotalDamage(Summon) sobre originalDamage).
-15. **La 2ª purga del en-US**: 183 fósiles purgados — paridad 1900 = 1900; el loop corrió y cazó la regresión hasta el verde.
+1. **EL RAYO DE VERDAD** (la letra: «debes copiar su tecnica»): la técnica del .tmod del usuario (decompilado) reencarnada 100% con material de la casa en **HazProyectadoLib** — la misma línea en SEIS CAPAS (envolventes ×2 con tapas + el cuerpo que FLUYE en tramos alineados tileables + el segundo flujo + los bordes que arden + las dos luces) con el CONTORNO ONDULANTE de tres octavas que viaja con el flujo y las puntas en sqrt. Tres consumidores: el rayo continuo del visor (18 px), LA PROYECCIÓN de la X (100 px) y el barrido del faro (66 px) — los parámetros EXACTOS del plano, con fallback a la pila de siempre.
+2. **La cura del client.log** (116 fallos/sesión): la clave `Proyectado.Opcionales` pide {0}/{1}/{2} y viajaban DOS argumentos — los TRES viajan (`TotalOpcionales` = 6).
+3. **LA BRUMA PEQUEÑA DE LA BASE** (la cura de los 5 fps): las tumbas de niebla v6.177 (radios ~1100 px) MUEREN, el cielo del interior vuelve al estado pre-bruma — y nace UNA bruma PEQUEÑA por tentáculo (52-138 px, calidad 0.16-0.18, alfa bajo). R24 en el MAESTRO.
+4. **LA NOCHE PRESTADA UNIVERSAL**: las IA vanilla huyen del mediodía eterno (EncourageDespawn por IsItDay — decompile) — la noche prestada pasa de SOLO SkeletronHead a TODO NPC: en el interior NADIE ve el amanecer y TODOS los jefes se quedan.
+5. **LA VIDA CONTADA** (los spikes eternos del Rey Slime 26): el default vanilla de `timeLeft` es 3600 ticks = 60 s y el Spike NO tiene override — TODA volea de TODOS los jefes nace con 180 ticks. R23 en el MAESTRO.
+6. **EL VIGÍA BORRADO POR LA PÁGINA**: la Página en Blanco también limpia el reloj de invocaciones del Devorador — desde el olvido, la SEGUNDA invocación vuelve a soltar la ASPIRADORA.
+7. **El blanco de las ranuras EXORCIZADO**: el banco de pruebas **DiagnosticoPersistenciaSistema** (headless) reproduce el reinicio de verdad (disco → ítem nuevo) y su veredicto es VERDE: ranuras · modo · albedrío · sello · PUERTA (1000/1000) SOBREVIVEN — la persistencia era inocente. La cura visual: icono blindado + EL NOMBRE DEL ARMA COSIDO debajo de cada ranura.
+8. **El faro con MUCHOS VFX**: LA CORONA FANTASMA curada (los 22 picos dibujaban con `VFXCore.Quad` que SOLO ACUMULA sin Flush: INVISIBLES desde la v6.177) + LA ESTELA DEL BARRIDO + LA CAMPANADA por vuelta + EL CHOQUE DE PUNTA (LaserScan + chispas).
+9. **Los botones con GARANTÍA ABSOLUTA**: piso de legibilidad 0.72 + ELIPSIS — si al piso no cabe, se recorta con «…»: NADA desborda NUNCA (altar y pilar).
+10. **La lección del fósil COMPLETA**: el build Y EL SERVIDOR (cada carga) auto-pueblan el en-US fuente con ~180 claves DisplayName/Tooltip (el tick 18:39:00 lo cazó) — la fuente se restaura antes del commit, el .tmod nace limpio, el gate AUDIT mide contra el .tmod (paridad 1901=1901).
+11. **Las docs**: MAESTRO (R23/R24 + la técnica + la cronología) + EFECTOS-Y-LIBRERIAS (§0 la corona fantasma + §4.3b HazProyectadoLib + el mapa) + CHANGES con la letra.
 
 ## VERIFICACIÓN
-Oráculo 0/0 · build 0/0 · GUARDIÁN ✔ · AUDIT v6.177 ✔ · headless 0 exc · loop sin regresiones (fósiles 183→0) · sims SHIP (aspiradora · visor+faro 7.5 · sprites 8/10).
+Oráculo 0/0 (488 .cs) · build 0/0 · GUARDIÁN ✔ (las 4 texturas del rayo dentro) · AUDIT v6.178 ✔ (tumba muerta · 3 brumas · 3 argumentos · noche universal · 4 voleas · vigía borrable · paridad 1901=1901) · headless 0 exc + DiagnosticoPersistencia TODO VIVO · loop sin regresiones (fósiles 180→0) · sim del rayo SHIP (la ola viaja · puntas sqrt · costura 1/255) · QA VLM 7/10.
+
+## LO QUE SE ESPERA EN JUEGO
+- El rayo del visor y LA PROYECCIÓN se ven como EL ARMA REAL (las seis capas fluyendo).
+- El faro: corona picada VISIBLE + estela + campanada + choque de punta.
+- El interior a FPS normales + los tentáculos de fondo con SU bruma pequeña en la base.
+- El Ojo de Cthulhu (y TODOS los jefes) se quedan a pelear en el interior.
+- Los proyectiles de los jefes mueren en 3 segundos.
+- La Página en Blanco reestrena la aspiradora del Devoramundos.
+- El tooltip del visor sin excepciones (el log limpio).
