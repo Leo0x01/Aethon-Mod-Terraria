@@ -252,7 +252,7 @@ namespace AethonMod.Content.Weapons.Investigaciones
                 catch { VFXCore.CerrarLoteSiAbierto(); }
                 finally { VFXCore.RestaurarLoteVanilla(); }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("MiradaDelEterno", exRegistro); }
             return false;
         }
     }
@@ -638,7 +638,7 @@ namespace AethonMod.Content.Weapons.Investigaciones
                 catch { VFXCore.CerrarLoteSiAbierto(); }
                 finally { VFXCore.RestaurarLoteVanilla(); }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("MiradaDelEterno", exRegistro); }
             return false;
         }
     }

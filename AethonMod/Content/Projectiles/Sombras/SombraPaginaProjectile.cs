@@ -99,7 +99,7 @@ namespace AethonMod.Content.Projectiles.Sombras
                         return p.Center;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SombraPaginaProjectile", exRegistro); }
             return dueño.MountedCenter;
         }
 
@@ -122,7 +122,7 @@ namespace AethonMod.Content.Projectiles.Sombras
                     if (p.ai[2] > 0f) return (int)p.ai[2];
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SombraPaginaProjectile", exRegistro); }
             return ModContent.ItemType
                 <global::AethonMod.Content.Weapons.GrimoireEternal>();
         }
@@ -353,7 +353,7 @@ namespace AethonMod.Content.Projectiles.Sombras
                                         // cobra SU XP; el festín de los
                                         // jefes sigue en las fauces).
                                         bool deEstatua = false;
-                                        try { deEstatua = dueñoPool.SpawnedFromStatue; } catch { }
+                                        try { deEstatua = dueñoPool.SpawnedFromStatue; } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SombraPaginaProjectile", exRegistro); }
                                         if (!deEstatua)
                                         {
                                             global::AethonMod.Content.Weapons
@@ -453,7 +453,7 @@ namespace AethonMod.Content.Projectiles.Sombras
                         alma.SombrasGastadas - liberar);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SombraPaginaProjectile", exRegistro); }
         }
 
         private void DrawTodo()
@@ -601,7 +601,7 @@ namespace AethonMod.Content.Projectiles.Sombras
 
         private static void Sonar(Terraria.Audio.SoundStyle estilo, Vector2 pos)
         {
-            try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); } catch { }
+            try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SombraPaginaProjectile", exRegistro); }
         }
     }
 }

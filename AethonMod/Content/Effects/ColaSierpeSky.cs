@@ -162,7 +162,7 @@ namespace AethonMod.Content.Effects
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ColaSierpeSky", exRegistro); }
 
             // LA LLEGADA: intensidad 1 mientras los subs 9-10 (v6.50.52 —
             // la presentación ES la carrera; la aparición es el sub 10);
@@ -492,7 +492,7 @@ namespace AethonMod.Content.Effects
                             SamplerState.LinearClamp, DepthStencilState.None,
                             Main.Rasterizer, null, m);
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ColaSierpeSky", exRegistro); }
                 }
             }
         }
@@ -510,7 +510,7 @@ namespace AethonMod.Content.Effects
                         return n.ai[2];
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ColaSierpeSky", exRegistro); }
             return 0f;
         }
 
@@ -543,7 +543,7 @@ namespace AethonMod.Content.Effects
                 _cielo = new ColaSierpeSky();
                 SkyManager.Instance["AethonMod:ColaSierpe"] = _cielo;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ColaSierpeSky", exRegistro); }
         }
 
         public override void Unload()
@@ -553,7 +553,7 @@ namespace AethonMod.Content.Effects
             // para siempre, cero referencias a ModContent en Draw.
             ColaSierpeSky.Descargado = true;
             try { _cielo?.Reset(); }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ColaSierpeSky", exRegistro); }
             _cielo = null;
         }
 
@@ -565,9 +565,9 @@ namespace AethonMod.Content.Effects
             // log del servidor, nada más).
             if (Main.dedServ) return;
             try { SkyManager.Instance.Deactivate("AethonMod:ColaSierpe"); }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ColaSierpeSky", exRegistro); }
             try { _cielo?.Reset(); }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ColaSierpeSky", exRegistro); }
         }
 
         /// <summary>
@@ -598,7 +598,7 @@ namespace AethonMod.Content.Effects
                          _cielo.AlfaInterno <= 0.02f)
                     SkyManager.Instance.Deactivate("AethonMod:ColaSierpe");
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ColaSierpeSky", exRegistro); }
         }
     }
 }

@@ -400,7 +400,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             if (Main.netMode == NetmodeID.Server) return;
             // El cuerpo de la medusa también pica: quemadura fría del vacío.
-            try { target.AddBuff(BuffID.Frostburn, 180); } catch { }
+            try { target.AddBuff(BuffID.Frostburn, 180); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("NebulaJellyfishMinion", exRegistro); }
             for (int i = 0; i < 5; i++)
             {
                 Dust d = Dust.NewDustPerfect(target.Center, DustID.BlueTorch,

@@ -146,7 +146,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                                 _strike, new Vector2(0f, 1f), 7f, 10, 16, 0.4f,
                                 "AethonSkyBolt"));
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RunicLightning", exRegistro); }
                 }
             }
 
@@ -186,7 +186,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                 Content.Systems.GolpeMotor.Golpear(Projectile, npc, Projectile.damage, 2.5f, true);
                 if (Main.netMode != NetmodeID.MultiplayerClient)
-                    try { npc.AddBuff(BuffID.Electrified, 240); } catch { }
+                    try { npc.AddBuff(BuffID.Electrified, 240); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RunicLightning", exRegistro); }
                 hit.Add(npc);
             }
 
@@ -199,7 +199,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                 Content.Systems.GolpeMotor.Golpear(Projectile, npc, Projectile.damage, 3f, true);
                 if (Main.netMode != NetmodeID.MultiplayerClient)
-                    try { npc.AddBuff(BuffID.Electrified, 240); } catch { }
+                    try { npc.AddBuff(BuffID.Electrified, 240); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RunicLightning", exRegistro); }
                 hit.Add(npc);
             }
 
@@ -234,7 +234,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                 Content.Systems.GolpeMotor.Golpear(Projectile, best, chainDamage, 1.5f, true);
                 if (Main.netMode != NetmodeID.MultiplayerClient)
-                    try { best.AddBuff(BuffID.Electrified, 240); } catch { }
+                    try { best.AddBuff(BuffID.Electrified, 240); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RunicLightning", exRegistro); }
             }
         }
 

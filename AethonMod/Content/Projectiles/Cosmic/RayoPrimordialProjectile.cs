@@ -97,7 +97,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         Content.Systems.GolpeMotor.Golpear(Projectile, npc,
                             Projectile.damage, 3f, true);
                         if (Main.netMode != NetmodeID.MultiplayerClient)
-                            try { npc.AddBuff(BuffID.Electrified, 300); } catch { }
+                            try { npc.AddBuff(BuffID.Electrified, 300); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayoPrimordialProjectile", exRegistro); }
                         golpeados.Add(npc);
                     }
                 }
@@ -114,7 +114,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Content.Systems.GolpeMotor.Golpear(Projectile, npc,
                         (int)(Projectile.damage * 0.6f), 2f, true);
                     if (Main.netMode != NetmodeID.MultiplayerClient)
-                        try { npc.AddBuff(BuffID.Electrified, 240); } catch { }
+                        try { npc.AddBuff(BuffID.Electrified, 240); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayoPrimordialProjectile", exRegistro); }
 
                     // el arco de la cadena TAMBIÉN es un canal de vanilla
                     // (el Arco de ArcSurge, a la mitad del ancho).

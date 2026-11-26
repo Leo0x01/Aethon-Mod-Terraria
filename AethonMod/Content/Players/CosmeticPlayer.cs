@@ -534,7 +534,7 @@ namespace AethonMod.Content.Players
                     Player.wingTime = Player.wingTimeMax;                    // RELLENO DURO: infinito DE VERDAD
                 // Player.wings queda 0: el sprite vanilla NO — las alas del aura SON el visual
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CosmeticPlayer", exRegistro); }
         }
 
         /// <summary>¿Ya vive mi portador de aura con este modo?</summary>

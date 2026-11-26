@@ -440,16 +440,12 @@ namespace AethonMod.Content.Effects
             {
                 Terraria.On_TimeLogger.DetailedDrawTime -= ApplyGravitationalLens;
             }
-            catch
-            {
-                // Programación defensiva: el detach del hook jamás puede
-                // impedir que la desactivación del mod continúe.
-            }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BlackHoleLensSystem", exRegistro); }
             try
             {
                 Terraria.Graphics.Effects.On_FilterManager.EndCapture -= ComponerLenteBajoFiltros;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BlackHoleLensSystem", exRegistro); }
 
             // v5.87 — FIX del ThreadStateException:
             // "most FNA3D audio/graphics functions must be called on the main
@@ -468,19 +464,10 @@ namespace AethonMod.Content.Effects
                     Main.QueueMainThreadAction(() =>
                     {
                         try { target.Dispose(); }
-                        catch
-                        {
-                            // Defensivo: una excepción aquí subiría hasta
-                            // Main.Update() y rompería el bucle del juego.
-                        }
+                        catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BlackHoleLensSystem", exRegistro); }
                     });
                 }
-                catch
-                {
-                    // Encolado imposible (p. ej. apagado total del proceso):
-                    // se abandona la referencia — el driver libera los
-                    // recursos del proceso al terminar de todos modos.
-                }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BlackHoleLensSystem", exRegistro); }
             }
 
             // v5.95 — el target del pase B se destruye igual (hilo principal).
@@ -492,10 +479,10 @@ namespace AethonMod.Content.Effects
                     Main.QueueMainThreadAction(() =>
                     {
                         try { targetB.Dispose(); }
-                        catch { }
+                        catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BlackHoleLensSystem", exRegistro); }
                     });
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BlackHoleLensSystem", exRegistro); }
             }
 
             _lensTarget = null;
@@ -510,10 +497,10 @@ namespace AethonMod.Content.Effects
                     Main.QueueMainThreadAction(() =>
                     {
                         try { targetC.Dispose(); }
-                        catch { }
+                        catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BlackHoleLensSystem", exRegistro); }
                     });
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BlackHoleLensSystem", exRegistro); }
             }
             _capturaRetro = null;
             _capturandoRetro = false;
@@ -849,7 +836,7 @@ namespace AethonMod.Content.Effects
                     gd.SetRenderTarget(null);
                     BlitFullscreen(gd, _capturaRetro);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BlackHoleLensSystem", exRegistro); }
             }
         }
 

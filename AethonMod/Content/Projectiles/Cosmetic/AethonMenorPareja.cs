@@ -605,7 +605,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                                     EmoteBubble.NewBubble(EmoteID.EmoteLaugh,
                                         new WorldUIAnchor(p), 100);
                                 }
-                                catch { }
+                                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonMenorPareja", exRegistro); }
                             }
                         }
                     }
@@ -740,7 +740,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                         HideCombatText = false,
                     }, false, true);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonMenorPareja", exRegistro); }
             }
 
             // === EL TEATRO (solo pantallas): el vecino ASUSTADO y la
@@ -755,7 +755,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     EmoteBubble.NewBubble(EmoteID.EmoteFear, new WorldUIAnchor(n), 90);
                     EmoteBubble.NewBubble(EmoteID.EmoteLaugh, new WorldUIAnchor(p), 90);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonMenorPareja", exRegistro); }
 
                 // LAS PARTÍCULAS OSCURAS de la mordida (o del zarpazo de
                 // los ojos — el mismo polvillo del grimorio).
@@ -793,7 +793,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     EmoteBubble.NewBubble(EmoteID.EmoteSilly, new WorldUIAnchor(p), 90);
                     EmoteBubble.NewBubble(EmoteID.EmoteLaugh, new WorldUIAnchor(p), 90);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonMenorPareja", exRegistro); }
             }
 
             // LA MONEDA DEL 50%: OTRO vecino cercano (contador NUEVO) o
@@ -1163,7 +1163,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 //     murió): se quedan en la corona y pegan a distancia.
                 DibujarRayitos(p, e, victima, ojos);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonMenorPareja", exRegistro); }
         }
 
         // ==================================================================
@@ -1236,7 +1236,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                         alpha * ventana, 0.16f);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonMenorPareja", exRegistro); }
         }
 
         // ==================================================================
@@ -1275,7 +1275,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     ? dueño.GetModPlayer<Players.ShardPlayer>() : null;
                 if (spCoro != null) spCoro.TicksSinCoro = 0;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonMenorPareja", exRegistro); }
             for (int c = 0; c < 5; c++)
                 NacerConejoEnElBorde(e, dueño.Center);
 
@@ -1287,7 +1287,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 {
                     EmoteBubble.NewBubble(EmoteID.EmoteFear, new WorldUIAnchor(p), 90);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonMenorPareja", exRegistro); }
             }
         }
 
@@ -1429,7 +1429,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     d.noGravity = !dividido;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonMenorPareja", exRegistro); }
         }
 
         /// <summary>La posición DIBUJADA de un conejo (su Pos + el salto

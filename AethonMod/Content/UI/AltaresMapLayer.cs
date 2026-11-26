@@ -87,7 +87,7 @@ namespace AethonMod.Content.UI
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltaresMapLayer", exRegistro); }
 
             // ── EL PILAR (el mundo INTERIOR: su faro propio) ──
             try
@@ -107,7 +107,7 @@ namespace AethonMod.Content.UI
                             "Mods.AethonMod.Mapa.Pilar");
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltaresMapLayer", exRegistro); }
         }
     }
 }

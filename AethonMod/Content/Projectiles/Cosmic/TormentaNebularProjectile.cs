@@ -162,7 +162,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             point, new Vector2(0.3f, 1f), 3.5f, 6, 10, 0.25f,
                             "AethonNebularStorm"));
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TormentaNebularProjectile", exRegistro); }
             }
 
             // === EL DAÑO EN ÁREA del punto de impacto — v6.50 — GolpeMotor
@@ -175,7 +175,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if ((npc.Center - point).Length() > StrikeR) continue;
                 Content.Systems.GolpeMotor.Golpear(Projectile, npc, Projectile.damage, 2.5f, true);
                 if (Main.netMode != NetmodeID.MultiplayerClient)
-                    try { npc.AddBuff(BuffID.Electrified, 200); } catch { }
+                    try { npc.AddBuff(BuffID.Electrified, 200); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TormentaNebularProjectile", exRegistro); }
             }
         }
 

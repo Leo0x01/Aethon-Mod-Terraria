@@ -532,7 +532,7 @@ namespace AethonMod.Content.NPCs
         private static void Sonar(Terraria.Audio.SoundStyle estilo, Vector2 pos)
         {
             try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonSellado", exRegistro); }
         }
 
         // ════════════════════════════════════════════════════════════
@@ -636,7 +636,7 @@ namespace AethonMod.Content.NPCs
                         ojoTex.Size() * 0.5f, 0.55f, SpriteEffects.None, 0f);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonSellado", exRegistro); }
             return false;
         }
     }
@@ -761,7 +761,7 @@ namespace AethonMod.Content.NPCs
                 sb.Draw(tex, pos, null, Color.White, rot,
                     tex.Size() * 0.5f, escGen, SpriteEffects.None, 0f);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonSellado", exRegistro); }
             return false;
         }
 

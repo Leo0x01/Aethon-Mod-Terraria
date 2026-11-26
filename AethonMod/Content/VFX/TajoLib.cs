@@ -196,7 +196,7 @@ namespace AethonMod.Content.VFX
                     RayoStrip.CerrarLote();
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TajoLib", exRegistro); }
         }
 
         /// <summary>
@@ -318,7 +318,7 @@ namespace AethonMod.Content.VFX
                     RayoStrip.CerrarLote();
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TajoLib", exRegistro); }
         }
 
         /// <summary>

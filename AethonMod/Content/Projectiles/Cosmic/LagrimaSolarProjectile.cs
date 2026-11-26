@@ -214,7 +214,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 {
                     OndaLib.Flash(PyraPalettes.Sample(PyraPalettes.SolarFire, 1f), 0.16f, 6, Projectile.Center);
                     try { Terraria.Audio.SoundEngine.PlaySound(SoundID.Item20.WithPitchOffset(0.4f), Projectile.Center); }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LagrimaSolarProjectile", exRegistro); }
                     PyraLib.Sparks(Projectile.Center, Vector2.Zero, 4, PyraPalettes.SolarFire,
                         Seed + 31, out ParticleData[] motas);
                     if (motas != null)
@@ -280,7 +280,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (Main.netMode != NetmodeID.MultiplayerClient)
                 {
                     // El metal fundido se pega: quemadura cósmica 7 s (el debuff de la casa).
-                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), QuemaduraTicks); } catch { }
+                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), QuemaduraTicks); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LagrimaSolarProjectile", exRegistro); }
 
                     _golpes++;
                     if (_golpes >= MaxGolpes)
@@ -321,7 +321,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 4f, true);
                     // La quemadura del área: server/SP (autoridad del debuff).
                     if (Main.netMode != NetmodeID.MultiplayerClient)
-                        try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), QuemaduraTicks); } catch { }
+                        try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), QuemaduraTicks); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LagrimaSolarProjectile", exRegistro); }
                 }
             }
 
@@ -330,7 +330,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 OndaLib.Kick(1.6f, 8);
                 OndaLib.Flash(PyraPalettes.Sample(PyraPalettes.SolarFire, 0.9f), 0.20f, 7, Projectile.Center);
                 try { Terraria.Audio.SoundEngine.PlaySound(SoundID.Item14.WithPitchOffset(-0.25f), Projectile.Center); }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LagrimaSolarProjectile", exRegistro); }
                 PyraLib.Sparks(Projectile.Center, Vector2.Zero, 12, PyraPalettes.SolarFire,
                     Seed + 99, out ParticleData[] motas);
                 if (motas != null)

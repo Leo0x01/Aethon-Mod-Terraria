@@ -201,7 +201,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (Main.netMode != NetmodeID.Server)
                 {
                     try { Terraria.Audio.SoundEngine.PlaySound(SoundID.Item9.WithPitchOffset(-0.55f), Projectile.Center); }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ColapsoMagnetarProjectile", exRegistro); }
                     OndaLib.Kick(1.6f, 6);
                     RiftLib.ChispasAnomalia(Projectile.Center, 8, Paleta, Seed + 77, out ParticleData[] motas);
                     Spawn(motas);
@@ -229,7 +229,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (Main.netMode != NetmodeID.Server)
                 {
                     try { Terraria.Audio.SoundEngine.PlaySound(SoundID.Item77.WithPitchOffset(-0.35f), Projectile.Center); }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ColapsoMagnetarProjectile", exRegistro); }
                 }
             }
         }
@@ -269,7 +269,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         SoundID.Item77.WithPitchOffset(MathHelper.Lerp(-0.35f, 0.30f, carga)),
                         Projectile.Center);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ColapsoMagnetarProjectile", exRegistro); }
             }
 
             if (carga >= 1f)
@@ -288,7 +288,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.Item62.WithPitchOffset(-0.45f), Projectile.Center);
                         Terraria.Audio.SoundEngine.PlaySound(SoundID.Item94.WithPitchOffset(0.35f + 0.3f * p), Projectile.Center);
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ColapsoMagnetarProjectile", exRegistro); }
                     // Sacudida 4+4·p + el destello de la sobre-exposición.
                     OndaLib.Kick(4f + 4f * p, 10);
                     OndaLib.Flash(ColorBlanco, 0.30f, 8, Projectile.Center);
@@ -325,7 +325,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (Main.netMode != NetmodeID.Server)
                 {
                     try { Terraria.Audio.SoundEngine.PlaySound(SoundID.Item94.WithPitchOffset(0.55f), Projectile.Center); }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ColapsoMagnetarProjectile", exRegistro); }
                     OndaLib.Flash(ColorVioleta, 0.16f, 6, Projectile.Center);
                 }
             }
@@ -376,7 +376,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.5f, true);
                 // El plasma del haz reaviva la quemadura (servidor).
                 if (Main.netMode != NetmodeID.MultiplayerClient)
-                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 240); } catch { }
+                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 240); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ColapsoMagnetarProjectile", exRegistro); }
             }
         }
 
@@ -413,7 +413,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, Projectile.knockBack * 2f, true);
                 // La reconexión magnética chamusca durante 20 s (servidor).
                 if (Main.netMode != NetmodeID.MultiplayerClient)
-                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), QuemaduraTicks); } catch { }
+                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), QuemaduraTicks); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ColapsoMagnetarProjectile", exRegistro); }
             }
         }
 
@@ -453,7 +453,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             // La superviviente agotada colapsa en un último destello.
             try { Terraria.Audio.SoundEngine.PlaySound(SoundID.Item12.WithPitchOffset(-0.2f), Projectile.Center); }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ColapsoMagnetarProjectile", exRegistro); }
             OndaLib.Flash(ColorVioleta, 0.20f, 6, Projectile.Center);
             OndaLib.Kick(2.2f, 6);
             RiftLib.ChispasAnomalia(Projectile.Center, 14, Paleta, Seed + 99, out ParticleData[] motas);

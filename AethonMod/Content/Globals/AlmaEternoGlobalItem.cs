@@ -130,7 +130,7 @@ namespace AethonMod.Content.Globals
                     if (sl != null) _nivelLibroCap = sl.Level;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AlmaEternoGlobalItem", exRegistro); }
             return SombrasCap;
         }
 
@@ -442,7 +442,7 @@ namespace AethonMod.Content.Globals
                 item.SetNameOverride(nombreBase + " (" +
                     global::AethonMod.Content.Weapons.GrimoireEternal.NombreEtiqueta(idx) + ")");
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AlmaEternoGlobalItem", exRegistro); }
         }
 
         // ================================================================
@@ -473,7 +473,7 @@ namespace AethonMod.Content.Globals
                     PuebloChismesNPC.LaBurlaDelEterno();
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AlmaEternoGlobalItem", exRegistro); }
             return false;
         }
 
@@ -602,7 +602,7 @@ namespace AethonMod.Content.Globals
                 if (dist < 36f || item.Hitbox.Intersects(cercano.Hitbox))
                     DevolverAlInventario(cercano, item);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AlmaEternoGlobalItem", exRegistro); }
         }
 
         /// <summary>LA VUELTA A CASA: el libro ENTRA al inventario del
@@ -716,7 +716,7 @@ namespace AethonMod.Content.Globals
                 catch { VFXCore.CerrarLoteSiAbierto(); }
                 VFXCore.ReabrirLoteVanilla();
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AlmaEternoGlobalItem", exRegistro); }
             return true;   // el sprite del libro lo dibuja vanilla
         }
 
@@ -914,7 +914,7 @@ namespace AethonMod.Content.Globals
                     tag["bancoItemsCobrado"] = listaC;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AlmaEternoGlobalItem", exRegistro); }
         }
 
         public override void LoadData(Item item, TagCompound tag)
@@ -1148,7 +1148,7 @@ namespace AethonMod.Content.Globals
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AlmaEternoGlobalItem", exRegistro); }
         }
     }
 
@@ -1201,7 +1201,7 @@ namespace AethonMod.Content.Globals
                         alma.SombrasGastadas = vivas;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AlmaEternoGlobalItem", exRegistro); }
         }
     }
 }

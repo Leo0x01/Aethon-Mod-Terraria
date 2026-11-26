@@ -316,7 +316,7 @@ namespace AethonMod.Content.UI
                         Main.DefaultSamplerState, DepthStencilState.None,
                         RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ArbolHabilidadesUI", exRegistro); }
 
                 // ============================================================
                 //  LA INTERACCIÓN (lección 2: el clic es DE LA VENTANA —

@@ -65,7 +65,7 @@ namespace AethonMod.Content.UI
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item74);
                 Systems.SubmundoGrimorio.Salir(yo);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PrismaInteriorUI", exRegistro); }
         }
 
         public static void ClicEnInvocar()
@@ -76,7 +76,7 @@ namespace AethonMod.Content.UI
                 if (yo == null || !yo.active || !_abierta) return;
                 InvocarLaLlamada(yo);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PrismaInteriorUI", exRegistro); }
         }
 
         public static void ClicEnSellado()
@@ -88,7 +88,7 @@ namespace AethonMod.Content.UI
                 if (!NPCs.AethonSellado.Invocar(yo))
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PrismaInteriorUI", exRegistro); }
         }
 
         public static void ClicEnLanzar(int nivel)
@@ -100,7 +100,7 @@ namespace AethonMod.Content.UI
                 nivel = Math.Max(1, Math.Min(10, nivel));
                 LanzarLaOleada(yo, nivel);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PrismaInteriorUI", exRegistro); }
         }
 
         public static void ClicEnJefe(int tipoJefe)
@@ -111,7 +111,7 @@ namespace AethonMod.Content.UI
                 if (yo == null || !yo.active || !_abierta) return;
                 InvocarJefeInterior(yo, tipoJefe);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PrismaInteriorUI", exRegistro); }
         }
 
         /// <summary>EL PRISMA SE ABRE (o se cierra).</summary>
@@ -138,7 +138,7 @@ namespace AethonMod.Content.UI
                     PilarDelLibro.NivelElegido = _nivelElegido;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PrismaInteriorUI", exRegistro); }
         }
 
         private static int _nivelElegido = 1;
@@ -165,7 +165,7 @@ namespace AethonMod.Content.UI
                     new Vector2(_tileX * 16f + 24f, _tileY * 16f + 8f));
                 if (dist > 280f) CerrarConElLibro();
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PrismaInteriorUI", exRegistro); }
         }
 
         private static void CerrarConElLibro()
@@ -190,7 +190,7 @@ namespace AethonMod.Content.UI
                 Systems.GrimorioFuriaSistema.Provocar(yo,
                     Math.Max(1, Math.Min(10, nivel)), natural: false);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PrismaInteriorUI", exRegistro); }
         }
 
         // ================================================================
@@ -203,18 +203,30 @@ namespace AethonMod.Content.UI
             try
             {
                 if (Main.netMode == NetmodeID.MultiplayerClient) return;
-                // ¿YA VIVE uno de la arena? (la arena es de UN duelista)
-                for (int i = 0; i < Main.maxNPCs; i++)
-                {
-                    NPC n = Main.npc[i];
-                    if (n == null || !n.active) continue;
-                    if (n.TryGetGlobalNPC<Globals.JefeInteriorGlobalNPC>(out var ji) && ji.EsInterior)
-                        return;
-                }
+                // v6.175 — SIN LÍMITE (la letra: «en el mundo interior no
+                // deben haber limites para la cantidad de jefes que se
+                // pueden invocar»): la ley de «la arena es de UN duelista»
+                // MUERE — cada clic del pilar invoca a SU jefe, vivan los
+                // que vivan. La arena es del CUERPO ENTERO del dios: tan
+                // grande como el hambre del portador.
 
                 var sp = yo.GetModPlayer<Players.ShardPlayer>();
                 int kills = sp != null ? sp.KillsInteriorDe(tipoJefe) : 0;
                 int nivelIA = Math.Min(10, 1 + kills);
+
+                // ============================================================
+                //  v6.175 — LA ASPIRADORA DEL DEVORADOR (la letra: «para ese
+                //  jefe exclusivamente desactiva la devoracion normal, en
+                //  cambio en el momento en el que sea invocado por segunda
+                //  vez se hace una animacion espacial… el grimorio del
+                //  eterno lo devora por completo al mismo tiempo, todas sus
+                //  secciones son separadas y devoradas como una
+                //  aspiradora»): el GUSANO invocado (EoW o el Destructor)
+                //  desde su SEGUNDA invocación no se pelea: el grimorio se
+                //  lo lleva ENTERO con el cine espacial.
+                // ============================================================
+                bool esGusano = tipoJefe == NPCID.EaterofWorldsHead || tipoJefe == NPCID.TheDestroyer;
+                int vecesInvocado = sp != null ? sp.MarcarInvocacionInterior(tipoJefe) : 1;
 
                 // v6.141 — EL ANCLA LEJOS (la letra: «en el mundo interior
                 // los jefes deben aparecer alejados del jugador»): 100
@@ -239,9 +251,20 @@ namespace AethonMod.Content.UI
                 {
                     Globals.JefeInteriorGlobalNPC.Sellar(Main.npc[idx], nivelIA);
                     Main.npc[idx].netUpdate = true;
+
+                    // LA SEGUNDA INVOCACIÓN DEL GUSANO: LA ASPIRADORA
+                    if (esGusano && vecesInvocado >= 2)
+                    {
+                        int p = Projectile.NewProjectile(yo.GetSource_FromThis(),
+                            Main.npc[idx].Center, Vector2.Zero,
+                            ModContent.ProjectileType
+                                <global::AethonMod.Content.Projectiles.Sombras.AspiradoraDevoradorProjectile>(),
+                            0, 0f, Main.myPlayer, idx, yo.whoAmI);
+                        if (p >= 0) Main.projectile[p].timeLeft = 420;
+                    }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PrismaInteriorUI", exRegistro); }
         }
 
         // ================================================================

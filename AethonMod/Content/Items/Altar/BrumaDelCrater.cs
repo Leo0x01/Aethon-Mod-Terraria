@@ -138,7 +138,7 @@ namespace AethonMod.Content.Items.Altar
                     d.noGravity = true;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BrumaDelCrater", exRegistro); }
             return false;   // SIN sprite: la bruma ES el ítem
         }
     }

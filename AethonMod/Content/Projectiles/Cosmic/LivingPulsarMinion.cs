@@ -179,7 +179,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         Content.Systems.GolpeMotor.Golpear(Projectile, npc, beamDamage, 1.5f, true);
                         // radiación de sincrotrón: ELECTRIFIED (la firma) — server/SP
                         if (Main.netMode != NetmodeID.MultiplayerClient)
-                            try { npc.AddBuff(BuffID.Electrified, 160); } catch { }
+                            try { npc.AddBuff(BuffID.Electrified, 160); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LivingPulsarMinion", exRegistro); }
                     }
                 }
             }

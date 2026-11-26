@@ -289,7 +289,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                         { MaxInstances = 1, Volume = 1f },
                         Projectile.Center);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("IraSerExteriorCeremonia", exRegistro); }
             }
 
             // === LA LUZ: la bruma blanca y morada ALUMBRA (violeta
@@ -370,7 +370,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     ojo.whoAmI * 1f,         // la boca: ESTE ojo
                     Projectile.whoAmI * 1f); // el ancla: ESTA ceremonia
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("IraSerExteriorCeremonia", exRegistro); }
         }
 
         /// <summary>EL DISPARO — EL HAZ DE LA IRA: la ceremonia muere y
@@ -612,10 +612,10 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     semilla + 57, time * 1.25f, puffsVientre,
                     alpha: 0.24f + 0.32f * prog + 0.12f * contraccion);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("IraSerExteriorCeremonia", exRegistro); }
             finally
             {
-                try { Main.spriteBatch.End(); } catch { }
+                try { Main.spriteBatch.End(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("IraSerExteriorCeremonia", exRegistro); }
                 VFXCore.CerrarLoteSiAbierto();
             }
 

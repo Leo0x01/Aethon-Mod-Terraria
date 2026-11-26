@@ -124,8 +124,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Content.Systems.GolpeMotor.Golpear(Projectile, npc, auraDamage, 1f, true);
                     if (Main.netMode != NetmodeID.MultiplayerClient)
                     {
-                        try { npc.AddBuff(BuffID.OnFire, 240); } catch { }   // v6.30: TODO SOL QUEMA — el plasma ultracaliente
-                        try { npc.AddBuff(BuffID.CursedInferno, 90); } catch { }
+                        try { npc.AddBuff(BuffID.OnFire, 240); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("NeutronStarProjectile", exRegistro); }   // v6.30: TODO SOL QUEMA — el plasma ultracaliente
+                        try { npc.AddBuff(BuffID.CursedInferno, 90); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("NeutronStarProjectile", exRegistro); }
                     }
                 }
             }
@@ -146,7 +146,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         if ((npc.Center - Projectile.Center).Length() > 100f) continue;
                         Content.Systems.GolpeMotor.Golpear(Projectile, npc, quakeDamage, 2f, true);
                         if (Main.netMode != NetmodeID.MultiplayerClient)
-                            try { npc.AddBuff(BuffID.OnFire, 240); } catch { }   // v6.30: TODO SOL QUEMA — el plasma ultracaliente
+                            try { npc.AddBuff(BuffID.OnFire, 240); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("NeutronStarProjectile", exRegistro); }   // v6.30: TODO SOL QUEMA — el plasma ultracaliente
                     }
                     if (Main.netMode != NetmodeID.Server)
                     {
@@ -231,7 +231,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     if ((npc.Center - Projectile.Center).Length() > 120f) continue;
                     Content.Systems.GolpeMotor.Golpear(Projectile, npc, burst, 2f, true);
                     if (Main.netMode != NetmodeID.MultiplayerClient)
-                        try { npc.AddBuff(BuffID.OnFire, 240); } catch { }   // v6.30: TODO SOL QUEMA — el plasma ultracaliente
+                        try { npc.AddBuff(BuffID.OnFire, 240); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("NeutronStarProjectile", exRegistro); }   // v6.30: TODO SOL QUEMA — el plasma ultracaliente
                 }
             }
 
@@ -261,7 +261,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Projectile.Center, new Vector2(1f, 0f), 5f, 10, 14, 0.4f,
                     "AethonNeutronStarDeath"));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("NeutronStarProjectile", exRegistro); }
 
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item70, Projectile.Center);
         }

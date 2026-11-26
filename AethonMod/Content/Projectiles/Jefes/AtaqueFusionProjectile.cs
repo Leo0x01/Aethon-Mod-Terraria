@@ -532,7 +532,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                                 }
                                 finally { HazLib.Cerrar(); }
                             }
-                            catch { }
+                            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AtaqueFusionProjectile", exRegistro); }
 
                             // (2) LOS BROCHES (las puntas del láser — el
                             //     corazón brillante de cada extremo).

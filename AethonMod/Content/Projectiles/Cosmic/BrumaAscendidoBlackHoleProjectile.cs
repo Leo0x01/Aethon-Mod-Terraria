@@ -194,7 +194,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             toCenter.Normalize();
                             npc.velocity += toCenter * 0.8f;
                         }
-                        try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 360); } catch { }
+                        try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 360); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BrumaAscendidoBlackHoleProjectile", exRegistro); }
                     }
                     // v6.50 — GolpeMotor (el cauce del motor: crítica real,
                     // varianza, on-hit y sync MP del propio motor).
@@ -389,7 +389,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Projectile.Center, new Vector2(1f, 0f), 8f, 10, 20, 0.45f,
                     "AethonBrumaAscendidoFinalBlast"));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BrumaAscendidoBlackHoleProjectile", exRegistro); }
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item88, Projectile.Center);
 
             // Presets — colapso gravitatorio de la Ascendida (cian + blanco

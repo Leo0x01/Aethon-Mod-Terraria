@@ -244,7 +244,7 @@ namespace AethonMod.Content.Systems
             _manada.Clear();
             _actoManada = -1;
             _actorActual = -1;
-            try { _lote?.Dispose(); } catch { }
+            try { _lote?.Dispose(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SeleccionGrimorioSistema", exRegistro); }
             _lote = null;
         }
 
@@ -253,7 +253,7 @@ namespace AethonMod.Content.Systems
         {
             orig(tamanoCache, tamanoCacheEscalado);
             try { Pintar(); }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SeleccionGrimorioSistema", exRegistro); }
         }
 
         // ================================================================
@@ -1290,7 +1290,7 @@ namespace AethonMod.Content.Systems
             {
                 // EL RESET DEL DISPOSITIVO: si el lote murió, se descarta y
                 // RENACE al próximo frame.
-                try { _lote.Dispose(); } catch { }
+                try { _lote.Dispose(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SeleccionGrimorioSistema", exRegistro); }
                 _lote = null;
                 return;
             }
@@ -1301,8 +1301,8 @@ namespace AethonMod.Content.Systems
                     DibujarElLibro(_lote, _manada[i]);
                 DibujarVelosDelSol(_lote);
             }
-            catch { }
-            try { _lote.End(); } catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SeleccionGrimorioSistema", exRegistro); }
+            try { _lote.End(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SeleccionGrimorioSistema", exRegistro); }
 
             // El lote ADITIVO (la brasa violeta + las chispas + los
             // virotes + los anillos rúnicos).
@@ -1314,7 +1314,7 @@ namespace AethonMod.Content.Systems
             }
             catch
             {
-                try { _lote.Dispose(); } catch { }
+                try { _lote.Dispose(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SeleccionGrimorioSistema", exRegistro); }
                 _lote = null;
                 return;
             }
@@ -1328,8 +1328,8 @@ namespace AethonMod.Content.Systems
                 if (actor != null && actor.Acto == ACTO_LUNA) DibujarAnillosRunicos(_lote,
                     PosicionDeLaLuna(), 20f, Main.GlobalTimeWrappedHourly, 0.55f, 1f);
             }
-            catch { }
-            try { _lote.End(); } catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SeleccionGrimorioSistema", exRegistro); }
+            try { _lote.End(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SeleccionGrimorioSistema", exRegistro); }
         }
 
         /// <summary>v6.51.3 — ¿Quién está actuando el sol o la luna ahora?

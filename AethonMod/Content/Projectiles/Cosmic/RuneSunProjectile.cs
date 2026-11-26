@@ -259,7 +259,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
             // MP-seguro: AddBuff corre en quien tenga autoridad sobre el NPC.
-            try { target.AddBuff(BuffID.OnFire, 600); } catch { }
+            try { target.AddBuff(BuffID.OnFire, 600); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RuneSunProjectile", exRegistro); }
         }
 
         public override bool PreDraw(ref Color lightColor)
@@ -393,7 +393,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Projectile.Center, new Vector2(1f, 0f), tier >= 20 ? 12f : 8f, 12, 18, 0.45f,
                     "AethonRuneSunNova"));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RuneSunProjectile", exRegistro); }
 
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item14, Projectile.Center);
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item45, Projectile.Center);

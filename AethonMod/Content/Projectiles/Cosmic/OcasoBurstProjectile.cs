@@ -149,7 +149,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     (int)(Projectile.damage * 0.5f), 2.5f, true);
                 // La electrificación de la cadena: server/SP (autoridad del debuff).
                 if (Main.netMode != NetmodeID.MultiplayerClient)
-                    try { npc.AddBuff(BuffID.Electrified, 150); } catch { }   // v6.30: la cadena ELECTRIFICA
+                    try { npc.AddBuff(BuffID.Electrified, 150); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OcasoBurstProjectile", exRegistro); }   // v6.30: la cadena ELECTRIFICA
                 cadenas++;
             }
 

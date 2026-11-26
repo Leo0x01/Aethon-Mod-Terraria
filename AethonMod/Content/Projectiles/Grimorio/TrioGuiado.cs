@@ -264,7 +264,7 @@ namespace AethonMod.Content.Projectiles.Grimorio
                 }
                 finally { VFXCore.RestaurarLoteVanilla(); }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TrioGuiado", exRegistro); }
             return false;
         }
     }

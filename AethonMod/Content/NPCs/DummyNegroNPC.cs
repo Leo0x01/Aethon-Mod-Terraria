@@ -291,7 +291,7 @@ namespace AethonMod.Content.NPCs
                     // v6.56.1 de la casa.)
                     VFXCore.RestaurarLoteVanilla();
                 }
-                catch { try { VFXCore.RestaurarLoteVanilla(); } catch { } }
+                catch { try { VFXCore.RestaurarLoteVanilla(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DummyNegroNPC", exRegistro); } }
 
                 // (2) EL MUÑECO — el sprite de la casa tal cual (ya
                 //     nació negro-violeta en la forja), bañado por la
@@ -316,7 +316,7 @@ namespace AethonMod.Content.NPCs
                 }
                 catch
                 {
-                    try { VFXCore.CerrarLoteSiAbierto(); } catch { }
+                    try { VFXCore.CerrarLoteSiAbierto(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DummyNegroNPC", exRegistro); }
                 }
             }
             catch

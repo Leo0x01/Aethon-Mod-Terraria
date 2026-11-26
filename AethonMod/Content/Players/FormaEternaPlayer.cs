@@ -148,7 +148,7 @@ namespace AethonMod.Content.Players
                 if (alma.FormasPartes >= PartesTotales && !alma.FormaEscupida)
                     ConvertirLaForma(libro, alma);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FormaEternaPlayer", exRegistro); }
         }
 
         /// <summary>v6.150 — LA CONVERSIÓN, EN EL LIBRO (la letra: «en el
@@ -178,7 +178,7 @@ namespace AethonMod.Content.Players
                     Content.Systems.DespertarGrimorioSistema.ManifestacionDeLaForma(Player);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FormaEternaPlayer", exRegistro); }
         }
 
         // ============ EL VESTIDO (cada frame mientras USA el libro) ============
@@ -305,7 +305,7 @@ namespace AethonMod.Content.Players
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FormaEternaPlayer", exRegistro); }
         }
 
         // ============ LA MIGRACIÓN (una sola vez) ============
@@ -331,7 +331,7 @@ namespace AethonMod.Content.Players
                 LegadoConvertida = false;
                 LegadoManifestacion = false;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FormaEternaPlayer", exRegistro); }
         }
 
         // ============ PERSISTENCIA (solo la migración pendiente) ============

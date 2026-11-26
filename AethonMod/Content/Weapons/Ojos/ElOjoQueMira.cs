@@ -104,7 +104,7 @@ namespace AethonMod.Content.Weapons.Ojos
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ElOjoQueMira", exRegistro); }
             return 0;
         }
 
@@ -657,7 +657,7 @@ namespace AethonMod.Content.Weapons.Ojos
                         vacio.DuenoVacio = dueno.whoAmI + 1;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ElOjoQueMira", exRegistro); }
         }
 
         /// <summary>MARCA a un PLAYER (PvP): el glifo + el fuego — el
@@ -671,7 +671,7 @@ namespace AethonMod.Content.Weapons.Ojos
                 target.AddBuff(ModContent.BuffType
                     <global::AethonMod.Content.Buffs.QuemaduraVacioExterior>(), 300, false, true);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ElOjoQueMira", exRegistro); }
         }
     }
 }

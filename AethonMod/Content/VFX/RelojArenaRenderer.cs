@@ -378,7 +378,7 @@ namespace AethonMod.Content.VFX
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RelojArenaRenderer", exRegistro); }
 
             Main.spriteBatch.End();
         }

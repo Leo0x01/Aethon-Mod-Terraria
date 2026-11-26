@@ -462,7 +462,7 @@ namespace AethonMod.Content.Effects
                             9100 + i * 13, t + i * 2.3f, alpha: 0.24f * a, quality: 0.5f);
                     }
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CieloInteriorEterno", exRegistro); }
                 finally { VFXCore.CerrarLoteSiAbierto(); }
 
                 // ============================================================
@@ -594,7 +594,7 @@ namespace AethonMod.Content.Effects
                             SamplerState.LinearClamp, DepthStencilState.None,
                             Main.Rasterizer, null, m);
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CieloInteriorEterno", exRegistro); }
                 }
             }
         }
@@ -739,7 +739,7 @@ namespace AethonMod.Content.Effects
                 _cielo = new CieloInteriorEterno();
                 SkyManager.Instance["AethonMod:CieloInteriorEterno"] = _cielo;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CieloInteriorEterno", exRegistro); }
             // LA BRUMA DEL ASTRO: el postfix de DrawSunAndMoon (la posición
             // EXACTA de vanilla — el mismo contrato de
             // AmbienteOleadaSistema.TintarAstros) abrazca el disco del
@@ -752,7 +752,7 @@ namespace AethonMod.Content.Effects
             CieloInteriorEterno.Descargado = true;
             Terraria.On_Main.DrawSunAndMoon -= BrumaDelSolInterior;
             try { _cielo?.Reset(); }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CieloInteriorEterno", exRegistro); }
             _cielo = null;
         }
 
@@ -760,9 +760,9 @@ namespace AethonMod.Content.Effects
         {
             if (Main.dedServ) return;
             try { SkyManager.Instance.Deactivate("AethonMod:CieloInteriorEterno"); }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CieloInteriorEterno", exRegistro); }
             try { _cielo?.Reset(); }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CieloInteriorEterno", exRegistro); }
         }
 
         /// <summary>
@@ -786,7 +786,7 @@ namespace AethonMod.Content.Effects
                          _cielo.AlfaInterno <= 0.02f)
                     SkyManager.Instance.Deactivate("AethonMod:CieloInteriorEterno");
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CieloInteriorEterno", exRegistro); }
         }
 
         /// <summary>
@@ -854,7 +854,7 @@ namespace AethonMod.Content.Effects
                 }
                 finally
                 {
-                    try { Main.spriteBatch.End(); } catch { }
+                    try { Main.spriteBatch.End(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CieloInteriorEterno", exRegistro); }
                     // devolver el estado que vanilla traía (abierto→abierto,
                     // con los parámetros del pase de fondo de vanilla)
                     if (loteEstabaAbierto)
@@ -863,10 +863,7 @@ namespace AethonMod.Content.Effects
                             null, Main.Transform);
                 }
             }
-            catch
-            {
-                // la armadura de siempre: el dibujo del cielo JAMÁS tumba el frame
-            }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CieloInteriorEterno", exRegistro); }
         }
     }
 }

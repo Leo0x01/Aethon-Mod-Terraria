@@ -145,7 +145,7 @@ namespace AethonMod.Content.Projectiles.Sombras
 
             // EL PLATO FANTASMA va en el LOTE VANILLA (ya reabierto — el
             // contrato de la casa: dibujar sprites NUNCA dentro del lote VFX)
-            try { DibujarElFantasma(); } catch { }
+            try { DibujarElFantasma(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BocadoDelSueloProjectile", exRegistro); }
             return false;
         }
 
@@ -308,7 +308,7 @@ namespace AethonMod.Content.Projectiles.Sombras
 
         private static void Sonar(Terraria.Audio.SoundStyle estilo, Vector2 pos)
         {
-            try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); } catch { }
+            try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BocadoDelSueloProjectile", exRegistro); }
         }
 
         /// <summary>El masticar del festín chico (el ciclo del grande, rápido).</summary>

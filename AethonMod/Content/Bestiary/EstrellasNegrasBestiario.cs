@@ -115,7 +115,7 @@ namespace AethonMod.Content.Bestiary
                             SpriteEffects.None, 0f);
                     }
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EstrellasNegrasBestiario", exRegistro); }
             }
         }
     }

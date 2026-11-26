@@ -164,7 +164,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
             catch
             {
                 // La puerta blindada: pase lo que pase, el frame sigue.
-                try { VFXCore.CerrarLoteSiAbierto(); } catch { }
+                try { VFXCore.CerrarLoteSiAbierto(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("HazSobreElMundoSistema", exRegistro); }
             }
             finally
             {
@@ -181,7 +181,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                             SamplerState.LinearClamp, DepthStencilState.None,
                             RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("HazSobreElMundoSistema", exRegistro); }
                 }
             }
             return true;

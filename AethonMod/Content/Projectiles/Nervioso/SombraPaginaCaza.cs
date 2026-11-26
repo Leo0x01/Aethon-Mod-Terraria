@@ -352,7 +352,7 @@ namespace AethonMod.Content.Projectiles.Nervioso
 
         private static void Sonar(Terraria.Audio.SoundStyle estilo, Vector2 pos)
         {
-            try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); } catch { }
+            try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SombraPaginaCaza", exRegistro); }
         }
     }
 }

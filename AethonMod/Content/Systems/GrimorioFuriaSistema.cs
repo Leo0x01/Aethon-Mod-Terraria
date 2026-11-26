@@ -596,7 +596,7 @@ namespace AethonMod.Content.Systems
                 int itemActual = Main.LocalPlayer.HeldItem.type;
                 if (_ultimoItemEnMano >= 0 && _ultimoItemEnMano != itemActual)
                 {
-                    try { AudioLib.SilenciarZona(); } catch { }
+                    try { AudioLib.SilenciarZona(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioFuriaSistema", exRegistro); }
                 }
                 _ultimoItemEnMano = itemActual;
             }
@@ -609,7 +609,7 @@ namespace AethonMod.Content.Systems
             // del ambiente queda VESTIDO y el mundo perdería SU día/SU
             // modo — aquí se devuelve. Camino limpio: OleadaNPC.PostAI;
             // esta es la red de seguridad de cada tick).
-            try { Globals.OleadaNPC.VigilarPrestamo(); } catch { }
+            try { Globals.OleadaNPC.VigilarPrestamo(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioFuriaSistema", exRegistro); }
             // v6.50.48 - LA EXTENSION DEL DEVORADOR corre siempre que haya
             // un pendiente (la fase puede cambiar debajo).
             try { ProcesarExtensionDevorador(); } catch { _pendCabeza = -1; }
@@ -623,7 +623,7 @@ namespace AethonMod.Content.Systems
             // noche, con sus cruces suaves) es COSA de AmbienteOleadaSistema
             // y el bioma no se apaga por nada: la BRUMA AMBIENTE sigue
             // respirando alrededor del portador mientras el festín viva.
-            try { BrumaAmbienteDelFestin(); } catch { }
+            try { BrumaAmbienteDelFestin(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioFuriaSistema", exRegistro); }
             try { Paso(); }
             catch { Terminar(); }
         }
@@ -780,7 +780,7 @@ namespace AethonMod.Content.Systems
                         }
                     }
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioFuriaSistema", exRegistro); }
                 return;
             }
 
@@ -995,7 +995,7 @@ namespace AethonMod.Content.Systems
                         Main.npc[idx].netUpdate = true; // MP: la comida camina
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioFuriaSistema", exRegistro); }
         }
 
         private static void FaseJefe(Player hambriento)
@@ -1194,7 +1194,7 @@ namespace AethonMod.Content.Systems
                     new Color(226, 64, 64), jefe.FullName, 15);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, jefe.Center);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioFuriaSistema", exRegistro); }
         }
 
         /// <summary>
@@ -1273,7 +1273,7 @@ namespace AethonMod.Content.Systems
                 EcoRed.AnunciarMundo("Mods.AethonMod.Furia.Purga",
                     new Color(150, 140, 148));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioFuriaSistema", exRegistro); }
         }
 
         // ==================================================================
@@ -1638,7 +1638,7 @@ namespace AethonMod.Content.Systems
                     new Color(137, 178, 212), raro.FullName, _oleadaActual);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Roar, raro.Center);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioFuriaSistema", exRegistro); }
         }
 
         // ==================================================================
@@ -1723,7 +1723,7 @@ namespace AethonMod.Content.Systems
                 if (ultimo != null && ultimo.active)
                     EcoRed.SincronizarHambre(ultimo); // no-op fuera del servidor
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioFuriaSistema", exRegistro); }
 
             _fase = Fase.Inactivo;
             _oleadasTotales = 0;
@@ -2067,19 +2067,19 @@ namespace AethonMod.Content.Systems
             // Reiniciar del aura ya son nulo-seguros, pero OnWorldUnload
             // corre en la cadena de descarga — el mismo blindaje que los
             // vecinos de abajo.
-            try { Terminar(); } catch { }
-            try { AuraLib.Reiniciar(); } catch { } // los emisores de partículas mueren con el mundo
+            try { Terminar(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioFuriaSistema", exRegistro); }
+            try { AuraLib.Reiniciar(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioFuriaSistema", exRegistro); } // los emisores de partículas mueren con el mundo
             // v6.49 — EL BARRENDERO COMPLETO (auditoría AUD-C): el núcleo
             // de VFX y el anti-coros de audio también mueren con el mundo.
-            try { VFXCore.Reiniciar(); } catch { }
-            try { AudioLib.Reiniciar(); } catch { }
+            try { VFXCore.Reiniciar(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioFuriaSistema", exRegistro); }
+            try { AudioLib.Reiniciar(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioFuriaSistema", exRegistro); }
             // v6.52.1 — LAS ALAS DE CÓDIGO: sus BasicEffect y su ruido
             // también mueren con el mundo (el patrón de la casa).
-            try { VFX.AlasAuroraLib.Reiniciar(); } catch { }
+            try { VFX.AlasAuroraLib.Reiniciar(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioFuriaSistema", exRegistro); }
             // v6.50.1 — FIX: el contador de la carnada era un ESTÁTICO que
             // sobrevivía al mundo (dato de mundo en campo de clase — la
             // deuda nº recurrente de las auditorías). Vuelve al default.
-            try { Items.CarnadaDelGrimorio.OleadasPreparadas = 3; } catch { }
+            try { Items.CarnadaDelGrimorio.OleadasPreparadas = 3; } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioFuriaSistema", exRegistro); }
         }
         public override void Unload()
         {

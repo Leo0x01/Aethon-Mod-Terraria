@@ -634,7 +634,7 @@ namespace AethonMod.Content.VFX
                     StormTaper.Flat, 0, 0, suavizar: false, crackle: false,
                     alphaPorNodo: alfaNodo, anchoPorNodo: anchoNodo);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayoLib", exRegistro); }
         }
 
         /// <summary>El ángulo entre dos rumbos (0..π).</summary>
@@ -808,7 +808,7 @@ namespace AethonMod.Content.VFX
                     r.Blanco, r.TieneDireccion ? (Vector2?)r.Direccion : null);
                 if (arbol.Count > 0) r.Arbol = arbol;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayoLib", exRegistro); }
         }
 
         public override void PostUpdateWorld()
@@ -954,7 +954,7 @@ namespace AethonMod.Content.VFX
                 }
                 finally { RayoStrip.CerrarLote(); }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayoLib", exRegistro); }
             finally
             {
                 VFXCore.CerrarLoteSiAbierto();

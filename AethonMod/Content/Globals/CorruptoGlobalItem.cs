@@ -116,7 +116,7 @@ namespace AethonMod.Content.Globals
                 if (item.healMana > 0) item.healMana *= 2;
                 if (item.buffType > 0 && item.buffTime > 0) item.buffTime *= 2;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CorruptoGlobalItem", exRegistro); }
 
             VestirLaRareza(item);
         }
@@ -135,7 +135,7 @@ namespace AethonMod.Content.Globals
                     <global::AethonMod.Content.Rarities.RarityCorrupta>();
                 if (item.rare != corrupta) item.rare = corrupta;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CorruptoGlobalItem", exRegistro); }
         }
 
         // === EL YUNQUE CERRADO («ya no puede tener etiquetas») ===
@@ -305,7 +305,7 @@ namespace AethonMod.Content.Globals
                 if (item.Name != vestido)
                     item.SetNameOverride(vestido);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CorruptoGlobalItem", exRegistro); }
         }
 
         // === LA ETIQUETA Y EL LORE (donde vivía el prefijo) ===
@@ -430,7 +430,7 @@ namespace AethonMod.Content.Globals
                     { OverrideColor = oro });
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CorruptoGlobalItem", exRegistro); }
         }
 
         // (v6.97 — EL NOMBRE CONSAGRADO degradado MURIÓ en la v6.104: los
@@ -472,7 +472,7 @@ namespace AethonMod.Content.Globals
                         glow.Size() * 0.5f, new Vector2(34f, 34f) / glow.Size(),
                         SpriteEffects.None, 0f);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CorruptoGlobalItem", exRegistro); }
         }
 
         // === v6.97 — EL AURA NEGRA DEL CONSAGRADO CAÍDO (la letra: «todo
@@ -525,7 +525,7 @@ namespace AethonMod.Content.Globals
                     d.noGravity = true;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CorruptoGlobalItem", exRegistro); }
             return true;
         }
     }

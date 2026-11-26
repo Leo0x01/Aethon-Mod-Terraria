@@ -245,7 +245,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     if (ageV <= 1f && Main.netMode != NetmodeID.Server)
                     {
                         try { Terraria.Audio.SoundEngine.PlaySound(SoundID.Item9.WithPitchOffset(-0.8f), _origin); }
-                        catch { }
+                        catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RealityTearProjectile", exRegistro); }
                     }
 
                     // EL TEMBLOR de cámara creciendo (2→4 px, sutil pero VIVO).
@@ -334,7 +334,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         if (Main.netMode != NetmodeID.Server)
                         {
                             try { Terraria.Audio.SoundEngine.PlaySound(SoundID.Item12.WithPitchOffset(0.3f), _origin); }
-                            catch { }
+                            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RealityTearProjectile", exRegistro); }
                             RiftLib.ChispasAnomalia(_origin, 8, Paleta, seed + 99, out ParticleData[] motas);
                             if (motas != null)
                                 for (int i = 0; i < motas.Length; i++)
@@ -363,7 +363,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, knockback, true);
                 // La herida electrifica lo que toca (la anomalía del desgarro) — server/SP.
                 if (Main.netMode != NetmodeID.MultiplayerClient)
-                    try { npc.AddBuff(BuffID.Electrified, 90); } catch { }
+                    try { npc.AddBuff(BuffID.Electrified, 90); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RealityTearProjectile", exRegistro); }
             }
         }
 

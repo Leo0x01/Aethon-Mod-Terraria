@@ -312,7 +312,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Projectile.Center, new Vector2(1f, 0f), 11f, 12, 18, 0.45f,
                     "AethonRedSupergiantNova"));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RedSupergiantProjectile", exRegistro); }
 
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item14, Projectile.Center);
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item45.WithPitchOffset(-0.25f), Projectile.Center);

@@ -150,7 +150,7 @@ namespace AethonMod.Content.Globals
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CosmicProjectileFX", exRegistro); }
 
             // === EXPLOSIÓN CÓSMICA al impactar (v5.3: duración CORTA) ===
             // Mismo fix que la estela: noGravity + fadeIn=0 + alpha alto + scale pequeño

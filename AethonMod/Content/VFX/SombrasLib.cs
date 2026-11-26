@@ -964,10 +964,10 @@ namespace AethonMod.Content.VFX
                 BrumaFX.BeginMass();
                 dibujar();
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SombrasLib", exRegistro); }
             finally
             {
-                try { Main.spriteBatch.End(); } catch { }
+                try { Main.spriteBatch.End(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SombrasLib", exRegistro); }
                 VFXCore.CerrarLoteSiAbierto();
             }
         }

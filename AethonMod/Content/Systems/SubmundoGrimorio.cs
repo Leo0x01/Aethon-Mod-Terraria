@@ -412,7 +412,7 @@ namespace AethonMod.Content.Systems
             // el mundo real, muere AQUÍ (el interior sirve SU PROPIO ciclo
             // eterno — las oleadas de afuera no persiguen al portador
             // adentro del cuerpo del dios).
-            try { GrimorioFuriaSistema.DetenerFestin(); } catch { }
+            try { GrimorioFuriaSistema.DetenerFestin(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
             _ticksCalma = 0;
             _ciclosFestin = 0;
             _tinteCedido = 0f;
@@ -456,7 +456,7 @@ namespace AethonMod.Content.Systems
                 Activo = true;
                 // v6.120 — LA MONEDA DE LA MÚSICA nace vírgen en cada
                 // visita (EscenaInteriorGrimorio: la banda suelta al azar).
-                try { EscenaInteriorGrimorio.AlEntrar(); } catch { }
+                try { EscenaInteriorGrimorio.AlEntrar(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
                 Main.rand = new UnifiedRandom((int)DateTime.Now.Ticks);
                 WorldGen.gen = true;
                 WorldGen.loadFailed = false;
@@ -482,7 +482,7 @@ namespace AethonMod.Content.Systems
 
                 // el mapa del interior: LIMPIO (el velo lo cubre — el
                 // interior no se cartografía como el mundo real).
-                try { Main.Map = new WorldMap((ushort)Ancho, (ushort)Alto); } catch { }
+                try { Main.Map = new WorldMap((ushort)Ancho, (ushort)Alto); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
                 // v6.117 — EL MINIMAPA NACE LIMPIO: la cola de secciones
                 // y las regiones de actualización del MUNDO REAL mueren
                 // AQUÍ (el IL: DrawToMap no clampea mapMaxX/mapMaxY —
@@ -500,7 +500,7 @@ namespace AethonMod.Content.Systems
                     while (Main.mapEnabled && Main.loadMapLock && paciencia++ < 6000)
                         Thread.Sleep(0);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
 
                 // el FileData falso del interior (el hook ya impide que se
                 // escriba; esto es para que el juego tenga ALGO coherente).
@@ -548,7 +548,7 @@ namespace AethonMod.Content.Systems
                         Main.LocalPlayer.fullRotation = 0f;
                         global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna.Tragado = false;
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
                     if (Main.myPlayer >= 0 && !Main.dedServ)
                     {
                         Main.NewText(Language.GetTextValue("Mods.AethonMod.Submundo.Bienvenida"),
@@ -561,7 +561,7 @@ namespace AethonMod.Content.Systems
             {
                 // la red de seguridad de la casa: si el interior no nace, se
                 // vuelve al mundo real POR DISCO — jamás en limbo.
-                try { LogModo("Entrar", e); } catch { }
+                try { LogModo("Entrar", e); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
                 VolverADiscoPorFallo();
             }
         }
@@ -573,7 +573,7 @@ namespace AethonMod.Content.Systems
             // v6.118 — EL FESTÍN MUERE CON EL CUERPO: las oleadas del
             // interior NO persiguen al portador al mundo real (la furia
             // del libro se queda en su casa — afuera manda SU reloj).
-            try { GrimorioFuriaSistema.DetenerFestin(); } catch { }
+            try { GrimorioFuriaSistema.DetenerFestin(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
             _ticksCalma = 0;
             _ciclosFestin = 0;
             _tinteCedido = 0f;
@@ -631,11 +631,11 @@ namespace AethonMod.Content.Systems
                         // disco POR UN MAPA. Renace del tamaño correcto
                         // y LUEGO carga; y si aun así el archivo viene
                         // roto: mapa limpio y a jugar (nada de crash).
-                        try { Main.Map = new WorldMap((ushort)Main.maxTilesX, (ushort)Main.maxTilesY); } catch { }
+                        try { Main.Map = new WorldMap((ushort)Main.maxTilesX, (ushort)Main.maxTilesY); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
                         try { Main.Map.Load(); }
                         catch
                         {
-                            try { Main.Map = new WorldMap((ushort)Main.maxTilesX, (ushort)Main.maxTilesY); } catch { }
+                            try { Main.Map = new WorldMap((ushort)Main.maxTilesX, (ushort)Main.maxTilesY); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
                         }
                     }
                     // v6.117 — el minimapa también nace limpio AL VOLVER
@@ -655,7 +655,7 @@ namespace AethonMod.Content.Systems
                         while (Main.mapEnabled && Main.loadMapLock && paciencia++ < 6000)
                             Thread.Sleep(0);
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
                 }
 
                 Main.QueueMainThreadAction(delegate
@@ -679,7 +679,7 @@ namespace AethonMod.Content.Systems
                         Main.LocalPlayer.fullRotation = 0f;
                         global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna.Tragado = false;
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
                     // la vuelta cae AL LADO DEL ALTAR por donde entró —
                     // el libro te devuelve donde te abrió.
                     try
@@ -687,7 +687,7 @@ namespace AethonMod.Content.Systems
                         Main.LocalPlayer.Center = _posRetorno;
                         Main.LocalPlayer.velocity = Vector2.Zero;
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
                     if (Main.myPlayer >= 0 && !Main.dedServ)
                     {
                         Main.NewText(Language.GetTextValue("Mods.AethonMod.Submundo.Despedida"),
@@ -697,7 +697,7 @@ namespace AethonMod.Content.Systems
             }
             catch (Exception e)
             {
-                try { LogModo("Salir", e); } catch { }
+                try { LogModo("Salir", e); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
                 VolverADiscoPorFallo();
             }
         }
@@ -728,7 +728,7 @@ namespace AethonMod.Content.Systems
                 Main.refreshMap = true;                    // todas las secciones se repintan
                 Main.clearMap = true;                      // los render targets se barren
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
         }
 
         /// <summary>
@@ -787,7 +787,7 @@ namespace AethonMod.Content.Systems
                 // EL MAPA ESTÁ ROTO: renace limpio en las dimensiones
                 // del mundo actual (la exploración se rehace caminando;
                 // un crash fatal jamás)
-                try { Main.Map = new WorldMap((ushort)Main.maxTilesX, (ushort)Main.maxTilesY); } catch { }
+                try { Main.Map = new WorldMap((ushort)Main.maxTilesX, (ushort)Main.maxTilesY); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
                 ReiniciarMiniMapa();
                 if (!_mapaBlindado)
                 {
@@ -798,7 +798,7 @@ namespace AethonMod.Content.Systems
                             "[SubmundoGrimorio/BlindarMapa] el mapa sobreviviente era más chico " +
                             "que el mundo — renació limpio (la cura del crash del client.log v6.121)");
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
                 }
             }
         }
@@ -833,7 +833,7 @@ namespace AethonMod.Content.Systems
                     .GetMethod("Load", BindingFlags.NonPublic | BindingFlags.Static);
                 carga?.Invoke(null, new object[] { ruta, flag });
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
             if (status != 0)
             {
                 WorldGen.loadFailed = true;
@@ -862,7 +862,7 @@ namespace AethonMod.Content.Systems
             // que el intento murió y que la puerta puede volver a
             // abrirse (Transicion ya está libre y el juego responde:
             // ToggleGameplayUpdates(true) ANTES de soltar el mundo).
-            try { Main.ToggleGameplayUpdates(true); } catch { }
+            try { Main.ToggleGameplayUpdates(true); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
             try
             {
                 Main.QueueMainThreadAction(delegate
@@ -873,10 +873,10 @@ namespace AethonMod.Content.Systems
                             "Mods.AethonMod.Submundo.FalloPuerta"),
                             new Color(255, 120, 120));
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
                 });
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
             try
             {
                 if (_mundoPrincipal != null)
@@ -884,7 +884,7 @@ namespace AethonMod.Content.Systems
                 Main.menuMode = 0;
                 Main.gameMenu = true;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
         }
 
         private static void LogModo(string donde, Exception e)
@@ -894,7 +894,7 @@ namespace AethonMod.Content.Systems
                 ModContent.GetInstance<SubmundoGrimorio>().Mod.Logger
                     .Error($"[SubmundoGrimorio/{donde}] {e.Message}\n{e.StackTrace}");
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
         }
 
         // ==================================================================
@@ -977,9 +977,9 @@ namespace AethonMod.Content.Systems
                     }
                     Main.updateMap = true;
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
 
             // ==============================================================
             //  (3) LOS RESPIRADEROS — las cinco bocas del llano (la
@@ -1098,7 +1098,7 @@ namespace AethonMod.Content.Systems
                     _solPuesto = true;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
         }
 
         /// <summary>El sol de siempre vuelve a su ranura (idempotente).</summary>
@@ -1109,7 +1109,7 @@ namespace AethonMod.Content.Systems
             {
                 if (_solOriginal != null) TextureAssets.Sun = _solOriginal;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
             _solPuesto = false;
             _solOriginal = null;
         }
@@ -1179,7 +1179,7 @@ namespace AethonMod.Content.Systems
                                 var sp = hambriento.GetModPlayer<Players.ShardPlayer>();
                                 if (sp != null) nivel = Math.Max(2, Math.Min(10, sp.FuriaNivel));
                             }
-                            catch { }
+                            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
                             GrimorioFuriaSistema.Provocar(hambriento, nivel, natural: false);
                             _ciclosFestin++;
                             _ticksCalma = 0;
@@ -1266,7 +1266,7 @@ namespace AethonMod.Content.Systems
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
         }
 
         /// <summary>
@@ -1303,7 +1303,7 @@ namespace AethonMod.Content.Systems
                 m.EnableComponent(global::AethonMod.Content.Particles.ComponentFlag.EmitLight);
                 global::AethonMod.Content.Particles.ParticleManager.Spawn(m);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
         }
 
         public override void OnWorldLoad()
@@ -1354,10 +1354,10 @@ namespace AethonMod.Content.Systems
                             "sobreviviente no calzaba con el mundo — renació " +
                             $"{Main.maxTilesX}×{Main.maxTilesY} (la cura del crash v6.138)");
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
         }
 
         public override void OnWorldUnload()
@@ -1377,7 +1377,7 @@ namespace AethonMod.Content.Systems
                         p.velocity = Vector2.Zero;
                     }
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
             }
             Activo = false;
             Transicion = false;
@@ -1410,7 +1410,7 @@ namespace AethonMod.Content.Systems
         public override void SaveWorldData(Terraria.ModLoader.IO.TagCompound tag)
         {
             try { tag["esenciasConsagradasAltar"] = EsenciasConsagradas; }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
         }
 
         public override void LoadWorldData(Terraria.ModLoader.IO.TagCompound tag)
@@ -1421,7 +1421,7 @@ namespace AethonMod.Content.Systems
                 var n = tag.Get<int>("esenciasConsagradasAltar");
                 if (n > 0) EsenciasConsagradas = n;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
         }
 
         // ==================================================================
@@ -1574,13 +1574,7 @@ namespace AethonMod.Content.Systems
                 BrumaFX.Cloud(new Vector2(w * 0.5f, h * 0.55f), h * 0.30f,
                     new Color(64, 42, 96), 6371, t * 0.8f, 3, alpha: 0.10f + 0.05f * latido);
             }
-            catch
-            {
-                // v6.117 — la armadura ya NO mata el velo por un frame
-                // raro (la sonda solo muere si LA TEXTURA falta): el
-                // lote de la capa queda intacto pase lo que pase (nunca
-                // lo abrimos) y su End() lo cierra limpio.
-            }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
             return true;
         }
 
@@ -1671,7 +1665,7 @@ namespace AethonMod.Content.Systems
                     Main.spriteBatch.End();
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
         }
 
         // ==================================================================
@@ -1779,7 +1773,7 @@ namespace AethonMod.Content.Systems
                     }
                     finally
                     {
-                        try { Main.spriteBatch.End(); } catch { }
+                        try { Main.spriteBatch.End(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
                     }
                 }
                 // v6.119 — LA SALIDA CERRADA (la cura del crash): el
@@ -1788,7 +1782,7 @@ namespace AethonMod.Content.Systems
                 // ajeno dejara un Begin vivo, la sonda lo caza aquí.
                 finally { VFXCore.CerrarLoteSiAbierto(); }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
         }
     }
 

@@ -197,7 +197,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             toCenter.Normalize();
                             npc.velocity += toCenter * 0.8f;
                         }
-                        try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 360); } catch { }
+                        try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 360); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OlvidoAscendidoBlackHoleProjectile", exRegistro); }
                     }
                     Content.Systems.GolpeMotor.Golpear(Projectile, npc, auraDamage, 0f, true);
                 }
@@ -392,7 +392,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Projectile.Center, new Vector2(1f, 0f), 8f, 12, 22, 0.5f,
                     "AethonOlvidoAscendidoFinalBlast"));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OlvidoAscendidoBlackHoleProjectile", exRegistro); }
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item88, Projectile.Center);
 
             // Presets — colapso gravitatorio del olvido (azul + blanco-frío)

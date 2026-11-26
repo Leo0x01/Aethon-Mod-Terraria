@@ -491,7 +491,7 @@ namespace AethonMod.Content.Weapons
                 //     del precio base: idempotente, sin acumulación.
                 Item.value = (int)(100000L * (1f + LaReforja[idxEtiqueta].Valor));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimoireEternal", exRegistro); }
         }
 
         // ================================================================
@@ -1172,7 +1172,7 @@ namespace AethonMod.Content.Weapons
                     break;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimoireEternal", exRegistro); }
 
             // === v6.50.108 — LA SEGUNDA VENTANA: en vista COMPLETA se
             //     ocultan las líneas vanilla básicas (el hueco lo llenan
@@ -1604,7 +1604,7 @@ namespace AethonMod.Content.Weapons
                             tooltips.Add(new TooltipLine(Mod, "WSombras",
                                 $"[c/96A8C8:Sombras de la página: {almaS.SombrasLibres}/{capS} — la primera nace con el libro · una por cada 20 despertares · una por cada 100 niveles del grimorio · el modo caza las reparte, el arma las concentra]"));
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimoireEternal", exRegistro); }
                     tooltips.Add(new TooltipLine(Mod, "WIra2",
                         "[c/78788C:(el escuadrón de 11, TODOS al máximo, cierra el círculo · daño 1000 + mágico + 50% invocación)]"));
                 }
@@ -1985,7 +1985,7 @@ namespace AethonMod.Content.Weapons
                             $"[c/C49CFF:  EL GRIMORIO DESPERTÓ DEL TODO — {Systems.DespertarGrimorio.NivelMax} de {Systems.DespertarGrimorio.NivelMax}]"));
                     }
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimoireEternal", exRegistro); }
 
                 // v6.97 — EL HAMBRE SE MUDÓ A LA VENTANA BÁSICA (la
                 //     letra: «de la ventana de progresion debemos mover el

@@ -666,7 +666,7 @@ namespace AethonMod.Content.Weapons
                                 SoundID.Item122.WithPitchOffset(-0.2f).WithVolumeScale(0.6f),
                                 player.Center);
                         }
-                        catch { }
+                        catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioHambrientoNervioso", exRegistro); }
                     }
                 }
             }
@@ -725,7 +725,7 @@ namespace AethonMod.Content.Weapons
                 Main.NewText("«" + Language.GetTextValue("Mods.AethonMod.Hambre.Nervioso." + clave) + "»",
                     color);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioHambrientoNervioso", exRegistro); }
         }
 
         /// <summary>v6.50.104 — LA DIETA POR LIBRO: cuánto hambre quita
@@ -850,7 +850,7 @@ namespace AethonMod.Content.Weapons
                             string.Format(Language.GetTextValue(
                                 "Mods.AethonMod.Hambre.Nervioso.Absorbe"), "+0,1%"));
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioHambrientoNervioso", exRegistro); }
                 }
             }
             else
@@ -880,7 +880,7 @@ namespace AethonMod.Content.Weapons
                         string.Format(Language.GetTextValue("Mods.AethonMod.Hambre.Nervioso.Absorbe"),
                             "−" + (quita * 100f).ToString("0.##")));
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioHambrientoNervioso", exRegistro); }
             }
         }
 
@@ -931,7 +931,7 @@ namespace AethonMod.Content.Weapons
                         sl.GrantXP(inv, xp);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioHambrientoNervioso", exRegistro); }
         }
 
         // =================================================================
@@ -996,7 +996,7 @@ namespace AethonMod.Content.Weapons
                             sl.Level, sl.XP, sl.XPForNextLevel()))
                         { OverrideColor = new Color(198, 160, 78) });
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioHambrientoNervioso", exRegistro); }
         }
     }
 }

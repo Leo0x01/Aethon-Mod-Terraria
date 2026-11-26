@@ -96,7 +96,7 @@ namespace AethonMod.Content.Globals
                 if (Main.rand.Next(1000) == 0)
                     Soltar(npc, tipoEsencia, 1 * mult);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EsenciaCorruptaDrops", exRegistro); }
         }
 
         /// <summary>EL DROP limpio: nace sobre el cuerpo y camina al cable.</summary>

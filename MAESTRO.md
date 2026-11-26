@@ -17,7 +17,7 @@
 | **Qué es** | Mod de contenido masivo para **Terraria** vía **tModLoader 2026.09.3.1** |
 | **Lenguaje** | C# (.NET 8, `net8.0`, LangVersion latest) |
 | **Repo** | `https://github.com/Leo0x01/Aethon-Mod-Terraria` (privado durante el desarrollo) |
-| **Versión actual** | **6.146** (vive en `AethonMod/build.txt`, línea `version = 6.144`) |
+| **Versión actual** | **6.175** (vive en `AethonMod/build.txt`, línea `version = 6.175`) |
 | **Última release** | [v6.146](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.146) — md5 `a5fa29117116c8d8c1e0dfad4991819d`, 19.400.025 B, 528 entradas |
 | **Licencia** | Propietaria — © 2026 Leo0x01. VER README §AVISO LEGAL. Nada de terceros. |
 | **Idiomas** | Código y comentarios en **español**; localización del juego en es-MX (primario), es-ES, en-US |
@@ -105,6 +105,8 @@ Detalles de cada paso:
 | R16 | **Persistir TODO script** (>10 líneas) en `mod/tools/` o `/home/z/my-project/scripts/` | Artefacto recuperable |
 | R17 | **Cero secretos en el repo**: el token de GitHub vive SOLO en `remote.origin.url` (nunca en un .md del repo) | Seguridad |
 | R18 | **Música/texturas/sonidos = generados por código de la casa** (numpy/PIL) | Cero derechos de terceros |
+| R19 | **NINGÚN «catch { }» vacío vuelve a nacer (v6.175)**: todo catch registra (`RegistroSistema.Fallo`) o devuelve. El silencio costó la v6.173 (botones muertos sin pista). El gate mide: `loop_retro_v6175.py` marca regresión si suben de 0 | El loop de retroalimentación |
+| R20 | **EL LOOP DE RETROALIMENTACIÓN corre antes de cada release** (`tools/loop_retro_v6175.py`): mide catches vacíos · azar en el dibujo · claves de loc · PNGs y COMPARA con la medición anterior | medir → comparar → arreglar |
 
 ### 1.4 Estilo del código
 
@@ -238,9 +240,10 @@ sobrevive). Al empezar cualquier sesión:
 # 1. ¿el entorno vive?
 ls /tmp/tml/start-tModLoader.sh 2>/dev/null || echo "TMP-TML-GONE"
 # 2. si murió → restaurar TODO con UN comando:
-bash /home/z/my-project/scripts/restaura_entorno_v6121.sh
-#    (extrae /home/z/my-project/sdk.tar.gz → /tmp/sdk · descarga tML 2026.09.3.1
-#     de GitHub releases → /tmp/tml · ~1-2 min)
+bash /home/z/my-project/scripts/restaura_entorno.sh
+#    (v6.175: recreado tras el recicle TOTAL del sandbox — descarga el
+#     SDK 8.0.404 de builds.dotnet.microsoft.com + el tML 2026.09.3.1
+#     de GitHub releases → /tmp · oráculo y enabled.json listos)
 # 3. pip install hjson   (el módulo se pierde también)
 ```
 

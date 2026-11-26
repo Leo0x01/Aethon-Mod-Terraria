@@ -163,7 +163,7 @@ namespace AethonMod.Content.Systems
                     EcoRed.HablarVarianteAlPortador(oyente, claveBase, 3, tinte);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EcoSistema", exRegistro); }
         }
 
         /// <summary>
@@ -288,7 +288,7 @@ namespace AethonMod.Content.Systems
                     type == ModContent.NPCType<Content.NPCs.AethonBossOscuro>() ||
                     type == ModContent.NPCType<Content.NPCs.AethonBossFusionado>()) return "Aethon";
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EcoSistema", exRegistro); }
             return "Desconocido"; // jefes del mod desconocidos: la voz genérica
         }
 
@@ -327,7 +327,7 @@ namespace AethonMod.Content.Systems
                     type == ModContent.NPCType<Content.NPCs.AethonBossFusionado>())
                     return new Color(196, 150, 255);   // la luz del grimorio mismo
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EcoSistema", exRegistro); }
             return new Color(245, 196, 81);                                   // el dorado del grimorio
         }
 
@@ -346,7 +346,7 @@ namespace AethonMod.Content.Systems
                     new Color(255, 122, 218),  // magenta raro
                     rugido: false, escala: 0.62f);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EcoSistema", exRegistro); }
         }
     }
 }

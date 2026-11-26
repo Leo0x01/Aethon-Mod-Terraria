@@ -51,7 +51,7 @@ namespace AethonMod.Content.DrawLayers
 
                 AuraLib.DibujarJugador(ref drawInfo, perfil, frontal: true);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AuraJugadorCapas", exRegistro); }
         }
 
         /// <summary>

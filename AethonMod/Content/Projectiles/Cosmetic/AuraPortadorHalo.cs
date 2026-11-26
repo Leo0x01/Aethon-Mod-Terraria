@@ -262,7 +262,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 if (AuraLib.DibujarJugadorAditivo(duenio, p))
                     AuraLib.ReabrirLoteVanilla();
             }
-            catch { try { AuraLib.ReabrirLoteVanilla(); } catch { } }
+            catch { try { AuraLib.ReabrirLoteVanilla(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AuraPortadorHalo", exRegistro); } }
 
             return false; // el halo SE dibuja solo (el vuelco fue el dibujo)
         }

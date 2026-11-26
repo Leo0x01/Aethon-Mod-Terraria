@@ -313,7 +313,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         _golpeNucleo[npc.whoAmI] = (int)_age;
                         Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmgNucleo, 3f, true);
                         if (Main.netMode != NetmodeID.MultiplayerClient)
-                            try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 240); } catch { }
+                            try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 240); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CometaErranteProjectile", exRegistro); }
                     }
                 }
 
@@ -343,7 +343,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (Vector2.DistanceSquared(npc.Center, Projectile.Center) > alcance * alcance) continue;
                 Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 5f, true);
                 if (Main.netMode != NetmodeID.MultiplayerClient)
-                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 300); } catch { }
+                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 300); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CometaErranteProjectile", exRegistro); }
             }
 
             if (Main.netMode != NetmodeID.Server)
@@ -351,7 +351,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 OndaLib.Kick(2.4f, 9);
                 OndaLib.Flash(ColorCian, 0.20f, 8, Projectile.Center);
                 try { Terraria.Audio.SoundEngine.PlaySound(SoundID.Item27.WithPitchOffset(-0.25f), Projectile.Center); }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CometaErranteProjectile", exRegistro); }
                 RiftLib.ChispasAnomalia(Projectile.Center, 18, PyraPalettes.ColdFire, Seed + 5, out ParticleData[] motas);
                 if (motas != null)
                     for (int i = 0; i < motas.Length; i++)

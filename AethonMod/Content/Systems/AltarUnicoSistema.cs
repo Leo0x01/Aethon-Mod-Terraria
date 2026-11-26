@@ -70,7 +70,7 @@ namespace AethonMod.Content.Systems
                         Main.Map.UpdateType(x, y);
                     }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltarUnicoSistema", exRegistro); }
         }
 
         public override void PostUpdateTime()
@@ -118,7 +118,7 @@ namespace AethonMod.Content.Systems
                         }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltarUnicoSistema", exRegistro); }
         }
 
         /// <summary>EL ALTAR ACTIVO MURIÓ (lo picaron): si queda otro
@@ -214,7 +214,7 @@ namespace AethonMod.Content.Systems
                 }
                 if (!coordsVivas) PromoverSiHaceFalta();
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltarUnicoSistema", exRegistro); }
         }
     }
 }

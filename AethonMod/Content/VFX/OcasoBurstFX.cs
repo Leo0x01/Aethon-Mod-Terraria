@@ -94,7 +94,7 @@ namespace AethonMod.Content.VFX
                         intensidad, d.Seed, time + i * 0.7f);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OcasoBurstFX", exRegistro); }
         }
 
         /// <summary>Vaciado en las descargas (recargas limpias).</summary>

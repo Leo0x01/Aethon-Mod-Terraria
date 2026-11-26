@@ -57,7 +57,7 @@ namespace AethonMod.Content.Globals
                     projectile.originalDamage = projectile.damage;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("MinionOriginalDamageGlobal", exRegistro); }
         }
     }
 }

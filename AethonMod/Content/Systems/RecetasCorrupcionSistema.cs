@@ -121,7 +121,7 @@ namespace AethonMod.Content.Systems
                 // v6.89 — Y VISTE SU RAREZA (el nombre negro en TODAS partes).
                 global::AethonMod.Content.Globals.CorruptoGlobalItem.VestirLaRareza(item);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RecetasCorrupcionSistema", exRegistro); }
         }
     }
 }

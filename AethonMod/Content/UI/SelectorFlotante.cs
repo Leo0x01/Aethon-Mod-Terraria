@@ -332,7 +332,7 @@ namespace AethonMod.Content.UI
                 }
                 if ((clicNuevo || clicDerNuevo) && !dentro) Cerrar();
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SelectorFlotante", exRegistro); }
             finally
             {
                 // LA EDAD AVANZA AL FINAL DEL PASE: en el frame de

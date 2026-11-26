@@ -209,7 +209,7 @@ namespace AethonMod.Content.Projectiles.Nervioso
                         if (d > magicoTotal) magicoTotal = d;
                     }
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SombraPaginaEterno", exRegistro); }
                 if (magicoTotal <= 0f && magico > 0f)
                     magicoTotal = magico * 10f;   // sin armas mágicas: el multiplicador como base
                 // LA FÓRMULA DE LA LETRA:
@@ -253,7 +253,7 @@ namespace AethonMod.Content.Projectiles.Nervioso
         public override void OnKill(int timeLeft)
         {
             try { DevolverLaSombra(); }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SombraPaginaEterno", exRegistro); }
         }
 
         public override bool PreDraw(ref Color lightColor)
@@ -315,7 +315,7 @@ namespace AethonMod.Content.Projectiles.Nervioso
 
         private static void Sonar(Terraria.Audio.SoundStyle estilo, Vector2 pos)
         {
-            try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); } catch { }
+            try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SombraPaginaEterno", exRegistro); }
         }
     }
 }

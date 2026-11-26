@@ -205,7 +205,7 @@ namespace AethonMod.Content.VFX
                     LineaDebug(sb, b + perp - pantalla, b - perp - pantalla, guia, 1f);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FormaLib", exRegistro); }
             finally { CerrarLoteDebug(habiaLote); }
         }
 
@@ -242,7 +242,7 @@ namespace AethonMod.Content.VFX
                     LineaDebug(sb, c + dir * radioInterno, c + dir * radioExterno, guia, 1f);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FormaLib", exRegistro); }
             finally { CerrarLoteDebug(habiaLote); }
         }
 
@@ -287,7 +287,7 @@ namespace AethonMod.Content.VFX
                     anterior = actual;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FormaLib", exRegistro); }
             finally { CerrarLoteDebug(habiaLote); }
         }
 

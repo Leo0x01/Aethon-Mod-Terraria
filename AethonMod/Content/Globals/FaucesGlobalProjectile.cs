@@ -50,7 +50,7 @@ namespace AethonMod.Content.Globals
                             -1, -1, null, projectile.whoAmI);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FaucesGlobalProjectile", exRegistro); }
         }
     }
 }

@@ -56,7 +56,7 @@ namespace AethonMod.Content.Buffs
                 global::AethonMod.Content.Systems.EscuadronUtil.Despedir(
                     ModContent.ProjectileType<global::AethonMod.Content.Projectiles.DagaEternaMinion>());
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DagaEternaBuff", exRegistro); }
             return true;   // y el buff se cancela (vanilla lo retira)
         }
     }

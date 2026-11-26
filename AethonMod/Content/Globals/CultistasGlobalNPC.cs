@@ -99,7 +99,7 @@ namespace AethonMod.Content.Globals
                     "Mods.AethonMod.Cultistas.Burla", 3,
                     new Color(178, 110, 236), rugido: true, escala: 0.60f);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CultistasGlobalNPC", exRegistro); }
         }
 
         // ================================================================
@@ -167,7 +167,7 @@ namespace AethonMod.Content.Globals
                 Systems.EcoRed.HablarAlPortador(p, "Mods.AethonMod.Cultistas.Devorado",
                     new Color(178, 110, 236), rugido: true, escala: 0.62f);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CultistasGlobalNPC", exRegistro); }
         }
 
         // ================================================================
@@ -195,7 +195,7 @@ namespace AethonMod.Content.Globals
                         prioridad: true);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CultistasGlobalNPC", exRegistro); }
         }
     }
 }

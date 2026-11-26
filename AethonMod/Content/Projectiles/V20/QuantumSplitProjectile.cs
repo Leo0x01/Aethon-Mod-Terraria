@@ -98,7 +98,7 @@ namespace AethonMod.Content.Projectiles.V20
                 Color lc = RainbowColor(Main.GameUpdateCount);
                 Lighting.AddLight(Projectile.Center, new Vector3(lc.R / 255f * 0.6f, lc.G / 255f * 0.6f, lc.B / 255f * 0.6f));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("QuantumSplitProjectile", exRegistro); }
         }
 
         private void SplitIntoThree()
@@ -149,7 +149,7 @@ namespace AethonMod.Content.Projectiles.V20
                     d.fadeIn = 0f;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("QuantumSplitProjectile", exRegistro); }
         }
 
         // Color arcoíris basado en GameUpdateCount
@@ -173,7 +173,7 @@ namespace AethonMod.Content.Projectiles.V20
                     d.fadeIn = 0f;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("QuantumSplitProjectile", exRegistro); }
         }
 
         public override void OnKill(int timeLeft)
@@ -190,7 +190,7 @@ namespace AethonMod.Content.Projectiles.V20
                     d.fadeIn = 0f;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("QuantumSplitProjectile", exRegistro); }
         }
 
         public override bool OnTileCollide(Vector2 oldVelocity)
@@ -205,7 +205,7 @@ namespace AethonMod.Content.Projectiles.V20
                 Projectile.position += Projectile.velocity;
                 Projectile.netUpdate = true;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("QuantumSplitProjectile", exRegistro); }
             return false;
         }
 
@@ -269,11 +269,11 @@ namespace AethonMod.Content.Projectiles.V20
                     new Color(255, 255, 255, 220),
                     0f, origin, 0.4f, SpriteEffects.None, 0f);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("QuantumSplitProjectile", exRegistro); }
             finally
             {
                 VFXCore.CerrarLoteSiAbierto();
-                try { AuraLib.ReabrirLoteVanilla(); } catch { } // restore del pase de entidades (v6.50.2)
+                try { AuraLib.ReabrirLoteVanilla(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("QuantumSplitProjectile", exRegistro); } // restore del pase de entidades (v6.50.2)
             }
             return false;
         }

@@ -129,7 +129,7 @@ namespace AethonMod.Content.VFX
                 Terraria.Audio.SoundEngine.PlaySound(
                     Elegir(familia, m).WithPitchOffset(p).WithVolumeScale(v), pos);
             }
-            catch { }   // a prueba de balas, como toda la casa
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AudioLib", exRegistro); }   // a prueba de balas, como toda la casa
         }
 
         /// <summary>

@@ -90,7 +90,7 @@ namespace AethonMod.Content.Projectiles.V20
 
                 Lighting.AddLight(Projectile.Center, new Vector3(0.7f, 0.2f, 0.9f));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PlasmaStormProjectile", exRegistro); }
         }
 
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
@@ -109,7 +109,7 @@ namespace AethonMod.Content.Projectiles.V20
                     d.fadeIn = 0f;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PlasmaStormProjectile", exRegistro); }
         }
 
         public override bool PreDraw(ref Color lightColor)
@@ -183,11 +183,11 @@ namespace AethonMod.Content.Projectiles.V20
                         SpriteEffects.None, 0f);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PlasmaStormProjectile", exRegistro); }
             finally
             {
                 VFXCore.CerrarLoteSiAbierto();
-                try { AuraLib.ReabrirLoteVanilla(); } catch { } // restore del pase de entidades (v6.50.2)
+                try { AuraLib.ReabrirLoteVanilla(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PlasmaStormProjectile", exRegistro); } // restore del pase de entidades (v6.50.2)
             }
             return false;
         }

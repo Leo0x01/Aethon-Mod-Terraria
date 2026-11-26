@@ -340,11 +340,11 @@ namespace AethonMod.Content.Projectiles.Grimorio
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PalabraCortadaProjectile", exRegistro); }
             // EL CIERRE DEL LOTE ADITIVO + la vuelta al lote del juego
             // (el patrón de la Grieta: End SIEMPRE, y Reabrir para que
             // el resto del frame dibuje normal).
-            try { Main.spriteBatch.End(); } catch { }
+            try { Main.spriteBatch.End(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PalabraCortadaProjectile", exRegistro); }
             VFXCore.ReabrirLoteVanilla();
             return false;
         }

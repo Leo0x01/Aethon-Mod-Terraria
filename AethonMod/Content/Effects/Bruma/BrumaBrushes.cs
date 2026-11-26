@@ -275,7 +275,7 @@ namespace AethonMod.Content.Effects.Bruma
                 foreach (Texture2D tex in moribundas)
                 {
                     try { tex.Dispose(); }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BrumaBrushes", exRegistro); }
                 }
             });
         }

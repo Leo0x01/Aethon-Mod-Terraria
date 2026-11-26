@@ -150,7 +150,7 @@ namespace AethonMod.Content.Systems
                     if (desperto) continue;   // un despertar por pulso (con calma)
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DespertarGrimorioSistema", exRegistro); }
         }
 
         // ================================================================
@@ -207,7 +207,7 @@ namespace AethonMod.Content.Systems
                         NetMessage.SendData(MessageID.SyncItem, -1, -1, null, idx);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DespertarGrimorioSistema", exRegistro); }
         }
 
         // ================================================================
@@ -248,7 +248,7 @@ namespace AethonMod.Content.Systems
                     if (idx >= 0 && Main.netMode == NetmodeID.Server)
                         NetMessage.SendData(MessageID.SyncItem, -1, -1, null, idx);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DespertarGrimorioSistema", exRegistro); }
             }
         }
 
@@ -665,7 +665,7 @@ namespace AethonMod.Content.Systems
                     if (alma != null) return alma;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DespertarGrimorioSistema", exRegistro); }
             return null;
         }
 
@@ -722,7 +722,7 @@ namespace AethonMod.Content.Systems
                     Main.NewText(Language.GetTextValue(
                         "Mods.AethonMod.Despertar.LibroEntregado"), new Color(196, 138, 255));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DespertarGrimorioSistema", exRegistro); }
         }
 
         // ================================================================
@@ -761,7 +761,7 @@ namespace AethonMod.Content.Systems
                     EcoRed.HablarAlPortador(p, clave, new Color(255, 170, 120));
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DespertarGrimorioSistema", exRegistro); }
         }
 
         /// <summary>¿PUEDE PASAR LA PUERTA de este peldaño? Si el nivel no
@@ -882,7 +882,7 @@ namespace AethonMod.Content.Systems
                     mp.netUpdate = true;   // que el ExtraAI camine YA
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DespertarGrimorioSistema", exRegistro); }
         }
 
         // ================================================================
@@ -929,7 +929,7 @@ namespace AethonMod.Content.Systems
                     sp.SyncAhoraDevoracion();
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DespertarGrimorioSistema", exRegistro); }
         }
 
         // ================================================================
@@ -1012,7 +1012,7 @@ namespace AethonMod.Content.Systems
                         }
                     }
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DespertarGrimorioSistema", exRegistro); }
 
                 // LA OFRENDA SE LA COME (el item muere en todas las pantallas).
                 if (ofrenda != null && !ofrenda.IsAir)
@@ -1136,7 +1136,7 @@ namespace AethonMod.Content.Systems
                             fe?.ConstruirParte(12);
                         }
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DespertarGrimorioSistema", exRegistro); }
                 }
 
                 // NIVEL 20 — LA PELÍCULA DE LA MASCOTA (una sola vez POR
@@ -1157,7 +1157,7 @@ namespace AethonMod.Content.Systems
                 // máquina — el paquete del festín lleva el despertar).
                 EcoRed.SincronizarDevoracion(p);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DespertarGrimorioSistema", exRegistro); }
         }
 
         /// <summary>v6.141 — LA MANIFESTACIÓN DE LA FORMA ETERNA (la
@@ -1274,7 +1274,7 @@ namespace AethonMod.Content.Systems
                         "Mods.AethonMod.Despertar.ManifestacionTexto",
                         new Color(255, 236, 190));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DespertarGrimorioSistema", exRegistro); }
         }
 
         /// <summary>La esquina inferior-derecha de la zona en píxeles (el
@@ -1391,7 +1391,7 @@ namespace AethonMod.Content.Systems
                 // EL FESTÍN CAMINA (stats nuevos a la máquina del portador).
                 EcoRed.SincronizarDevoracion(p);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DespertarGrimorioSistema", exRegistro); }
         }
 
         /// <summary>¿Es un ARMA? («un arma de cualquier tipo»): la única
@@ -1477,7 +1477,7 @@ namespace AethonMod.Content.Systems
                 // EL FESTÍN CAMINA.
                 EcoRed.SincronizarDevoracion(p);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DespertarGrimorioSistema", exRegistro); }
         }
 
         /// <summary>LA EXP DE UNA UNIDAD de material (la letra: mínimo 10;
@@ -1585,7 +1585,7 @@ namespace AethonMod.Content.Systems
                 EcoRed.HablarAlPortador(p, "Mods.AethonMod.Despertar.Escupidizo",
                     new Color(178, 110, 236), rugido: true, escala: 0.72f, prioridad: true);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DespertarGrimorioSistema", exRegistro); }
         }
 
         /// <summary>LA MASCOTA YA ESTÁ FUERA: la llama el cine al llegar
@@ -1613,7 +1613,7 @@ namespace AethonMod.Content.Systems
                 int buff = ModContent.BuffType<global::AethonMod.Content.Buffs.GrimorioMenorBuff>();
                 p.AddBuff(buff, 18000);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DespertarGrimorioSistema", exRegistro); }
         }
 
         // ================================================================

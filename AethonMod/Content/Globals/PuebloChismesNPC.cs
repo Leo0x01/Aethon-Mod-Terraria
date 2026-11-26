@@ -89,7 +89,7 @@ namespace AethonMod.Content.Globals
                     if (sello != null && sello.Corrompido) return true;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PuebloChismesNPC", exRegistro); }
             return false;
         }
 
@@ -136,7 +136,7 @@ namespace AethonMod.Content.Globals
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PuebloChismesNPC", exRegistro); }
         }
 
         public override void GetChat(NPC npc, ref string chat)

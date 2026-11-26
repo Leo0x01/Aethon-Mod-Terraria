@@ -89,7 +89,7 @@ namespace AethonMod.Content.Buffs
                 }
                 tip = texto;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AuraVacioBuff", exRegistro); }
         }
     }
 }

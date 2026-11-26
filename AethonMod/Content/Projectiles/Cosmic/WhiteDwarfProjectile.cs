@@ -110,7 +110,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     if ((npc.Center - Projectile.Center).Length() > AuraRadius) continue;
                     Content.Systems.GolpeMotor.Golpear(Projectile, npc, auraDamage, 1f, true);
                     if (Main.netMode != NetmodeID.MultiplayerClient)
-                        try { npc.AddBuff(BuffID.OnFire, 240); } catch { }   // v6.30: TODO SOL QUEMA — el rescoldo cristalino
+                        try { npc.AddBuff(BuffID.OnFire, 240); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("WhiteDwarfProjectile", exRegistro); }   // v6.30: TODO SOL QUEMA — el rescoldo cristalino
                 }
             }
 
@@ -201,7 +201,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if ((npc.Center - Projectile.Center).Length() > 110f) continue;
                 Content.Systems.GolpeMotor.Golpear(Projectile, npc, burst, 1.5f, true);
                 if (Main.netMode != NetmodeID.MultiplayerClient)
-                    try { npc.AddBuff(BuffID.OnFire, 240); } catch { }   // v6.30: TODO SOL QUEMA — el rescoldo cristalino
+                    try { npc.AddBuff(BuffID.OnFire, 240); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("WhiteDwarfProjectile", exRegistro); }   // v6.30: TODO SOL QUEMA — el rescoldo cristalino
             }
 
             if (Main.netMode == NetmodeID.Server) return;

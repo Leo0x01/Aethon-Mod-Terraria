@@ -204,7 +204,7 @@ namespace AethonMod.Content.VFX
         {
             if (Main.netMode == NetmodeID.Server || Main.dedServ) return;
             try { RayoStrip.VolcarTriangulos(); }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("HazLib", exRegistro); }
             finally { RayoStrip.CerrarLote(); }
         }
 

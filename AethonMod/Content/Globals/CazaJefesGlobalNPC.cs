@@ -116,7 +116,7 @@ namespace AethonMod.Content.Globals
                         }
                     }
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CazaJefesGlobalNPC", exRegistro); }
 
                 // ============================================================
                 //  v6.86 — LA MURALLA SUELTA EL LIBRO (la letra del
@@ -152,7 +152,7 @@ namespace AethonMod.Content.Globals
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CazaJefesGlobalNPC", exRegistro); }
         }
 
         /// <summary>LA PUERTA QUE PAGA ESTE NPC (0 = ninguno de la

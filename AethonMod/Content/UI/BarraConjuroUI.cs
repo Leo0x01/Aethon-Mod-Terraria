@@ -103,7 +103,7 @@ namespace AethonMod.Content.UI
                     new Vector2(x + w / 2f, y + h / 2f),
                     destello ? Color.White : new Color(240, 234, 255), 0.95f, 0.5f, 0.4f);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BarraConjuroUI", exRegistro); }
         }
 
         private static void Marco(SpriteBatch sb, Texture2D pixel, Rectangle r, Color c)

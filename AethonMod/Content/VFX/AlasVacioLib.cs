@@ -82,7 +82,7 @@ namespace AethonMod.Content.VFX
             if (viejo == null) return;
             Main.QueueMainThreadAction(delegate
             {
-                try { viejo.Dispose(); } catch { }
+                try { viejo.Dispose(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AlasVacioLib", exRegistro); }
             });
         }
 
@@ -179,7 +179,7 @@ namespace AethonMod.Content.VFX
             }
             catch
             {
-                try { VFXCore.ReabrirLoteVanilla(); } catch { }
+                try { VFXCore.ReabrirLoteVanilla(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AlasVacioLib", exRegistro); }
                 return false;
             }
         }
@@ -432,7 +432,7 @@ namespace AethonMod.Content.VFX
             }
             catch
             {
-                try { VFXCore.ReabrirLoteVanilla(); } catch { }
+                try { VFXCore.ReabrirLoteVanilla(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AlasVacioLib", exRegistro); }
                 return false;
             }
         }

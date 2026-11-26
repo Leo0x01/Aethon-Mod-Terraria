@@ -136,7 +136,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         _chainTo[slot] = best.Center;
                         _chainLife[slot] = 9f;
 
-                        try { best.AddBuff(BuffID.Electrified, 180); } catch { }
+                        try { best.AddBuff(BuffID.Electrified, 180); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SinfoniaPrimordialProjectile", exRegistro); }
                     }
                 }
             }
@@ -228,7 +228,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if ((npc.Center - Projectile.Center).Length() > BurstR) continue;
                 Content.Systems.GolpeMotor.Golpear(Projectile, npc, Projectile.damage, 3.5f, true);
                 if (Main.netMode != NetmodeID.MultiplayerClient)
-                    try { npc.AddBuff(BuffID.Electrified, 240); } catch { }
+                    try { npc.AddBuff(BuffID.Electrified, 240); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SinfoniaPrimordialProjectile", exRegistro); }
             }
         }
 

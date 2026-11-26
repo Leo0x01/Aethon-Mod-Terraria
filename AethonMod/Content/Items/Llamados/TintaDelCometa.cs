@@ -107,7 +107,7 @@ namespace AethonMod.Content.Items.Llamados
                         break;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TintaDelCometa", exRegistro); }
         }
 
         // v6.50.126 — SIN RECETA: la tinta viaja en la Bolsa de la Cría

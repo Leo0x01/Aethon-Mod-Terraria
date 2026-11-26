@@ -104,7 +104,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Content.Systems.GolpeMotor.Golpear(Projectile, npc,
                         (int)(Projectile.damage * 0.7f), 1.5f, true);
                     if (Main.netMode != NetmodeID.MultiplayerClient)
-                        try { npc.AddBuff(BuffID.Electrified, 300); } catch { }
+                        try { npc.AddBuff(BuffID.Electrified, 300); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ArcoSobretensionProjectile", exRegistro); }
 
                     if (Main.netMode != NetmodeID.Server && !Main.dedServ)
                     {
@@ -126,7 +126,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         {
             // EL ZAPPED de vanilla (buff rojo 4-7 s — aquí Electrified, el
             // eléctrico del arsenal).
-            try { target.AddBuff(BuffID.Electrified, 300); } catch { }
+            try { target.AddBuff(BuffID.Electrified, 300); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ArcoSobretensionProjectile", exRegistro); }
         }
 
         // INVISIBLE: el canal lo dibuja el RayoSistema (PostDrawTiles).

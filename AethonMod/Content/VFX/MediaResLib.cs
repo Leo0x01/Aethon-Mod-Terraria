@@ -253,7 +253,7 @@ namespace AethonMod.Content.VFX
                 return;
 
             GraphicsDevice gd = null;
-            try { gd = Main.graphics?.GraphicsDevice; } catch { }
+            try { gd = Main.graphics?.GraphicsDevice; } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("MediaResLib", exRegistro); }
             if (gd == null)
                 return;
 
@@ -268,7 +268,7 @@ namespace AethonMod.Content.VFX
                     // El Dispose directo es seguro AQUÍ: Empezar corre en el
                     // hilo de dibujado (el hilo principal) — la lección v5.87
                     // solo prohíbe el Dispose desde el hilo de descarga.
-                    try { _rt?.Dispose(); } catch { }
+                    try { _rt?.Dispose(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("MediaResLib", exRegistro); }
                     _rt = new RenderTarget2D(gd, ancho, alto, false,
                         SurfaceFormat.Color, DepthFormat.None, 0,
                         RenderTargetUsage.DiscardContents);
@@ -347,7 +347,7 @@ namespace AethonMod.Content.VFX
             }
 
             GraphicsDevice gd = null;
-            try { gd = Main.graphics?.GraphicsDevice; } catch { }
+            try { gd = Main.graphics?.GraphicsDevice; } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("MediaResLib", exRegistro); }
 
             bool destinoRestaurado = false;
             try
@@ -529,7 +529,7 @@ namespace AethonMod.Content.VFX
         private static void SanarPaseColgado()
         {
             GraphicsDevice gd = null;
-            try { gd = Main.graphics?.GraphicsDevice; } catch { }
+            try { gd = Main.graphics?.GraphicsDevice; } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("MediaResLib", exRegistro); }
 
             // El lote del pase abandonado: End defensivo (sus draws pendientes
             // caen donde caigan — el daño de un pase abandonado ya está hecho;
@@ -582,19 +582,10 @@ namespace AethonMod.Content.VFX
                 Main.QueueMainThreadAction(() =>
                 {
                     try { target.Dispose(); }
-                    catch
-                    {
-                        // Defensivo: una excepción aquí subiría hasta
-                        // Main.Update() y rompería el bucle del juego.
-                    }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("MediaResLib", exRegistro); }
                 });
             }
-            catch
-            {
-                // Encolado imposible (apagado total del proceso): se abandona
-                // la referencia — el driver libera los recursos del proceso
-                // al terminar de todos modos.
-            }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("MediaResLib", exRegistro); }
         }
     }
 
@@ -619,10 +610,7 @@ namespace AethonMod.Content.VFX
         public override void Unload()
         {
             try { MediaResLib.Detach(); }
-            catch
-            {
-                // Programación defensiva: nunca romper la descarga.
-            }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("MediaResLib", exRegistro); }
         }
     }
 }

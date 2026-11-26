@@ -293,7 +293,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                 }
                 finally { HazLib.Cerrar(); }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("JefeHacesProjectiles", exRegistro); }
             return false;
         }
     }
@@ -410,7 +410,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                             { MaxInstances = 1, Volume = 0.9f, Pitch = -0.15f },
                             Projectile.Center);
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("JefeHacesProjectiles", exRegistro); }
                 }
                 // EL TEMBLOR SOSTENIDO (el modelo de trauma de la casa).
                 if (Tiempo > Carga && Tiempo < Carga + Laser)
@@ -592,7 +592,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                     finally { HazLib.Cerrar(); }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("JefeHacesProjectiles", exRegistro); }
             return false;
         }
     }
@@ -820,7 +820,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("JefeHacesProjectiles", exRegistro); }
             return false;
         }
     }
@@ -1090,7 +1090,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("JefeHacesProjectiles", exRegistro); }
             return false;
         }
     }
@@ -1214,7 +1214,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                             { MaxInstances = 1, Volume = 0.9f, Pitch = 0.05f },
                             Projectile.Center);
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("JefeHacesProjectiles", exRegistro); }
                 }
                 if (Tiempo > Carga && Tiempo < Carga + Laser)
                 {
@@ -1418,7 +1418,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("JefeHacesProjectiles", exRegistro); }
             return false;
         }
     }
@@ -1725,7 +1725,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                     finally { HazLib.Cerrar(); }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("JefeHacesProjectiles", exRegistro); }
             return false;
         }
 

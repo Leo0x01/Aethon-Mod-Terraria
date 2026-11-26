@@ -373,7 +373,7 @@ namespace AethonMod.Content.Systems
                         if (n != null && n.active && n.type == herederos[t]) return n;
                     }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonLlegadaSistema", exRegistro); }
             return null;
         }
 
@@ -394,7 +394,7 @@ namespace AethonMod.Content.Systems
                         if (n != null && n.active && n.type == herederos[t]) return true;
                     }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonLlegadaSistema", exRegistro); }
             return false;
         }
     }

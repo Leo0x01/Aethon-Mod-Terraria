@@ -428,6 +428,61 @@ namespace AethonMod.Content.Globals
         /// la lista se marca YA (un tipo, UNA cena) y el cine toma el
         /// mando (PreAI mueve, el proyectil dibuja).
         /// </summary>
+        // ================================================================
+        //  v6.175 — EL CONTEO DE SOMBRAS (la letra: «en ese momento cuenta
+        //  cuantas sombras de la pagina puede usar, y las usa todas
+        //  atrapando, paralizando al jefe… segun el nivel normal y el
+        //  nivel de despertar del jugador en ese momento, si no tiene
+        //  suficiente nivel que usa 1»): nivel del grimorio + nivel del
+        //  despertar → N = 1 + nivel/30 + despertar/20, tope 8, piso 1.
+        // ================================================================
+        public static int ContarSombras(Player portador)
+        {
+            try
+            {
+                if (portador == null || !portador.active) return 1;
+                int nivel = 0;
+                try
+                {
+                    var sp = portador.GetModPlayer<Players.ShardPlayer>();
+                    if (sp != null) nivel = Math.Max(0, sp.NivelGrimorioPublico);
+                }
+                catch { }
+                int despertar = 0;
+                try
+                {
+                    Item eterno = global::AethonMod.Content.Globals.AlmaEternoGlobalItem.Activo(portador);
+                    if (eterno != null && !eterno.IsAir)
+                    {
+                        var alma = eterno.GetGlobalItem<global::AethonMod.Content.Globals.AlmaEternoGlobalItem>();
+                        if (alma != null) despertar = Math.Max(0, alma.NivelDespertar);
+                    }
+                }
+                catch { }
+                int n = 1 + nivel / 30 + despertar / 20;
+                return Math.Max(1, Math.Min(8, n));
+            }
+            catch { return 1; }
+        }
+
+        /// <summary>v6.175 — ¿Es un GUSANO INVOCADO por el pilar? (la
+        /// letra del Devorador: «para ese jefe exclusivamente desactiva
+        /// la devoracion normal» — la devoración del gusano invocado es
+        /// SOLO la ASPIRADORA de la segunda invocación; su muerte normal
+        /// cae con loot SIN cine de festín).
+        public static bool EsGusanoInvocado(NPC npc)
+        {
+            try
+            {
+                if (npc == null || !npc.active) return false;
+                if (!EsSegmentoDeGusano(npc) &&
+                    npc.type != NPCID.EaterofWorldsHead && npc.type != NPCID.TheDestroyer)
+                    return false;
+                return npc.TryGetGlobalNPC<JefeInteriorGlobalNPC>(out var ji) && ji.EsInterior;
+            }
+            catch { return false; }
+        }
+
         public static void ArrancarPrimeraCena(NPC jefe, Player portador)
         {
             if (jefe == null || !jefe.active || portador == null) return;
@@ -463,7 +518,7 @@ namespace AethonMod.Content.Globals
                 if (sp != null && !sp.JefesDevorados.Contains(tipoCanonico))
                     sp.JefesDevorados.Add(tipoCanonico);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FaucesGlobalNPC", exRegistro); }
 
             g.DevorarEstado = ESTADO_PRIMERA_CENA;
             g.DevorarEstilo = 4;
@@ -478,6 +533,12 @@ namespace AethonMod.Content.Globals
             jefe.active = true;
             jefe.dontTakeDamage = true;
             jefe.damage = 0;
+            // v6.175 — INTANGIBLE E INTARGETEABLE «en todos los sentidos»
+            // (la letra): dontTakeDamage APAGA los golpes y la puntería
+            // (CanBeChasedBy lo respeta — los teledirigidos lo sueltan);
+            // chaseable=false cierra la puerta a los mínions; los cerrojos
+            // CanBeHitBy* de abajo sellan el resto.
+            jefe.chaseable = false;
             jefe.netUpdate = true;
 
             // LA PELÍCULA: el proyectil del cine (netImportant: viaja solo)
@@ -511,6 +572,12 @@ namespace AethonMod.Content.Globals
             //     el banco de pruebas renace con su vida restaurada y
             //     NUNCA se congela en la cine del festín) ===
             if (npc.type == ModContent.NPCType<global::AethonMod.Content.NPCs.DummyNegroNPC>())
+                return;
+
+            // v6.175 — EL GUSANO INVOCADO NO ENTRA AL FESTÍN (la letra
+            //     del Devorador: devoración normal desactivada para él —
+            //     su devour es SOLO la ASPIRADORA de la 2ª invocación)
+            if (EsGusanoInvocado(npc) || EsGusanoInvocado(DueñoDelPool(npc)))
                 return;
 
             NPC dueño = DueñoDelPool(npc);
@@ -599,6 +666,16 @@ namespace AethonMod.Content.Globals
             if (DevorarEstado == 0 && npc.life <= 0 &&
                 Main.netMode != NetmodeID.MultiplayerClient && EsJefe(npc))
             {
+                // v6.175 — EL GUSANO INVOCADO NO CENA (la letra del
+                //     Devorador: «para ese jefe exclusivamente desactiva
+                //     la devoracion normal»): su muerte cae NORMAL (loot,
+                //     banderas) — la devoración del gusano invocado es
+                //     SOLO la ASPIRADORA de la segunda invocación)
+                if (EsGusanoInvocado(npc))
+                {
+                    OleadaNPC.AislarJefeDeOleada(npc);
+                    return true;
+                }
                 NPC dueñoCena = DueñoDelPool(npc);
                 if (dueñoCena != null && dueñoCena.active &&
                     PrimeraCenaPendiente(dueñoCena, out Player portadorCena))
@@ -674,6 +751,22 @@ namespace AethonMod.Content.Globals
             return false;   // ← SU MUERTE ORIGINAL NUNCA ARRANCA
         }
 
+        // ==================================================================
+        //  v6.175 — LOS CERROJOS DE INTANGIBILIDAD (la letra: «haciendo
+        //  intangible e intargeteable en todos los sentidos»): mientras
+        //  el festín o la CENA viven, el preso NO recibe golpes de NADIE
+        //  (ítem, proyectil u otro NPC) — además del dontTakeDamage y el
+        //  chaseable=false que el motor ya viste.
+        // ==================================================================
+        public override bool? CanBeHitByProjectile(NPC npc, Projectile projectile)
+            => EnFauces(npc) ? (bool?)false : base.CanBeHitByProjectile(npc, projectile);
+
+        public override bool? CanBeHitByItem(NPC npc, Player player, Item item)
+            => EnFauces(npc) ? (bool?)false : base.CanBeHitByItem(npc, player, item);
+
+        public override bool CanBeHitByNPC(NPC npc, NPC attacker)
+            => !EnFauces(npc) && base.CanBeHitByNPC(npc, attacker);
+
         public override bool PreAI(NPC npc)
         {
             // === v6.50.117 — AUTOCURACIÓN DE LA CENA ACTIVA: una cena
@@ -710,6 +803,11 @@ namespace AethonMod.Content.Globals
             if (DevorarEstado == 0 && !npc.dontTakeDamage && npc.life > 0 &&
                 Main.netMode != NetmodeID.MultiplayerClient && EsJefe(npc))
             {
+                // v6.175 — EL GUSANO INVOCADO TAMPOCO CENA POR EL UMBRAL
+                //     (misma letra: devoración normal desactivada)
+                if (EsGusanoInvocado(npc)) { /* nada: la IA sigue */ }
+                else
+                {
                 NPC dueñoPool = DueñoDelPool(npc);
                 // v6.154 — EL GUSANO SE COME POR LA COLA (la letra:
                 // «el grimorio solo come la primera seccion, cuando
@@ -728,6 +826,7 @@ namespace AethonMod.Content.Globals
                 {
                     ArrancarPrimeraCena(dueñoPool, portador);
                 }
+                }   // fin del else del gusano invocado
             }
 
             // congelar TAMBIÉN a los segmentos de un worm devorado
@@ -881,7 +980,7 @@ namespace AethonMod.Content.Globals
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FaucesGlobalNPC", exRegistro); }
         }
 
         /// <summary>
@@ -934,7 +1033,7 @@ namespace AethonMod.Content.Globals
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FaucesGlobalNPC", exRegistro); }
         }
 
 
@@ -1251,7 +1350,7 @@ namespace AethonMod.Content.Globals
                 if (ParteDeJefeDevorado(npc) && npc.life <= 0)
                     npc.life = 1;   // sin gore, sin rejilla: el festín sigue
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FaucesGlobalNPC", exRegistro); }
         }
 
         /// <summary>
@@ -1349,7 +1448,7 @@ namespace AethonMod.Content.Globals
 
         private static void Sonar(Terraria.Audio.SoundStyle estilo, Vector2 pos)
         {
-            try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); } catch { }
+            try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FaucesGlobalNPC", exRegistro); }
         }
     }
 }

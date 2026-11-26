@@ -355,7 +355,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Projectile.Kill();
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CosmicShockwaveProjectile", exRegistro); }
         }
 
         // ================================================================

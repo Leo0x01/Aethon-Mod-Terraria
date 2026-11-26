@@ -234,7 +234,7 @@ namespace AethonMod.Content.VFX
                 Main.spriteBatch.Draw(tex, pos, null, falda, 0f, origen,
                     size * 1.6f / tex.Size(), SpriteEffects.None, 0f);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OndaSystem", exRegistro); }
             finally
             {
                 // v6.50.11 — SONDA + CURACIÓN: cierra lo nuestro sin
@@ -250,7 +250,7 @@ namespace AethonMod.Content.VFX
                             SamplerState.LinearClamp, DepthStencilState.None,
                             RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OndaSystem", exRegistro); }
                 }
             }
         }

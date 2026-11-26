@@ -225,7 +225,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.2f, true);
                     // ELECTRIFICADO: el debuff vanilla que castiga el movimiento.
                     if (Main.netMode != NetmodeID.MultiplayerClient)
-                        try { npc.AddBuff(BuffID.Electrified, 120); } catch { }
+                        try { npc.AddBuff(BuffID.Electrified, 120); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DesgarrosNuevosProjectiles2", exRegistro); }
                 }
             }
         }

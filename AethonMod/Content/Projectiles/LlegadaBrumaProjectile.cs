@@ -221,10 +221,10 @@ namespace AethonMod.Content.Projectiles
                             SombrasLib.HumoVioleta, semilla + 79, tiempo * 1.15f,
                             5, alpha: 0.55f * alfa);
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LlegadaBrumaProjectile", exRegistro); }
                     finally
                     {
-                        try { Main.spriteBatch.End(); } catch { }
+                        try { Main.spriteBatch.End(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LlegadaBrumaProjectile", exRegistro); }
                         VFXCore.CerrarLoteSiAbierto();
                     }
                 }

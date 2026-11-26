@@ -109,7 +109,7 @@ namespace AethonMod.Content.Items.Altar
                     "Mods.AethonMod.Despertar.LibroEnInventario",
                     new Color(178, 110, 236));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LibroCorrupto", exRegistro); }
             return true;
         }
 
@@ -118,7 +118,7 @@ namespace AethonMod.Content.Items.Altar
         public override void SaveData(Item item, TagCompound tag)
         {
             try { if (!string.IsNullOrEmpty(RecibidoPor)) tag["recibidoPor"] = RecibidoPor; }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LibroCorrupto", exRegistro); }
         }
 
         public override void LoadData(Item item, TagCompound tag)
@@ -175,7 +175,7 @@ namespace AethonMod.Content.Items.Altar
                 if (idx >= 0 && Main.netMode == NetmodeID.Server)
                     NetMessage.SendData(MessageID.SyncItem, -1, -1, null, idx);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LibroCorrupto", exRegistro); }
         }
 
         /// <summary>¿Este tile está en la MAZMORRA? (la letra dice «rompiendo

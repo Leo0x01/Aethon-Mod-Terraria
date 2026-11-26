@@ -140,7 +140,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             SoundID.Item4.WithPitchOffset(-0.5f + 0.7f * charge).WithVolumeScale(0.6f),
                             _origin);
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RencorPrimordialProjectile", exRegistro); }
                 }
 
                 // LAS ASCUAS orbitando el círculo (client — las motas visuales).
@@ -185,7 +185,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             Terraria.Audio.SoundEngine.PlaySound(
                                 SoundID.Item93.WithPitchOffset(0.30f).WithVolumeScale(0.7f), _origin);
                         }
-                        catch { }
+                        catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RencorPrimordialProjectile", exRegistro); }
                     }
 
                     // EL TILE DONDE MUERE EL HAZ (el hogar de brazos y ascuas).
@@ -211,7 +211,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         Terraria.Audio.SoundEngine.PlaySound(
                             SoundID.Item9.WithPitchOffset(0.25f).WithVolumeScale(0.30f), _origin);
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RencorPrimordialProjectile", exRegistro); }
                 }
 
                 // === LOS BRAZOS NACEN ESCALONADOS de la superficie ===
@@ -233,7 +233,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                                     SoundID.Item63.WithPitchOffset(-0.45f).WithVolumeScale(0.45f),
                                     _puntoTile);
                             }
-                            catch { }
+                            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RencorPrimordialProjectile", exRegistro); }
                         }
                     }
                     if (!_brazoNacido[b]) continue;
@@ -293,7 +293,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         Terraria.Audio.SoundEngine.PlaySound(
                             SoundID.Item4.WithPitchOffset(-0.8f).WithVolumeScale(0.5f), _origin);
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RencorPrimordialProjectile", exRegistro); }
                     // La última exhalación de bruma.
                     for (int i = 0; i < 10; i++)
                     {

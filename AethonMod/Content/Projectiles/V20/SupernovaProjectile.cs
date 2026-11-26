@@ -176,7 +176,7 @@ namespace AethonMod.Content.Projectiles.V20
                                 Projectile.Center, new Vector2(1f, 0f), rumble, 6, 8, 0.3f,
                                 "AethonSupernovaCharge"));
                         }
-                        catch { }
+                        catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SupernovaProjectile", exRegistro); }
                     }
                 }
 
@@ -187,7 +187,7 @@ namespace AethonMod.Content.Projectiles.V20
                 Lighting.AddLight(Projectile.Center,
                     new Vector3(1f, 0.85f - 0.05f * chargeEased, 0.55f - 0.1f * chargeEased) * lightIntensity);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SupernovaProjectile", exRegistro); }
         }
 
         // ================================================================
@@ -494,7 +494,7 @@ namespace AethonMod.Content.Projectiles.V20
                 // quemadura de la nova final acompaña a la de sus ondas).
                 target.AddBuff(BuffID.OnFire, 600);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SupernovaProjectile", exRegistro); }
         }
     }
 }

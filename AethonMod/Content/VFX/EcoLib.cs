@@ -176,7 +176,7 @@ namespace AethonMod.Content.VFX
                     _cola.Enqueue(eco);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EcoLib", exRegistro); }
         }
 
         /// <summary>
@@ -390,7 +390,7 @@ namespace AethonMod.Content.VFX
                 sb.DrawString(font, texto, centro,
                     eco.Tinte * alpha, 0f, origen, escalaFinal, SpriteEffects.None, 0f);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EcoLib", exRegistro); }
         }
 
         /// <summary>OnWorldUnload/Unload: la cola y la voz activa mueren con el mundo.</summary>

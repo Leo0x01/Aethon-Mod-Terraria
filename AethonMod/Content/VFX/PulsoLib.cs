@@ -61,7 +61,7 @@ namespace AethonMod.Content.VFX
                     Main.LocalPlayer.Center, dir, fuerzaPx, ticks, Math.Min(ticks, 12), 0.35f,
                     "AethonPulso"));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PulsoLib", exRegistro); }
         }
 
         // ------------------------------------------------------------------

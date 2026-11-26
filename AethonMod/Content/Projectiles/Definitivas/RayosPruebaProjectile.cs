@@ -513,7 +513,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     {
                         _cargaSlot = SoundEngine.PlaySound(carga, Projectile.Center);
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayosPruebaProjectile", exRegistro); }
                 }
 
                 if (Time > ChargeTime && Time < ChargeTime + LaserDuration)
@@ -731,7 +731,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 if (_cargaSlot.IsValid && SoundEngine.TryGetActiveSound(_cargaSlot, out ActiveSound sonidoActivo) && sonidoActivo != null)
                     sonidoActivo.Stop();
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayosPruebaProjectile", exRegistro); }
             _cargaSlot = default;
         }
 
@@ -1081,10 +1081,10 @@ namespace AethonMod.Content.Projectiles.Definitivas
                         }
                     }
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayosPruebaProjectile", exRegistro); }
                 finally
                 {
-                    try { Main.spriteBatch.End(); } catch { }
+                    try { Main.spriteBatch.End(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayosPruebaProjectile", exRegistro); }
                     VFXCore.CerrarLoteSiAbierto();
                 }
             }

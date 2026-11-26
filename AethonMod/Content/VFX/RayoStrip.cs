@@ -376,7 +376,7 @@ namespace AethonMod.Content.VFX
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayoStrip", exRegistro); }
             _nVertsT = 0;
         }
 
@@ -669,7 +669,7 @@ namespace AethonMod.Content.VFX
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayoStrip", exRegistro); }
             _nVerts = 0;
         }
 

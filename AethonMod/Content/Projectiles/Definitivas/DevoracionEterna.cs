@@ -369,7 +369,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     {
                         p.velocity = Vector2.Zero;
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DevoracionEterna", exRegistro); }
                     Tragado = true;            // la presa desaparece DENTRO
                     if (Main.netMode != 2)
                     {
@@ -485,7 +485,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     if (Main.myPlayer >= 0 && Main.player[Main.myPlayer] != null)
                         Main.player[Main.myPlayer].fullRotation = 0f;
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DevoracionEterna", exRegistro); }
             }
         }
 
@@ -506,7 +506,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 catch { VFXCore.CerrarLoteSiAbierto(); }
                 VFXCore.ReabrirLoteVanilla();
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DevoracionEterna", exRegistro); }
             return false;
         }
 
@@ -917,7 +917,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                         SombrasLib.OndaChoque(PosLibro, 40f + 260f * (t - _tTrago) / 10f, 0.55f * snap);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DevoracionEterna", exRegistro); }
             VFXCore.FlushAdditive();
         }
 

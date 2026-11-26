@@ -75,7 +75,7 @@ namespace AethonMod.Content.Systems
                         break;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardSyncSystem", exRegistro); }
         }
     }
 }

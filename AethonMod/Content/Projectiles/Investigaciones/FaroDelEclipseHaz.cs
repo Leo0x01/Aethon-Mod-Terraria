@@ -256,7 +256,7 @@ namespace AethonMod.Content.Projectiles.Investigaciones
                 }
                 finally { VFXCore.RestaurarLoteVanilla(); }
             }
-            catch { try { VFXCore.CerrarLoteSiAbierto(); } catch { } }
+            catch { try { VFXCore.CerrarLoteSiAbierto(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FaroDelEclipseHaz", exRegistro); } }
             return false;
         }
 

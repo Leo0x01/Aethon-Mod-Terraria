@@ -231,7 +231,7 @@ namespace AethonMod.Content.Systems
                         new Color(255, 222, 120) * alfaG, 0f, Vector2.Zero, 0.85f, SpriteEffects.None, 0f);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardHUDSystem", exRegistro); }
         }
 
         // ================================================================

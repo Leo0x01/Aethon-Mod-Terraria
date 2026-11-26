@@ -519,7 +519,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             }
             catch
             {
-                try { VFXCore.ReabrirLoteVanilla(); } catch { }
+                try { VFXCore.ReabrirLoteVanilla(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonMenorPet", exRegistro); }
                 return false;
             }
         }

@@ -104,7 +104,7 @@ namespace AethonMod.Content.Weapons.Sombras
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SombraDeLaPagina", exRegistro); }
 
             int idxP = Projectile.NewProjectile(source, player.MountedCenter, rumbo * 14f, type, damage, knockback,
                 player.whoAmI, presa != null ? presa.whoAmI + 1 : 0, 0);

@@ -106,7 +106,7 @@ namespace AethonMod.Content.Players
                 if (Player.wingTimeMax > 0 && Player.wingTimeMax < TiempoVuelo)
                     Player.wingTimeMax = TiempoVuelo;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AlasAuroraPlayer", exRegistro); }
         }
 
         /// <summary>¿Ya vive mi halo de alas? (el patrón Espiar de la casa).</summary>

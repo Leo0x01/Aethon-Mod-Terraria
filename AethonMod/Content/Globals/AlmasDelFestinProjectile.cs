@@ -90,7 +90,7 @@ namespace AethonMod.Content.Globals
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AlmasDelFestinProjectile", exRegistro); }
         }
     }
 }

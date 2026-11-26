@@ -103,7 +103,7 @@ namespace AethonMod.Content.VFX
                 else if (op.Sobrecalentado) DibujarLockout(spriteBatch, op, centro, radio, time, vis);
                 else DibujarCarga(spriteBatch, op, centro, radio, time, vis);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OcasoSystem", exRegistro); }
         }
 
         // ==================================================================

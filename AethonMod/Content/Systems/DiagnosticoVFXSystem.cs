@@ -183,7 +183,7 @@ namespace AethonMod.Content.Systems
                         tinte * 0.92f, 0f, Vector2.Zero, 0.85f, SpriteEffects.None, 0f);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DiagnosticoVFXSystem", exRegistro); }
         }
     }
 }

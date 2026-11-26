@@ -192,7 +192,7 @@ namespace AethonMod.Content.Items.Altar
                             pct, pctReal)));
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ItemCorrupto", exRegistro); }
         }
     }
 }

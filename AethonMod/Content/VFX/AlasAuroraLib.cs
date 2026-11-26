@@ -1627,7 +1627,7 @@ namespace AethonMod.Content.VFX
                                 Volcar(graphicsDevice, _fxTextura, nvC, textura: true);
                             }
                         }
-                        catch { }
+                        catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AlasAuroraLib", exRegistro); }
                     }
                     // ============================================================
                     //  v6.132 — EL PAR DE ALITAS (la letra: «le falta algo
@@ -1719,7 +1719,7 @@ namespace AethonMod.Content.VFX
                                 Volcar(graphicsDevice, _fxTextura, nv, textura: true);
                             }
                         }
-                        catch { }
+                        catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AlasAuroraLib", exRegistro); }
                     }
                 }
                 finally
@@ -1734,9 +1734,7 @@ namespace AethonMod.Content.VFX
                 {
                     VFXCore.ReabrirLoteVanilla();
                 }
-                catch
-                {
-                }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AlasAuroraLib", exRegistro); }
                 return false;
             }
         }
@@ -2092,9 +2090,7 @@ namespace AethonMod.Content.VFX
                 {
                     VFXCore.ReabrirLoteVanilla();
                 }
-                catch
-                {
-                }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AlasAuroraLib", exRegistro); }
                 return false;
             }
         }
@@ -2217,9 +2213,7 @@ namespace AethonMod.Content.VFX
                         ((GraphicsResource)obj).Dispose();
                     }
                 }
-                catch
-                {
-                }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AlasAuroraLib", exRegistro); }
                 try
                 {
                     BasicEffect obj3 = textura;
@@ -2228,9 +2222,7 @@ namespace AethonMod.Content.VFX
                         ((GraphicsResource)obj3).Dispose();
                     }
                 }
-                catch
-                {
-                }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AlasAuroraLib", exRegistro); }
             });
         }
     }

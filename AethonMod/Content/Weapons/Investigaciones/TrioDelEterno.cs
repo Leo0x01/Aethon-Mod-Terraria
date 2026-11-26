@@ -179,7 +179,7 @@ namespace AethonMod.Content.Weapons.Investigaciones
                         return it.ModItem as TrioDelEterno;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TrioDelEterno", exRegistro); }
             return null;
         }
 
@@ -212,7 +212,7 @@ namespace AethonMod.Content.Weapons.Investigaciones
             {
                 sello = it.GetGlobalItem<global::AethonMod.Content.Globals.CorruptoGlobalItem>().Corrompido;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TrioDelEterno", exRegistro); }
             if (!sello)
             {
                 razon = Language.GetTextValue("Mods.AethonMod.Items.TrioRequiereConsagrada");
@@ -333,7 +333,7 @@ namespace AethonMod.Content.Weapons.Investigaciones
                     player.itemAnimationMax = animMax;
                     player.itemTime = tiempo;
                     player.itemTimeMax = tiempoMax;
-                    try { UsosDeLaAnimacion?.SetValue(player, usos); } catch { }
+                    try { UsosDeLaAnimacion?.SetValue(player, usos); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TrioDelEterno", exRegistro); }
                     TrioGuiado.Capturando = false;
                 }
                 nacidos = Math.Max(TrioGuiado.Nacidos, ContarProyectiles(player.whoAmI) - antes);

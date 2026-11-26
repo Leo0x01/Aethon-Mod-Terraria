@@ -135,7 +135,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 {
                     float subida = -0.35f + 0.95f * (_age / CargaTicks);
                     try { Terraria.Audio.SoundEngine.PlaySound(SoundID.Item15.WithPitchOffset(subida), Projectile.Center); }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("VozCuasarProjectile", exRegistro); }
                 }
             }
             else
@@ -236,7 +236,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                 Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1f, true);
                 if (Main.netMode != NetmodeID.MultiplayerClient)
-                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 240); } catch { }
+                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 240); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("VozCuasarProjectile", exRegistro); }
             }
         }
 
@@ -247,7 +247,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // MUERE CON UN DESTELLO.
             OndaLib.Flash(ColorBlanco, 0.24f, 8, Projectile.Center);
             try { Terraria.Audio.SoundEngine.PlaySound(SoundID.Item12.WithPitchOffset(0.55f), Projectile.Center); }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("VozCuasarProjectile", exRegistro); }
             RiftLib.ChispasAnomalia(Projectile.Center, 14,
                 new Color[] { ColorBlanco, ColorCian, ColorAzul }, Seed + 4, out ParticleData[] motas);
             if (motas != null)

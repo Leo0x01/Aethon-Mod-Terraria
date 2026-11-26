@@ -77,7 +77,7 @@ namespace AethonMod.Content.Buffs
                     d.noGravity = true;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("QuemaduraVacioExterior", exRegistro); }
         }
 
         public override void Update(NPC npc, ref int buffIndex)

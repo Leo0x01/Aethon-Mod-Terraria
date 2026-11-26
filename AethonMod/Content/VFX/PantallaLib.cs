@@ -863,7 +863,7 @@ namespace AethonMod.Content.VFX
                             SamplerState.LinearClamp, DepthStencilState.None,
                             RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PantallaLib", exRegistro); }
                 }
             }
         }

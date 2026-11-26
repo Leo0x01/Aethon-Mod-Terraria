@@ -191,7 +191,7 @@ namespace AethonMod.Content.Weapons.Definitivas
                 }
                 finally { HazLib.Cerrar(); }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TajoDelVacio", exRegistro); }
             return false;
         }
 

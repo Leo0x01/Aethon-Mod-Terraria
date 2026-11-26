@@ -192,7 +192,7 @@ namespace AethonMod.Content.Systems
                         return;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EcoRed", exRegistro); }
         }
 
         /// <summary>
@@ -266,7 +266,7 @@ namespace AethonMod.Content.Systems
                         GrimorioFuriaSistema.RequeridosServidor, 255)));
                 });
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EcoRed", exRegistro); }
         }
 
         // ================================================================
@@ -305,7 +305,7 @@ namespace AethonMod.Content.Systems
                     p.Write(xpLibro);
                 });
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EcoRed", exRegistro); }
         }
 
         // ================================================================
@@ -357,7 +357,7 @@ namespace AethonMod.Content.Systems
                     }
                 });
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EcoRed", exRegistro); }
         }
 
         /// <summary>
@@ -393,7 +393,7 @@ namespace AethonMod.Content.Systems
                     p.Write(sp.ResonanceShards);
                 });
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EcoRed", exRegistro); }
         }
 
         // ================================================================
@@ -421,7 +421,7 @@ namespace AethonMod.Content.Systems
                     Main.NewText(Language.GetTextValue(clave, args), color);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EcoRed", exRegistro); }
         }
 
         /// <summary>
@@ -482,7 +482,7 @@ namespace AethonMod.Content.Systems
                     p.Write(portador.GetModPlayer<global::AethonMod.Content.Players.ShardPlayer>().EsenciasConsumidas);
                 });
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EcoRed", exRegistro); }
         }
 
         /// <summary>
@@ -506,7 +506,7 @@ namespace AethonMod.Content.Systems
                     Main.NewText(Language.GetTextValue(clave, args), color);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EcoRed", exRegistro); }
         }
 
         // ================================================================
@@ -906,7 +906,7 @@ namespace AethonMod.Content.Systems
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EcoRed", exRegistro); }
         }
 
         // ================================================================
@@ -928,7 +928,7 @@ namespace AethonMod.Content.Systems
                 p.Write(MsgPedirLibros);
                 p.Send();
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EcoRed", exRegistro); }
         }
 
         /// <summary>
@@ -950,7 +950,7 @@ namespace AethonMod.Content.Systems
                 p.Write((byte)System.Math.Max(1, System.Math.Min(oleadas, 11)));
                 p.Send();
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EcoRed", exRegistro); }
         }
 
         /// <summary>
@@ -970,7 +970,7 @@ namespace AethonMod.Content.Systems
                 p.Write(MsgTomarCaida);
                 p.Send();
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EcoRed", exRegistro); }
         }
 
         /// <summary>
@@ -988,7 +988,7 @@ namespace AethonMod.Content.Systems
                 p.Write(MsgForzarCaida);
                 p.Send();
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EcoRed", exRegistro); }
         }
 
         /// <summary>
@@ -1017,7 +1017,7 @@ namespace AethonMod.Content.Systems
                 p.Write(y);
                 p.Send();
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EcoRed", exRegistro); }
         }
 
         /// <summary>
@@ -1037,7 +1037,7 @@ namespace AethonMod.Content.Systems
                     p.Write((byte)portador.whoAmI);
                 });
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EcoRed", exRegistro); }
         }
 
         /// <summary>
@@ -1059,7 +1059,7 @@ namespace AethonMod.Content.Systems
                 p.Write(quien);
                 p.Send(); // broadcast: TODOS los clientes
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EcoRed", exRegistro); }
         }
 
         // ================================================================

@@ -136,7 +136,7 @@ namespace AethonMod.Content.Players
                 tag["libroUsado"] = LibroUsado;
                 tag["libroRecibido"] = LibroRecibido;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CazaJefesPlayer", exRegistro); }
         }
 
         public override void LoadData(TagCompound tag)
@@ -182,7 +182,7 @@ namespace AethonMod.Content.Players
                     LegadoEmperatriz = true;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CazaJefesPlayer", exRegistro); }
         }
     }
 }

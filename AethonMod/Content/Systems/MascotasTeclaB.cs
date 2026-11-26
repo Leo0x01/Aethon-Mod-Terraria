@@ -96,7 +96,7 @@ namespace AethonMod.Content.Systems
                     it.buffType = 0;   // invisible para vanilla
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("MascotasTeclaB", exRegistro); }
 
             // (2) LA TECLA COMO ERA: pociones, comida, caldo — TODO igual
             //     (nuestras mascotas ya no están en el menú de vanilla).
@@ -135,7 +135,7 @@ namespace AethonMod.Content.Systems
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("MascotasTeclaB", exRegistro); }
         }
     }
 }

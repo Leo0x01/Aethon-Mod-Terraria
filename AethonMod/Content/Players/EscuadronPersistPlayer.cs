@@ -145,7 +145,7 @@ namespace AethonMod.Content.Players
                     tag["dagasDanos"] = DagasDanos;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EscuadronPersistPlayer", exRegistro); }
         }
 
         public override void LoadData(TagCompound tag)
@@ -254,7 +254,7 @@ namespace AethonMod.Content.Players
                         <global::AethonMod.Content.Buffs.DagaEternaBuff>(), 18000);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EscuadronPersistPlayer", exRegistro); }
         }
     }
 }

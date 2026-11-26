@@ -132,7 +132,7 @@ namespace AethonMod.Content.Globals
                 Main.spriteBatch.End();
                 AuraLib.ReabrirLoteVanilla();
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TestAdvancedFX", exRegistro); }
         }
     }
 }

@@ -59,7 +59,7 @@ namespace AethonMod.Content.Weapons.Cosmic
                         return it.GetGlobalItem<Globals.ShardLevelItem>().Level;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("IdeasGrimorioStaffs", exRegistro); }
             return 1;
         }
 

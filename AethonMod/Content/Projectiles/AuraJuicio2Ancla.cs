@@ -666,7 +666,7 @@ namespace AethonMod.Content.Projectiles
             }
             catch
             {
-                try { VFXCore.CerrarLoteSiAbierto(); } catch { }
+                try { VFXCore.CerrarLoteSiAbierto(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AuraJuicio2Ancla", exRegistro); }
             }
             VFXCore.ReabrirLoteVanilla();
             return false;   // el ancla NUNCA se dibuja

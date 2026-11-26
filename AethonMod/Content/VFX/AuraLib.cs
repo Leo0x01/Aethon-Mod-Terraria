@@ -1490,7 +1490,7 @@ namespace AethonMod.Content.VFX
                 for (int i = 0; i < _barridoBuffer.Count; i++)
                     _emisores.Remove(_barridoBuffer[i]);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AuraLib", exRegistro); }
         }
         private static readonly List<int> _barridoBuffer = new List<int>(16);
 
@@ -1619,7 +1619,7 @@ namespace AethonMod.Content.VFX
                 // El contrato de rescate: el lote queda ABIERTO pase lo que
                 // pase (si estaba cerrado se reabre; si estaba abierto, el
                 // Begin falla sin tocar nada).
-                try { ReabrirLoteVanilla(); } catch { }
+                try { ReabrirLoteVanilla(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AuraLib", exRegistro); }
                 return false;
             }
         }
@@ -1667,7 +1667,7 @@ namespace AethonMod.Content.VFX
                 Emitir(pl.Center, p.Radio, p, frontal, 511, loteAlfa: true);
                 VFXCore.AppendToPlayerDraw(ref drawInfo);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AuraLib", exRegistro); }
         }
 
         /// <summary>
@@ -1750,7 +1750,7 @@ namespace AethonMod.Content.VFX
             }
             catch
             {
-                try { ReabrirLoteVanilla(); } catch { }
+                try { ReabrirLoteVanilla(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AuraLib", exRegistro); }
                 return false;
             }
         }
@@ -1815,7 +1815,7 @@ namespace AethonMod.Content.VFX
             }
             catch
             {
-                try { ReabrirLoteVanilla(); } catch { }
+                try { ReabrirLoteVanilla(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AuraLib", exRegistro); }
                 return false;
             }
         }
@@ -1842,7 +1842,7 @@ namespace AethonMod.Content.VFX
             }
             catch
             {
-                try { ReabrirLoteVanilla(); } catch { }
+                try { ReabrirLoteVanilla(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AuraLib", exRegistro); }
                 return false;
             }
         }
@@ -2602,7 +2602,7 @@ namespace AethonMod.Content.VFX
             }
             catch
             {
-                try { ReabrirLoteVanilla(); } catch { }
+                try { ReabrirLoteVanilla(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AuraLib", exRegistro); }
                 return false;
             }
         }
@@ -3202,7 +3202,7 @@ namespace AethonMod.Content.VFX
             }
             catch
             {
-                try { ReabrirLoteVanilla(); } catch { }
+                try { ReabrirLoteVanilla(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AuraLib", exRegistro); }
                 return false;
             }
         }
@@ -3300,7 +3300,7 @@ namespace AethonMod.Content.VFX
             }
             catch
             {
-                try { ReabrirLoteVanilla(); } catch { }
+                try { ReabrirLoteVanilla(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AuraLib", exRegistro); }
                 return false;
             }
         }
@@ -3690,7 +3690,7 @@ namespace AethonMod.Content.VFX
             }
             catch
             {
-                try { ReabrirLoteVanilla(); } catch { }
+                try { ReabrirLoteVanilla(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AuraLib", exRegistro); }
                 return false;
             }
         }
@@ -4173,7 +4173,7 @@ namespace AethonMod.Content.VFX
             catch
             {
                 // el contrato de rescate de la casa: lote ABIERTO pase lo que pase.
-                try { ReabrirLoteVanilla(); } catch { }
+                try { ReabrirLoteVanilla(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AuraLib", exRegistro); }
                 return false;
             }
         }
@@ -4763,7 +4763,7 @@ namespace AethonMod.Content.VFX
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AuraLib", exRegistro); }
             _ruido = null;
         }
 
@@ -4791,7 +4791,7 @@ namespace AethonMod.Content.VFX
                         _flipBruma[i] = null;
                     }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AuraLib", exRegistro); }
             _flipCuerpo = null;
             _flipLlamas = null;
             _flipBruma = null;
@@ -4840,19 +4840,10 @@ namespace AethonMod.Content.VFX
                         DesecharLote(flipLlamas);
                         DesecharLote(flipBruma);
                     }
-                    catch
-                    {
-                        // Defensivo: una excepción aquí subiría hasta
-                        // Main.Update() y rompería el bucle del juego.
-                    }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AuraLib", exRegistro); }
                 });
             }
-            catch
-            {
-                // Encolado imposible (apagado total del proceso): se
-                // abandonan las referencias — el driver libera los
-                // recursos del proceso al terminar de todos modos.
-            }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AuraLib", exRegistro); }
         }
 
         /// <summary>
@@ -4865,7 +4856,7 @@ namespace AethonMod.Content.VFX
             if (lote == null) return;
             for (int i = 0; i < lote.Length; i++)
             {
-                try { lote[i]?.Dispose(); } catch { }
+                try { lote[i]?.Dispose(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AuraLib", exRegistro); }
                 lote[i] = null;
             }
         }

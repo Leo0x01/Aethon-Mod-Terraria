@@ -155,7 +155,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if (Main.netMode != NetmodeID.Server)
                 {
                     try { Terraria.Audio.SoundEngine.PlaySound(SoundID.Item77.WithPitchOffset(-0.5f), Projectile.Center); }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DecretoEclipseProjectile", exRegistro); }
                     OndaLib.Kick(1.4f, 6);
                     OndaLib.Flash(ColorVioleta, 0.14f, 6, Projectile.Center);
                     RiftLib.ChispasAnomalia(Projectile.Center, 8, PaletaChispa, Seed + 7, out ParticleData[] motas);
@@ -236,7 +236,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 0f, true);
                 // El decreto quema 3 s con cada corte (servidor).
                 if (Main.netMode != NetmodeID.MultiplayerClient)
-                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), QuemaduraTicks); } catch { }
+                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), QuemaduraTicks); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DecretoEclipseProjectile", exRegistro); }
             }
 
             // EL GAME FEEL del tajo (solo con víctimas).
@@ -249,7 +249,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         SoundID.DD2_BetsyFireballShot.WithVolumeScale(0.35f).WithPitchOffset(-0.55f),
                         Projectile.Center);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DecretoEclipseProjectile", exRegistro); }
                 OndaLib.Flash(ColorOro, 0.13f, 5, Projectile.Center);
                 OndaLib.Kick(0.9f, 5);
             }
@@ -265,7 +265,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             // El círculo se cierra en un último destello.
             try { Terraria.Audio.SoundEngine.PlaySound(SoundID.Item12.WithPitchOffset(-0.2f), Projectile.Center); }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DecretoEclipseProjectile", exRegistro); }
             OndaLib.Flash(ColorOro, 0.18f, 6, Projectile.Center);
             OndaLib.Kick(2.2f, 6);
             RiftLib.ChispasAnomalia(Projectile.Center, 14, PaletaChispa, Seed + 99, out ParticleData[] motas);

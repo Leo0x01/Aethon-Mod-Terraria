@@ -156,7 +156,7 @@ namespace AethonMod.Content.Systems
                 // (el momento quedó grabado en ESTE mundo).
                 tag["llegoPrimerNpc"] = _llegoPrimerNpc;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LaCaidaSistema", exRegistro); }
         }
 
         public override void LoadWorldData(TagCompound tag)
@@ -201,7 +201,7 @@ namespace AethonMod.Content.Systems
                         entrada.GetInt("x"), entrada.GetInt("y")));
                 PurgarLaViejaEra(viejos);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LaCaidaSistema", exRegistro); }
         }
 
         public override void OnWorldUnload()
@@ -232,7 +232,7 @@ namespace AethonMod.Content.Systems
                     RevivirLibro(pendiente);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LaCaidaSistema", exRegistro); }
         }
 
         /// <summary>Engendra el Grimorio Dormido de una pendiente (si aún no vive) para SU destinatario.</summary>
@@ -274,7 +274,7 @@ namespace AethonMod.Content.Systems
                         }
                     }
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LaCaidaSistema", exRegistro); }
 
                 int idx = IndiceDeJugador(pendiente.Jugador);
                 int npcIdx = NPC.NewNPC(new EntitySource_Misc("LaCaida"),
@@ -294,7 +294,7 @@ namespace AethonMod.Content.Systems
                     DifundirLibro(libro);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LaCaidaSistema", exRegistro); }
         }
 
         /// <summary>El índice del jugador vivo con este nombre (-1 si no está conectado).</summary>
@@ -339,7 +339,7 @@ namespace AethonMod.Content.Systems
                 // ai[1] en su propia IA (GrimorioDormido, cada 60 ticks).
                 Terraria.NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, libro.whoAmI);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LaCaidaSistema", exRegistro); }
         }
 
         // ================================================================
@@ -471,7 +471,7 @@ namespace AethonMod.Content.Systems
                 if ((Main.GameUpdateCount % 120ul) == 0ul)
                     ReconciliarPendientes();
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LaCaidaSistema", exRegistro); }
         }
 
         /// <summary>¿Este jugador ya tiene un Grimorio del Eterno en los 59 slots del inventario?</summary>
@@ -730,7 +730,7 @@ namespace AethonMod.Content.Systems
                     DifundirLibro(libro);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LaCaidaSistema", exRegistro); }
         }
 
         /// <summary>v6.51.0 — ¿ES EL DESTINATARIO de este libro? (la
@@ -819,7 +819,7 @@ namespace AethonMod.Content.Systems
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LaCaidaSistema", exRegistro); }
         }
 
         // ================================================================
@@ -935,7 +935,7 @@ namespace AethonMod.Content.Systems
                             }
                             Main.updateMap = true;
                         }
-                        catch { }
+                        catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LaCaidaSistema", exRegistro); }
                         // v6.137 — LA CIMA DEL ALTAR: la fila más alta
                         // del mueble colocado — la llegada nace el libro
                         // POR ENCIMA, jamás solapado.
@@ -1031,7 +1031,7 @@ namespace AethonMod.Content.Systems
                     SensacionDelPacto(p);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LaCaidaSistema", exRegistro); }
         }
 
         /// <summary>
@@ -1096,7 +1096,7 @@ namespace AethonMod.Content.Systems
                         EcoRed.OtorgarCaida(p);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LaCaidaSistema", exRegistro); }
         }
 
         /// <summary>
@@ -1129,7 +1129,7 @@ namespace AethonMod.Content.Systems
 
                 TomarElLibro(libro, p);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LaCaidaSistema", exRegistro); }
         }
 
         /// <summary>Apaga la pendiente cuyo libro vive cerca de este punto (la toma consumó la caída).</summary>
@@ -1147,7 +1147,7 @@ namespace AethonMod.Content.Systems
                         sys.CaidasPendientes.RemoveAt(i);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LaCaidaSistema", exRegistro); }
         }
 
         /// <summary>v6.50.125 — Registra que ESTE mundo ya le dio su caída a
@@ -1162,7 +1162,7 @@ namespace AethonMod.Content.Systems
                 var sys = ModContent.GetInstance<LaCaidaSistema>();
                 if (sys != null) sys._cayoEnEsteMundo.Add(nombre);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LaCaidaSistema", exRegistro); }
         }
 
         // ================================================================
@@ -1228,7 +1228,7 @@ namespace AethonMod.Content.Systems
                         NetMessage.SendTileSquare(-1, x - 4, y - 10, 9, 15);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LaCaidaSistema", exRegistro); }
         }
 
         /// <summary>v6.51.0 — LA BRUMA DE LA LLEGADA SE DISIPA: la toma del
@@ -1246,7 +1246,7 @@ namespace AethonMod.Content.Systems
                     pr.Kill();
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LaCaidaSistema", exRegistro); }
         }
 
         /// <summary>v6.50.125 — LA PÁGINA EN BLANCO también blanquea el cielo
@@ -1280,7 +1280,7 @@ namespace AethonMod.Content.Systems
                     d.noGravity = true;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LaCaidaSistema", exRegistro); }
         }
 
         /// <summary>La dádiva llegó al cliente (EcoRed.MsgTomarCaida): marca local del .plr + sensación.</summary>
@@ -1292,7 +1292,7 @@ namespace AethonMod.Content.Systems
                 if (sp != null) sp.CaidaRecibida = true;
                 SensacionDelPacto(Main.LocalPlayer);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LaCaidaSistema", exRegistro); }
         }
     }
 }

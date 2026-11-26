@@ -103,7 +103,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     if ((npc.Center - Projectile.Center).Length() > AuraRadius) continue;
                     Content.Systems.GolpeMotor.Golpear(Projectile, npc, auraDamage, 1f, true);
                     if (Main.netMode != NetmodeID.MultiplayerClient)
-                        try { npc.AddBuff(BuffID.Electrified, 150); } catch { }   // v6.30: el campo magnético ELECTRIFICA
+                        try { npc.AddBuff(BuffID.Electrified, 150); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("MagnetarProjectile", exRegistro); }   // v6.30: el campo magnético ELECTRIFICA
                 }
             }
 
@@ -118,7 +118,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 {
                     Content.Systems.GolpeMotor.Golpear(Projectile, npc, chainDamage, 2f, true);
                     if (Main.netMode != NetmodeID.MultiplayerClient)
-                        try { npc.AddBuff(BuffID.Electrified, 150); } catch { }
+                        try { npc.AddBuff(BuffID.Electrified, 150); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("MagnetarProjectile", exRegistro); }
                 }
 
                 // El TRUENO de la andanada (solo donde se oye).
@@ -242,7 +242,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     if ((npc.Center - Projectile.Center).Length() > 180f) continue;
                     Content.Systems.GolpeMotor.Golpear(Projectile, npc, burst, 3f, true);
                     if (Main.netMode != NetmodeID.MultiplayerClient)
-                        try { npc.AddBuff(BuffID.Electrified, 180); } catch { }
+                        try { npc.AddBuff(BuffID.Electrified, 180); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("MagnetarProjectile", exRegistro); }
                 }
             }
 
@@ -274,7 +274,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Projectile.Center, new Vector2(1f, 0f), 7f, 10, 16, 0.4f,
                     "AethonMagnetarDeath"));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("MagnetarProjectile", exRegistro); }
 
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item93, Projectile.Center);
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122.WithPitchOffset(-0.3f), Projectile.Center);

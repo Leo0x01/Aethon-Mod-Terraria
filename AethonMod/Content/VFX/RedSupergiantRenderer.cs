@@ -121,7 +121,7 @@ namespace AethonMod.Content.VFX
             catch (Exception ex)
             {
                 VFXCore.CerrarLoteSiAbierto();
-                try { Terraria.ModLoader.Logging.PublicLogger.Error("[AethonMod] RedSupergiantRenderer.Draw falló: " + ex.Message, ex); } catch { }
+                try { Terraria.ModLoader.Logging.PublicLogger.Error("[AethonMod] RedSupergiantRenderer.Draw falló: " + ex.Message, ex); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RedSupergiantRenderer", exRegistro); }
             }
         }
 

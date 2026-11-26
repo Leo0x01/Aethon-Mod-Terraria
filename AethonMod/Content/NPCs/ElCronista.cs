@@ -168,7 +168,7 @@ namespace AethonMod.Content.NPCs
                         NetMessage.SendData(MessageID.SyncNPC, -1, -1, null, NPC.whoAmI);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ElCronista", exRegistro); }
             return true;
         }
 
@@ -232,7 +232,7 @@ namespace AethonMod.Content.NPCs
                     despertar = global::AethonMod.Content.Systems.DespertarGrimorio
                         .NivelDe(Main.LocalPlayer);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ElCronista", exRegistro); }
                 if (despertar >= 120)
                     return Language.GetTextValue("Mods.AethonMod.Cronista.ChatUltimaPuerta");
 
@@ -266,7 +266,7 @@ namespace AethonMod.Content.NPCs
                         }
                     }
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ElCronista", exRegistro); }
 
                 // LA ROTACIÓN: el dado de la casa sobre las 4 familias
                 // (genéricas 5 · portador 5 · oleadas 3 · despertar 1 ·
@@ -370,7 +370,7 @@ namespace AethonMod.Content.NPCs
                         return;   // UNO por mundo (el primero que lo lleve)
                     }
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ElCronista", exRegistro); }
             }
         }
 
@@ -469,7 +469,7 @@ namespace AethonMod.Content.NPCs
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ElCronista", exRegistro); }
 
             // LA CAJA DE DIÁLOGO SIGUE VIENDO AL NPC (la tira no se
             // dibuja pero el NPC vive: el retrato del chat usa su
@@ -501,7 +501,7 @@ namespace AethonMod.Content.NPCs
             catch { VFXCore.CerrarLoteSiAbierto(); }
             finally
             {
-                try { VFXCore.ReabrirLoteVanilla(); } catch { }
+                try { VFXCore.ReabrirLoteVanilla(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ElCronista", exRegistro); }
             }
         }
 
@@ -530,7 +530,7 @@ namespace AethonMod.Content.NPCs
                 var sp = comprador.GetModPlayer<global::AethonMod.Content.Players.ShardPlayer>();
                 if (sp != null) oleadas = Math.Max(1, Math.Min(10, sp.FuriaNivel));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ElCronista", exRegistro); }
             long precio = 100L + (long)rareza * despertarRequisito - oleadas;
             return Math.Max(100L, precio);   // el mínimo de la letra: 100
         }
@@ -551,7 +551,7 @@ namespace AethonMod.Content.NPCs
                         if (a == tipoArma) return nivel;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ElCronista", exRegistro); }
             return 0;
         }
 
@@ -811,7 +811,7 @@ namespace AethonMod.Content.NPCs
                         {
                             Mod.Logger.Error("[ElCronista/120] la cosecha de tiendas ajenas falló", eCol);
                         }
-                        catch { }
+                        catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ElCronista", exRegistro); }
                     }
 
                     // LA ELECCIÓN DETERMINISTA DEL DÍA (la casa no usa
@@ -876,7 +876,7 @@ namespace AethonMod.Content.NPCs
                 {
                     Mod.Logger.Error("[ElCronista/ModifyActiveShop] la tienda falló a medio llenar", e);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ElCronista", exRegistro); }
             }
         }
     }
@@ -955,7 +955,7 @@ namespace AethonMod.Content.NPCs
                 if (checkItem.type == esencia && accion != 0)
                     return 0;   // la esencia ENTRA al slot de monedas
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ElCronista", exRegistro); }
             return accion;   // todo lo demás: la vía de vanilla, intacta
         }
     }
@@ -1001,7 +1001,7 @@ namespace AethonMod.Content.NPCs
                         .Consagrar(item);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ElCronista", exRegistro); }
         }
     }
 }

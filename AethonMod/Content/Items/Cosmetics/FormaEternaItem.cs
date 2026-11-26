@@ -144,7 +144,7 @@ namespace AethonMod.Content.Items.Cosmetics
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FormaEternaItem", exRegistro); }
 
             // ==========================================================
             //  EL AURA DEL VACÍO (la octava gracia): el campo invisible
@@ -195,7 +195,7 @@ namespace AethonMod.Content.Items.Cosmetics
                 if (aurora != null && aurora.AlaEstilo == 0)
                     aurora.AlaEstilo = 14;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FormaEternaItem", exRegistro); }
         }
 
         public override void ModifyTooltips(List<TooltipLine> tooltips)

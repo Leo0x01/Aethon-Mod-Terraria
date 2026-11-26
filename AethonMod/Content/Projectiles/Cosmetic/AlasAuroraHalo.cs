@@ -323,9 +323,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 {
                     VFXCore.ReabrirLoteVanilla();
                 }
-                catch
-                {
-                }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AlasAuroraHalo", exRegistro); }
             }
             return false;
         }

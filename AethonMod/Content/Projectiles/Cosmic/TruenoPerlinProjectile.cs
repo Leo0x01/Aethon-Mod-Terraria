@@ -427,7 +427,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                 Content.Systems.GolpeMotor.Golpear(Projectile, npc, Projectile.damage, 2f, true);
                 if (Main.netMode != NetmodeID.MultiplayerClient)
-                    try { npc.AddBuff(BuffID.Electrified, 300); } catch { }
+                    try { npc.AddBuff(BuffID.Electrified, 300); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TruenoPerlinProjectile", exRegistro); }
                 golpeados.Add(npc);
             }
 
@@ -461,7 +461,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
                 Content.Systems.GolpeMotor.Golpear(Projectile, best, chainDamage, 1.2f, true);
                 if (Main.netMode != NetmodeID.MultiplayerClient)
-                    try { best.AddBuff(BuffID.Electrified, 300); } catch { }
+                    try { best.AddBuff(BuffID.Electrified, 300); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TruenoPerlinProjectile", exRegistro); }
                 golpeados.Add(best);
             }
         }

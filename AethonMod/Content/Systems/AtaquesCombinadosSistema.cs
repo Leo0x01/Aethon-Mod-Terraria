@@ -444,7 +444,7 @@ namespace AethonMod.Content.Systems
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AtaquesCombinadosSistema", exRegistro); }
         }
 
         // ================================================================
@@ -871,7 +871,7 @@ namespace AethonMod.Content.Systems
                 if (DispararLaIra(p, mejorados, DespertarGrimorio.NivelDe(p)))
                     _iraHasta[p.whoAmI] = Main.GameUpdateCount + IRA_ENFRIAMIENTO_FINAL;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AtaquesCombinadosSistema", exRegistro); }
         }
 
         /// <summary>v6.153 — LA VOZ DE LA IRA BLOQUEADA (la letra: «la
@@ -889,7 +889,7 @@ namespace AethonMod.Content.Systems
                 _iraAvisoTick[p.whoAmI] = Main.GameUpdateCount;
                 Main.NewText(Language.GetTextValue(clave), new Color(196, 138, 255));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AtaquesCombinadosSistema", exRegistro); }
         }
 
         private static readonly System.Collections.Generic.Dictionary<int, ulong> _iraAvisoTick =

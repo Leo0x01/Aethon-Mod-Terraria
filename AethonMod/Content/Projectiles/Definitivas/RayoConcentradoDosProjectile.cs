@@ -253,7 +253,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     {
                         _cargaSlot = SoundEngine.PlaySound(carga, Projectile.Center);
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayoConcentradoDosProjectile", exRegistro); }
                 }
 
                 // EL TEMBLOR (la letra: «debe mantener un pequeño temblor de
@@ -387,7 +387,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 if (_cargaSlot.IsValid && SoundEngine.TryGetActiveSound(_cargaSlot, out ActiveSound sonidoActivo) && sonidoActivo != null)
                     sonidoActivo.Stop();
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayoConcentradoDosProjectile", exRegistro); }
             _cargaSlot = default;
         }
 

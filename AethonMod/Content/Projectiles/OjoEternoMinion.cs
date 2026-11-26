@@ -272,7 +272,7 @@ namespace AethonMod.Content.Projectiles
                                 var sl = held.GetGlobalItem<Globals.ShardLevelItem>();
                                 if (sl != null) nivel = sl.Level;
                             }
-                            catch { }
+                            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OjoEternoMinion", exRegistro); }
                         }
                     }
                     if (nivel < 1) nivel = 1;
@@ -651,7 +651,7 @@ namespace AethonMod.Content.Projectiles
                         dano, Projectile.knockBack * 0.6f, Projectile.owner,
                         1f, Projectile.whoAmI, presa.whoAmI);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OjoEternoMinion", exRegistro); }
             }
 
             Sonar(SoundID.Item122.WithPitchOffset(-0.45f).WithVolumeScale(0.5f),
@@ -1253,7 +1253,7 @@ namespace AethonMod.Content.Projectiles
 
         private static void Sonar(Terraria.Audio.SoundStyle estilo, Vector2 pos)
         {
-            try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); } catch { }
+            try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OjoEternoMinion", exRegistro); }
         }
 
         public override void SetStaticDefaults()

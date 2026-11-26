@@ -63,7 +63,7 @@ namespace AethonMod.Content.Rarities
                     if (activo != null)
                         return ColorDelLibro(activo);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LegendarioSupremo", exRegistro); }
 
                 // SIN LIBRO A LA VISTA: el violeta cósmico de siempre —
                 // el ciclo primordial ↔ índigo del vacío ↔ magenta de la

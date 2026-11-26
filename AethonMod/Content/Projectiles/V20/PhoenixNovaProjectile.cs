@@ -119,7 +119,7 @@ namespace AethonMod.Content.Projectiles.V20
                 Lighting.AddLight(Projectile.Center,
                     new Vector3(1f * intensity, 0.55f * intensity, 0.15f * intensity));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PhoenixNovaProjectile", exRegistro); }
         }
 
         // ================================================================
@@ -150,7 +150,7 @@ namespace AethonMod.Content.Projectiles.V20
             {
                 target.AddBuff(BuffID.OnFire, 300); // 5 segundos de OnFire
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PhoenixNovaProjectile", exRegistro); }
         }
 
         // ================================================================

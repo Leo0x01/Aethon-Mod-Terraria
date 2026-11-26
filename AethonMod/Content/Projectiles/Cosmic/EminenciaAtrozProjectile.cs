@@ -156,7 +156,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             SoundID.Item117.WithPitchOffset(-0.4f).WithVolumeScale(0.6f),
                             Projectile.Center);
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EminenciaAtrozProjectile", exRegistro); }
                     // EL LATIGUEO de la masa al compactarse.
                     for (int i = 0; i < 24; i++)
                     {
@@ -261,7 +261,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             SoundID.Item9.WithPitchOffset(-0.7f).WithVolumeScale(0.7f),
                             Projectile.Center);
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EminenciaAtrozProjectile", exRegistro); }
                     // LOS ESPÍRITUS ESCAPAN: la última voluta de la masa.
                     for (int i = 0; i < 18; i++)
                     {

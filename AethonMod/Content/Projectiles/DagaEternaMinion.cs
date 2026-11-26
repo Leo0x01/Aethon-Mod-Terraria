@@ -556,7 +556,7 @@ namespace AethonMod.Content.Projectiles
                 Vector2? libro = PosicionDelLibro(dueño);
                 if (libro is Vector2 lb) centro = lb;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DagaEternaMinion", exRegistro); }
             return centro;
         }
 
@@ -623,7 +623,7 @@ namespace AethonMod.Content.Projectiles
                     <global::AethonMod.Content.Buffs.QuemaduraVacioExterior>();
                 target.AddBuff(quemadura, 180);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DagaEternaMinion", exRegistro); }
             Projectile.netUpdate = true;
         }
 
@@ -798,7 +798,7 @@ namespace AethonMod.Content.Projectiles
                 // tipo — el tinte SUAVE: el marfil se lee, el alma asoma)
                 Color tintaColmillo = Color.White;
                 try { tintaColmillo = Color.Lerp(Color.White, LuzDe(Tipo), 0.38f); }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DagaEternaMinion", exRegistro); }
                 Main.spriteBatch.Draw(tex, pos, rect, tintaColmillo, rot, orig, esc, SpriteEffects.None, 0f);
 
                 // ============== EL OJO DEL GRIMORIO (v6.130) ==============

@@ -121,7 +121,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             // v6.30 — LAS ARMAS ELÉCTRICAS ELECTRIFICAN (petición del
             // usuario): la hoja que desata cadenas de rayo prende al contacto.
-            try { target.AddBuff(BuffID.Electrified, 180); } catch { }
+            try { target.AddBuff(BuffID.Electrified, 180); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LanzaAlbaProjectile", exRegistro); }
 
             // === v6.25 — EL PULSO DE IMPACTO (OndaLib: la onda se dibuja
             //     en PreDraw; la SACUDIDA suave ya) + LAS ASCUAS de la
@@ -181,7 +181,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Content.Systems.GolpeMotor.Golpear(Projectile, best, chainDamage, 1.5f, true);
                 // La electrificación de la cadena: server/SP (autoridad del debuff).
                 if (Main.netMode != NetmodeID.MultiplayerClient)
-                    try { best.AddBuff(BuffID.Electrified, 180); } catch { }
+                    try { best.AddBuff(BuffID.Electrified, 180); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LanzaAlbaProjectile", exRegistro); }
             }
         }
 

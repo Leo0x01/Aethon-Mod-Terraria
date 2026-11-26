@@ -146,7 +146,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         Content.Systems.GolpeMotor.Golpear(Projectile, npc, beamDamage, 2.5f, true);
                         // La electrificación del haz: server/SP.
                         if (Main.netMode != NetmodeID.MultiplayerClient)
-                            try { npc.AddBuff(BuffID.Electrified, 120); } catch { }
+                            try { npc.AddBuff(BuffID.Electrified, 120); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PulsarProjectile", exRegistro); }
                     }
                 }
             }
@@ -248,7 +248,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     if ((npc.Center - Projectile.Center).Length() > 160f) continue;
                     Content.Systems.GolpeMotor.Golpear(Projectile, npc, burst, 2f, true);
                     if (Main.netMode != NetmodeID.MultiplayerClient)
-                        try { npc.AddBuff(BuffID.Electrified, 120); } catch { }   // v6.30: el pulso final ELECTRIFICA
+                        try { npc.AddBuff(BuffID.Electrified, 120); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PulsarProjectile", exRegistro); }   // v6.30: el pulso final ELECTRIFICA
                 }
             }
 
@@ -278,7 +278,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Projectile.Center, new Vector2(1f, 0f), 5f, 10, 14, 0.4f,
                     "AethonPulsarDeath"));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PulsarProjectile", exRegistro); }
 
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122.WithPitchOffset(-0.2f), Projectile.Center);
         }

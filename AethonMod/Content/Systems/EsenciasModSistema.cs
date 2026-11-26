@@ -88,7 +88,7 @@ namespace AethonMod.Content.Systems
                     EcoRed.AnunciarMundo("Mods.AethonMod.Esencia.UltimaAlma",
                         new Microsoft.Xna.Framework.Color(196, 150, 255), npc.FullName);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EsenciasModSistema", exRegistro); }
         }
 
         // === LA PERSISTENCIA (la cuenta vive con el mundo) ===
@@ -102,7 +102,7 @@ namespace AethonMod.Content.Systems
                 tag["esenciasModDadas"] = _dadas;
                 tag["esenciasModAvisadas"] = _avisadoSeco;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EsenciasModSistema", exRegistro); }
         }
 
         public override void LoadWorldData(TagCompound tag)
@@ -116,7 +116,7 @@ namespace AethonMod.Content.Systems
                 var avisadas = tag.GetList<bool>("esenciasModAvisadas");
                 for (int i = 0; i < avisadas.Count && i < 5; i++) _avisadoSeco[i] = avisadas[i];
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("EsenciasModSistema", exRegistro); }
         }
 
         public override void OnWorldUnload()

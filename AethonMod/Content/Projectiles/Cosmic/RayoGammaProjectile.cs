@@ -154,7 +154,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Content.Systems.GolpeMotor.Golpear(Projectile, npc, Math.Max(1, Projectile.damage), 5f, true);
                 // La quemadura del rayo: server/SP (autoridad del debuff).
                 if (Main.netMode != NetmodeID.MultiplayerClient)
-                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 300); } catch { }
+                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 300); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayoGammaProjectile", exRegistro); }
             }
             _marcas.Clear();
 
@@ -168,7 +168,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Terraria.Audio.SoundEngine.PlaySound(
                         SoundID.Item27.WithPitchOffset(0.4f), Projectile.Center);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayoGammaProjectile", exRegistro); }
                 OndaLib.Kick(2.6f, 9);
                 OndaLib.Flash(ColorCian, 0.14f, 8, Projectile.Center);
 

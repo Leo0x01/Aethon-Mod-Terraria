@@ -43,7 +43,7 @@ namespace AethonMod.Content.Effects.Bruma
             if (++_tickPodaMarcas >= 60)
             {
                 _tickPodaMarcas = 0;
-                try { global::AethonMod.Content.Globals.FaucesGlobalNPC.PodarMarcas(); } catch { }
+                try { global::AethonMod.Content.Globals.FaucesGlobalNPC.PodarMarcas(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BrumaSystem", exRegistro); }
             }
         }
 
@@ -59,13 +59,13 @@ namespace AethonMod.Content.Effects.Bruma
             // v6.49 — el barrendero único también en la descarga: el pool
             // de cintas y el NÚCLEO de VFX (búfer/presupuesto/factor) no
             // eran limpiados por NADIE (hallazgo AUD-C).
-            try { Cinta.Purgar(); } catch { }
-            try { VFXCore.Reiniciar(); } catch { }
+            try { Cinta.Purgar(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BrumaSystem", exRegistro); }
+            try { VFXCore.Reiniciar(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BrumaSystem", exRegistro); }
 
             // v6.56.1 — las ALAS también: sus 2 BasicEffect solo se
             // limpiaban al salir del MUNDO (OnWorldUnload) — en la
             // descarga del mod fugaban en cada recarga.
-            try { global::AethonMod.Content.VFX.AlasAuroraLib.Reiniciar(); } catch { }
+            try { global::AethonMod.Content.VFX.AlasAuroraLib.Reiniciar(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BrumaSystem", exRegistro); }
         }
     }
 }

@@ -204,7 +204,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Terraria.Audio.SoundEngine.PlaySound(
                         SoundID.Item14.WithPitchOffset(0.15f * _gen), Projectile.Center);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("NovaEncadenadaProjectile", exRegistro); }
                 RiftLib.ChispasAnomalia(Projectile.Center, 8 + _gen * 3, PyraPalettes.SolarFire,
                     Seed + 3, out ParticleData[] motas);
                 if (motas != null)
@@ -238,7 +238,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 3f, true);
                 // La quemadura del frente: server/SP (autoridad del debuff).
                 if (Main.netMode != NetmodeID.MultiplayerClient)
-                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 180); } catch { }
+                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 180); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("NovaEncadenadaProjectile", exRegistro); }
             }
         }
 

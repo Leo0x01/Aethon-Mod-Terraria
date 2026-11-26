@@ -65,7 +65,7 @@ namespace AethonMod.Content.VFX
         {
             if (Main.netMode == NetmodeID.Server || Main.gameMenu) return;
             try { PulsoLib.ActualizarPantalla(); }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PulsoSistema", exRegistro); }
         }
 
         public override void PostDrawInterface(SpriteBatch spriteBatch)
@@ -102,7 +102,7 @@ namespace AethonMod.Content.VFX
                 Main.spriteBatch.Draw(tex,
                     new Rectangle(0, 0, Main.screenWidth, Main.screenHeight), velo);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PulsoSistema", exRegistro); }
             finally
             {
                 VFXCore.CerrarLoteSiAbierto();
@@ -114,20 +114,20 @@ namespace AethonMod.Content.VFX
                             SamplerState.LinearClamp, DepthStencilState.None,
                             RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PulsoSistema", exRegistro); }
                 }
             }
         }
 
         public override void OnWorldUnload()
         {
-            try { PulsoLib.Reset(); } catch { }
+            try { PulsoLib.Reset(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PulsoSistema", exRegistro); }
         }
 
         public override void Unload()
         {
-            try { PulsoLib.Reset(); } catch { }
-            try { _pixel?.Dispose(); } catch { }
+            try { PulsoLib.Reset(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PulsoSistema", exRegistro); }
+            try { _pixel?.Dispose(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PulsoSistema", exRegistro); }
             _pixel = null;
         }
     }

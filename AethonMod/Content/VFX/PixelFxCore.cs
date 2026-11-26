@@ -1559,7 +1559,7 @@ namespace AethonMod.Content.VFX
                 int n = Math.Max(1, (int)Math.Ceiling(dt * 120 - 1e-9));
                 for (int i = 0; i < n; i++) u.Update(dt / n, options);
             }
-            catch { /* si el acto tropieza, que no tire el juego */ }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PixelFxCore", exRegistro); }
         }
 
         public void Draw(PxFrame frame, string layer = null)
@@ -1575,7 +1575,7 @@ namespace AethonMod.Content.VFX
                 if (layer != "front" && impl is IPxFxBack b) { p.layer = "back"; b.DrawBack(p, tt, options); }
                 if (layer != "back") { p.layer = "front"; impl.Draw(p, tt, options); }
             }
-            catch { /* un frame a medias se repinta al siguiente */ }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PixelFxCore", exRegistro); }
         }
 
         /// <summary>Dejarlo acabar: los loops se funden, los de un acto

@@ -359,7 +359,7 @@ namespace AethonMod.Content.Projectiles.Nervioso
             {
                 EmoteBubble.NewBubble(EmoteID.EmoteFear, new WorldUIAnchor(n), 90);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioNerviosoFlotante", exRegistro); }
         }
 
         public override void AI()
@@ -693,7 +693,7 @@ namespace AethonMod.Content.Projectiles.Nervioso
                             }
                             topeSombra = 1 + despertarCaza / 20 + nivelCaza / 100;
                         }
-                        catch { }
+                        catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioNerviosoFlotante", exRegistro); }
                         if (alma != null)
                         {
                             int capAlma = alma.SombrasCapDe(libroCaza);
@@ -906,7 +906,7 @@ namespace AethonMod.Content.Projectiles.Nervioso
 
         private static void Sonar(Terraria.Audio.SoundStyle estilo, Vector2 pos)
         {
-            try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); } catch { }
+            try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioNerviosoFlotante", exRegistro); }
         }
     }
 }

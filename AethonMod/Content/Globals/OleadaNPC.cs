@@ -637,7 +637,7 @@ namespace AethonMod.Content.Globals
                         nivel: GrimorioFuriaSistema.NivelFuriaPublico);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OleadaNPC", exRegistro); }
         }
 
         // ==================================================================
@@ -683,7 +683,7 @@ namespace AethonMod.Content.Globals
                     writer.Write(npc.knockBackResist);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OleadaNPC", exRegistro); }
         }
 
         /// <summary>
@@ -780,7 +780,7 @@ namespace AethonMod.Content.Globals
                     spawnRate = Math.Max(1, (int)(spawnRate * mult));
                 maxSpawns = Math.Max(maxSpawns, GrimorioFuriaSistema.TopeVivos(k));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OleadaNPC", exRegistro); }
         }
 
         /// <summary>
@@ -869,7 +869,7 @@ namespace AethonMod.Content.Globals
                 foreach (var par in menu)
                     pool[par.Key] = par.Value;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OleadaNPC", exRegistro); }
         }
 
         /// <summary>
@@ -891,7 +891,7 @@ namespace AethonMod.Content.Globals
             {
                 if (EsDeOleada && GrimorioFuriaSistema.Activo) return false;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OleadaNPC", exRegistro); }
             return true;
         }
 
@@ -1202,7 +1202,7 @@ namespace AethonMod.Content.Globals
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OleadaNPC", exRegistro); }
 
 
             if (EsDeOleada && !npc.boss)
@@ -1497,8 +1497,20 @@ namespace AethonMod.Content.Globals
                         Coreografia(npc, presa);
                     }
                 }
+
+                // ============================================================
+                //  v6.175 — EL MOTOR DE COMBATE DE LA ARENA, PRESTADO A LA
+                //  OLEADA (la letra: los jefes potenciados son los del
+                //  mundo interior Y los de las oleadas de hambre, «con su
+                //  aura rodeándolos»): dash con telégrafo · voleas
+                //  temáticas · combos por pasos — el MISMO motor del
+                //  interior, al nivel del festín. Solo los JEFES de
+                //  oleada (la chusma no embiste).
+                // ============================================================
+                if (EsJefeDeOleada && EsEspecial)
+                    JefeInteriorGlobalNPC.MotorDeCombateExterno(npc, Math.Max(3, Nivel));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OleadaNPC", exRegistro); }
         }
 
         /// <summary>
@@ -1609,7 +1621,7 @@ namespace AethonMod.Content.Globals
                 }
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item17, npc.Center); // el escupitajo
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OleadaNPC", exRegistro); }
         }
 
         // ==================================================================
@@ -1672,7 +1684,7 @@ namespace AethonMod.Content.Globals
                 efimera.EsEspecial = nivel >= 10;
                 efimera.Coreografia(jefe, presa);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OleadaNPC", exRegistro); }
         }
 
         private void Coreografia(NPC npc, Player presa)
@@ -1697,7 +1709,7 @@ namespace AethonMod.Content.Globals
                         break;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OleadaNPC", exRegistro); }
         }
 
         /// <summary>
@@ -2117,7 +2129,7 @@ namespace AethonMod.Content.Globals
                 npc.netID = 0;
                 npc.boss = false;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OleadaNPC", exRegistro); }
         }
 
         /// <summary>El type VERDADERO de un npc del festín: el del
@@ -2131,7 +2143,7 @@ namespace AethonMod.Content.Globals
                 if (npc.TryGetGlobalNPC<OleadaNPC>(out var sello) &&
                     sello.TipoReservado > 0) return sello.TipoReservado;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OleadaNPC", exRegistro); }
             return npc.type;
         }
 
@@ -2147,7 +2159,7 @@ namespace AethonMod.Content.Globals
                 if (npc.TryGetGlobalNPC<OleadaNPC>(out var sello) &&
                     sello.TipoReservado > 0) return sello.JefeReservado;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OleadaNPC", exRegistro); }
             return npc.boss;
         }
 
@@ -2197,7 +2209,7 @@ namespace AethonMod.Content.Globals
                 if (self != null && (self.type == 0 || self.netID == 0))
                     return;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OleadaNPC", exRegistro); }
             orig(self, closestPlayer);
         }
 
@@ -2260,7 +2272,7 @@ namespace AethonMod.Content.Globals
                             <global::AethonMod.Content.Items.Altar.ItemCorrupto>(), 1);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OleadaNPC", exRegistro); }
         }
 
         // ==================================================================
@@ -2283,7 +2295,7 @@ namespace AethonMod.Content.Globals
             }
             catch
             {
-                try { AuraLib.ReabrirLoteVanilla(); } catch { }
+                try { AuraLib.ReabrirLoteVanilla(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OleadaNPC", exRegistro); }
             }
             return true;
         }
@@ -2304,7 +2316,7 @@ namespace AethonMod.Content.Globals
             }
             catch
             {
-                try { AuraLib.ReabrirLoteVanilla(); } catch { }
+                try { AuraLib.ReabrirLoteVanilla(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OleadaNPC", exRegistro); }
             }
         }
     }

@@ -109,7 +109,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     if ((npc.Center - Projectile.Center).Length() > EntropyRadius) continue;
                     Content.Systems.GolpeMotor.Golpear(Projectile, npc, dot, 0f, true);
                     if (Main.netMode != NetmodeID.MultiplayerClient)
-                        try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 300); } catch { }   // v6.30: el fuego de una estrella MUERTA es NEGRO
+                        try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 300); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DeadStarProjectile", exRegistro); }   // v6.30: el fuego de una estrella MUERTA es NEGRO
                 }
             }
 
@@ -180,7 +180,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 if ((npc.Center - Projectile.Center).Length() > 100f) continue;
                 Content.Systems.GolpeMotor.Golpear(Projectile, npc, burst, 0.5f, true);
                 if (Main.netMode != NetmodeID.MultiplayerClient)
-                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 300); } catch { }   // v6.30: el fuego de una estrella MUERTA es NEGRO
+                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 300); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DeadStarProjectile", exRegistro); }   // v6.30: el fuego de una estrella MUERTA es NEGRO
             }
 
             if (Main.netMode == NetmodeID.Server) return;

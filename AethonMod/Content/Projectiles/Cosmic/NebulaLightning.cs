@@ -132,7 +132,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item12,
                     Projectile.Center);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("NebulaLightning", exRegistro); }
 
             for (int i = 0; i < 18; i++)
             {
@@ -151,7 +151,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
             // la quemadura fría del vacío (firma de la medusa)
-            try { target.AddBuff(BuffID.Frostburn, 300); } catch { }
+            try { target.AddBuff(BuffID.Frostburn, 300); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("NebulaLightning", exRegistro); }
             if (Main.netMode == NetmodeID.Server) return;
 
             for (int i = 0; i < 7; i++)

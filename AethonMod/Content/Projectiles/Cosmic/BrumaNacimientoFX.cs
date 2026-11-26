@@ -162,10 +162,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             alpha: 0.62f * densidad);
                     }
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BrumaNacimientoFX", exRegistro); }
                 finally
                 {
-                    try { Main.spriteBatch.End(); } catch { }
+                    try { Main.spriteBatch.End(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BrumaNacimientoFX", exRegistro); }
                     VFXCore.CerrarLoteSiAbierto();
                 }
 
@@ -276,10 +276,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         alpha: 0.34f * apagon * fadeIn);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BrumaNacimientoFX", exRegistro); }
             finally
             {
-                try { Main.spriteBatch.End(); } catch { }
+                try { Main.spriteBatch.End(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("BrumaNacimientoFX", exRegistro); }
                 VFXCore.CerrarLoteSiAbierto();
             }
 

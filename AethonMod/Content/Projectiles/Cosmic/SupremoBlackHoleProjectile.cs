@@ -196,7 +196,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             toCenter.Normalize();
                             npc.velocity += toCenter * 0.8f;
                         }
-                        try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 480); } catch { }
+                        try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 480); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SupremoBlackHoleProjectile", exRegistro); }
                     }
                 }
             }
@@ -388,7 +388,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Projectile.Center, new Vector2(1f, 0f), 7f, 10, 20, 0.45f,
                     "AethonSupremoBlackHoleFinalBlast"));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SupremoBlackHoleProjectile", exRegistro); }
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item88, Projectile.Center);
 
             // Presets — el COLAPSO SUPREMO (oro + violeta + blanco)

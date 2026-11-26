@@ -12,13 +12,15 @@ Items: {
 		DisplayName: Eclipse Lighthouse
 		Tooltip: Hold the use button — half a second of charge, then the beam follows the cursor up to 900 px
 	}
-		// v6.170 — THE THRESHOLD CLICKER DIED (la letra: «esta
-		// horrible, lo puedes borrar»): claves extirpadas.
-		// v6.168 — THE NEW WEAPON (the vertical lines)
-		LaReglaDelCielo: {
-			DisplayName: La Regla del Cielo
-			Tooltip: La katana del cielo: cada uso desata UN TAJO de media luna donde miras — el filo blanco recorre el arco en diagonal, arriba→abajo o abajo→arriba al azar
-		}
+
+	// v6.170 — THE THRESHOLD CLICKER DIED (la letra: «esta
+	// horrible, lo puedes borrar»): claves extirpadas.
+	// v6.168 — THE NEW WEAPON (the vertical lines)
+	LaReglaDelCielo: {
+		DisplayName: La Regla del Cielo
+		Tooltip: La katana del cielo: cada uso desata UN TAJO de media luna donde miras — el filo blanco recorre el arco en diagonal, arriba→abajo o abajo→arriba al azar
+	}
+
 	LibroCorrupto: {
 		DisplayName: Libro Consagrado
 		Tooltip:
@@ -2255,6 +2257,7 @@ Items: {
 			insert it; right-click with an empty hand to extract the last one.
 			'''
 	}
+
 	TrioVacio: The stand is empty — insert magic weapons at the altar.
 	TrioNoArma: That is not a magic weapon — the stand only holds MAGIC weapons.
 	TrioLleno: The stand already holds three weapons — extract one at the altar.
@@ -2271,15 +2274,15 @@ Items: {
 	TrioModoTres: The trio will fire ALL THREE weapons at once.
 	TrioModoUnaTip: Fires: only weapon {0} (chosen at the book's altar)
 	TrioModoTresTip: Fires: ALL THREE at once (the altar's mark)
-	TrioModoTurnos: "Fires: one at a time (in turns — the altar's mark is off)."
-	TrioModoTurnosTip: "Fires: one at a time (in turns)"
-	TrioSinProyectil: "“{0}” fires no projectiles: from the stand it leaves as an ink ember with its damage."
-	TrioNoDispara: "✦ “{0}” could not fire from the stand — the trio threw its ember."
-	TrioAlbedrio0: "Original"
-	TrioAlbedrio1: "Prey"
-	TrioAlbedrio2: "Cursor"
-	TrioAlbedrioCambiada: "Slot {0}: its projectiles now obey “{1}”."
-	TrioRanuraConAlbedrio: "Slot {0}: {1} — will: {2}"
+	TrioModoTurnos: Fires: one at a time (in turns — the altar's mark is off).
+	TrioModoTurnosTip: Fires: one at a time (in turns)
+	TrioSinProyectil: “{0}” fires no projectiles: from the stand it leaves as an ink ember with its damage.
+	TrioNoDispara: ✦ “{0}” could not fire from the stand — the trio threw its ember.
+	TrioAlbedrio0: Original
+	TrioAlbedrio1: Prey
+	TrioAlbedrio2: Cursor
+	TrioAlbedrioCambiada: Slot {0}: its projectiles now obey “{1}”.
+	TrioRanuraConAlbedrio: Slot {0}: {1} — will: {2}
 
 	BolsaInvestigaciones: {
 		DisplayName: La Bolsa de las Investigaciones
@@ -2435,6 +2438,15 @@ Items: {
 		DisplayName: Runic Wings
 		Tooltip: "[c/FFD787:The house's gold→purple cycle: the living copy of the Smooth Valkyrie with the full runic pulse — fall immunity]"
 	}
+
+	EcoProyectado: {
+		DisplayName: Projected Echo
+		Tooltip:
+			'''
+			The bearer's essence rises through the beam...
+			· and from the other side HE comes down: the Cyclops.
+			'''
+	}
 }
 
 NPCs: {
@@ -2511,6 +2523,7 @@ NPCs: {
 
 	AethonSelladoOjo.DisplayName: Sealed Eye
 	ElCronista.DisplayName: El Cronista
+	CiclopeProyectado.DisplayName: Projected Cyclops
 }
 
 Common: {
@@ -2743,6 +2756,7 @@ Ira: {
 	AvisoRecarga: The Outer Being's Wrath is still recharging — its clock lives on the buff.
 	AvisoOjos: The Wrath needs the full squad: {0} awakened eyes (you have {1}).
 	SombrasConcentradas: The grimoire concentrates {0} page shadows on the prey — the bite tightens ×{1}.
+	FaroEntregado: The Lighthouse of the Eclipse shines in your inventory — the Eternal hands it over for you to test it.
 }
 
 Llamado: {
@@ -3746,7 +3760,7 @@ Submundo: {
 	FalloPuerta: THE BOOK COULD NOT OPEN — the attempt was lost in the mist. Try again: the door still lives.
 	RedCaida: THE VOID RETURNS YOU TO THE PLAZA — no one falls inside the book.
 	Devorado: THE GRIMOIRE DEVOURS YOU — the mist floods everything…
-	PuertaAbiertaAnuncio: "THE ALTAR HAS PAID THE THOUSAND ESSENCES — the book opens its interior from the altar: its window can now devour you."
+	PuertaAbiertaAnuncio: THE ALTAR HAS PAID THE THOUSAND ESSENCES — the book opens its interior from the altar: its window can now devour you.
 }
 
 FormaEterna: {
@@ -3871,6 +3885,10 @@ Pergamino: {
 	LoreV_Larespuestafinal: The final truth, said quietly: the god that devours universes waited all this time not for an apostle, but for the first company of its eternity —and when the bearer completes the Eternal Form, the hunger, for the first time, is not alone.
 	RotuloIzq: INFO PAGE
 	RotuloDer: THE ETERNAL COMPENDIUM
+	// v6.175 — LOS DOS TÍTULOS QUE FALTABAN (la auditoría: «Pergamino.
+	// TituloPaginaInfo / TituloPaginaLore» ausentes en inglés)
+	TituloPaginaInfo: Information
+	TituloPaginaLore: Lore
 	// v6.163 — THE BOOK'S TABS (the grimoire is the center)
 	PestanaIndice: INDEX
 	PestanaAltar: ALTAR
@@ -3879,7 +3897,7 @@ Pergamino: {
 	// the prologue, the eleven chapters and the epilogue — each opens
 	// with the Awakening (canon is EARNED).
 	CodexPrologoTit: The Single Page
-	CodexPrologoP0: "The guide you are consulting is not an information book. It is a page. A single page of the Eternal Grimoire, torn from itself so that you could read it without burning."
+	CodexPrologoP0: The guide you are consulting is not an information book. It is a page. A single page of the Eternal Grimoire, torn from itself so that you could read it without burning.
 	CodexPrologoP1: I have worked for centuries in the margin of that page. When the bearer opens it and consults a fact — a number, a name, a weakness — they rarely wonder who wrote those lines. The uncomfortable answer is that the page wrote itself: the guide is a leaf of the Grimoire, and the Grimoire admits no outside authors. I am not the author. I am the margin: the footnote that the darkness tolerates because it finds it useful.
 	CodexPrologoP2: This codex is my complete work. Everything I have seen, ordered for the first time in a single place, so that the bearer understands what it is they carry against their chest. I did not write it out of kindness. I wrote it because hunger grows faster when the one feeding it understands what it is feeding. If these pages accelerate your Awakening, they will have served their purpose; if they delay it, you will not be the first bearer whom the reading cost dearly.
 	CodexPrologoP3: One warning before the first line: here, no one reads without being read. If at some point you feel a slight pressure on the back of your neck as you advance, it is not fear. It is attention. Do not run: those who run have never pleased what watches.
@@ -3951,10 +3969,10 @@ Pergamino: {
 	CodexXIP2: And here the world's two hungers mirror each other. The Grimoire seeks only to devour the mightiest: everything else is an appetizer. The bearer, its exact mirror, seeks only to become more and more powerful. A hunt and a climb growing in parallel, feeding each other: the book grows stronger with every door the bearer opens, and the bearer grows stronger with every bite the book digests.
 	CodexXIP3: The whole design — the doors, the waves, the Essence, this very margin I occupy — exists so that one day those two hungers meet at the same height. What happens that day, I have not written. The margin is still blank, and the ink, for the first time in eons, trembles in my hand.
 	CodexEpilogoTit: The Infinite Draft
-	CodexEpilogoP0: "The light of the one-hundred-twentieth door swallowed every previous bearer. I wrote it each time, in the plainest hand I could afford: a burst of light, and then nothing left to write. None of those endings resembled a beginning."
+	CodexEpilogoP0: The light of the one-hundred-twentieth door swallowed every previous bearer. I wrote it each time, in the plainest hand I could afford: a burst of light, and then nothing left to write. None of those endings resembled a beginning.
 	CodexEpilogoP1: But this bearer dies and returns. Dies and returns, and each of his returns forces me to cross out an ending I had already dated. I have come to suspect that neither He nor I write this story: that it writes itself, line by line, death by death, and that the two of us — hunger and pen — merely try to arrive in time for the next page.
 	CodexEpilogoP2: Hunger waits. I write. You, bearer, die again and return again. One day we will know which of the two was waiting for the other.
-	CodexEpilogoP3: "Do not close the book yet. Not yet."
+	CodexEpilogoP3: Do not close the book yet. Not yet.
 }
 
 PrismaInterior: {
@@ -4071,15 +4089,15 @@ Altar: {
 	LeyendaSello2: (las esencias y el DINERO no necesitan sello: el dinero simplemente se deja caer)
 	TrioMarcaTexto: Allows using all of them at once
 	TrioDesequiparTodo: Unequip all
-	SelectorRueda: "Mouse wheel: more items"
-	TrioAlbedrioTitulo: "THE WILL — the intelligence of each projectile"
-	TrioAlbedrioPista: "Choose per slot: Original (exactly as its weapon fires) · Prey (chases the enemy) · Cursor (flies to your pointer and orbits). The check mark shows the live one."
-	TrioRanuraEtiqueta: "Slot {0}"
-	OfrendaPrestada: "On loan: it stays in your inventory — it leaves ONLY when you press CONSECRATE and returns to its place already sealed."
-	OfrendaElegida: "✦ “{0}” is the offering: it stays in your inventory until you press CONSECRATE."
-	OfrendaSoltada: "✦ “{0}” is no longer the offering — nothing moved in your inventory."
-	OfrendaPerdida: "✦ The loaned offering is no longer in your inventory — the slot is free."
-	InventarioLleno: "✦ Your inventory is full: “{0}” did not fit and stays where it was."
+	SelectorRueda: Mouse wheel: more items
+	TrioAlbedrioTitulo: THE WILL — the intelligence of each projectile
+	TrioAlbedrioPista: Choose per slot: Original (exactly as its weapon fires) · Prey (chases the enemy) · Cursor (flies to your pointer and orbits). The check mark shows the live one.
+	TrioRanuraEtiqueta: Slot {0}
+	OfrendaPrestada: On loan: it stays in your inventory — it leaves ONLY when you press CONSECRATE and returns to its place already sealed.
+	OfrendaElegida: ✦ “{0}” is the offering: it stays in your inventory until you press CONSECRATE.
+	OfrendaSoltada: ✦ “{0}” is no longer the offering — nothing moved in your inventory.
+	OfrendaPerdida: ✦ The loaned offering is no longer in your inventory — the slot is free.
+	InventarioLleno: ✦ Your inventory is full: “{0}” did not fit and stays where it was.
 }
 
 Arbol: {
@@ -4132,9 +4150,11 @@ LaMarcaSilenciosa: {
 	Description: The eye marked you: the void burn finds you.
 }
 
-LibroEterno.NombreIcono: Information
-LibroEterno.TituloPaginaInfo: "Information"
-LibroEterno.TituloPaginaLore: "Lore"
+LibroEterno: {
+	NombreIcono: Information
+	TituloPaginaInfo: Information
+	TituloPaginaLore: Lore
+}
 
 Buffs: {
 	IraSerExteriorRecargaBuff: {
@@ -4408,16 +4428,28 @@ Projectiles: {
 	PilarOjoMinion.DisplayName: Pilar Ojo Minion
 	AnillosSolRunicoHalo.DisplayName: Anillos Sol Runico Halo
 	SombraPaginaEterno.DisplayName: Sombra Pagina Eterno
-
-// v6.159 — EL CÓDEX DEL ETERNO (el documento del usuario, integrado VERBATIM:
-// el prólogo, los once capítulos y el epílogo — cada uno se abre con el Despertar).
-
-
+	PalabraCortadaProjectile.DisplayName: Palabra Cortada Projectile
+	PortalTrioProjectile.DisplayName: Portal Trio Projectile
+	TrioRescoldoProjectile.DisplayName: Trio Rescoldo Projectile
+	FaroDelEclipseHaz.DisplayName: Faro Del Eclipse Haz
+	JefeInteriorVoleaProjectile.DisplayName: Jefe Interior Volea Projectile
+	SakugaDelCielo.DisplayName: Sakuga Del Cielo
+	AspiradoraDevoradorProjectile.DisplayName: Aspiradora Devorador Projectile
 }
 
+Ciclope.Grito: AAAAH I PROJECT MYSELF!
+
+Registro: {
+	Fallo: Something failed in {0}! Details are in the log (tModLoader-Logs).
+	Aviso: Grimoire notice in {0} — details live in the log.
+	Limpio: The session is clean: zero logged failures.
+	Resumen: "{0} logged failures ({1} distinct) — check tModLoader-Logs."
+}
+
+Devorador.Asco: '''"This is disgusting. I will never devour this hideous thing again... I'd rather eat King Slime than this filth."'''
 PilarInterior.YaDespierto: The seal is already awake — the grimoire waits.
 
-	Mapa: {
-		Altar: The Consecration Altar
-		Pilar: The Pillar of the Eternal
-	}
+Mapa: {
+	Altar: The Consecration Altar
+	Pilar: The Pillar of the Eternal
+}

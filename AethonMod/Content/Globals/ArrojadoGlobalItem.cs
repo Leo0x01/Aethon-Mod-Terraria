@@ -153,7 +153,7 @@ namespace AethonMod.Content.Globals
                     Prefijo = clon.prefix
                 };
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ArrojadoGlobalItem", exRegistro); }
         }
 
         /// <summary>¿VIVE todavía el gemelo del tiro en esta casilla? (la
@@ -205,7 +205,7 @@ namespace AethonMod.Content.Globals
                     }
                     _tirosPendientes.Clear();
                 }
-                catch { try { _tirosPendientes.Clear(); } catch { } }
+                catch { try { _tirosPendientes.Clear(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ArrojadoGlobalItem", exRegistro); } }
             }
         }
 
@@ -244,7 +244,7 @@ namespace AethonMod.Content.Globals
                 if (mejor >= 0)
                     Main.item[mejor].GetGlobalItem<ArrojadoGlobalItem>().DelJugador = true;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ArrojadoGlobalItem", exRegistro); }
         }
 
         // ================================================================
@@ -254,7 +254,7 @@ namespace AethonMod.Content.Globals
         public override void SaveData(Item item, TagCompound tag)
         {
             try { if (DelJugador) tag["arrojado"] = true; }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ArrojadoGlobalItem", exRegistro); }
         }
 
         public override void LoadData(Item item, TagCompound tag)

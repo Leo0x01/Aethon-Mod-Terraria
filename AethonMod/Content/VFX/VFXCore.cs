@@ -1094,7 +1094,7 @@ namespace AethonMod.Content.VFX
                     Main.DefaultSamplerState, DepthStencilState.None,
                     Main.Rasterizer, null, Main.Transform);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("VFXCore", exRegistro); }
         }
 
         /// <summary>
@@ -1232,7 +1232,7 @@ namespace AethonMod.Content.VFX
                 device.SamplerStates[2] = SamplerState.LinearClamp;
                 device.SamplerStates[3] = SamplerState.LinearClamp;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("VFXCore", exRegistro); }
         }
 
         // --- LA PUERTA DE CALIDAD ---
@@ -1386,7 +1386,7 @@ namespace AethonMod.Content.VFX
         /// </summary>
         public static void Reiniciar()
         {
-            try { _quads.Clear(); } catch { }
+            try { _quads.Clear(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("VFXCore", exRegistro); }
             // v6.50.51 — el anillo horneado se suelta (se rehornea solo al
             // próximo uso — 1 ms). v6.56.1 — LAS 4 HORNEADAS TAMBIÉN
             // (Carne/Colmillo/Ventosa/OjoRasgado): el comentario viejo decía
@@ -1422,11 +1422,11 @@ namespace AethonMod.Content.VFX
                 {
                     Main.QueueMainThreadAction(() =>
                     {
-                        try { vieja.Dispose(); } catch { }
+                        try { vieja.Dispose(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("VFXCore", exRegistro); }
                     });
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("VFXCore", exRegistro); }
         }
 
         /// <summary>
@@ -1598,7 +1598,7 @@ namespace AethonMod.Content.VFX
             // Solo procesos que dibujan; jamás romper el frame por higiene.
             if (Main.netMode == NetmodeID.Server || Main.gameMenu) return;
             try { VFXCore.Janitor(); }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("VFXCore", exRegistro); }
         }
     }
 }

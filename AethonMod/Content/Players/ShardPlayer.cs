@@ -421,7 +421,7 @@ namespace AethonMod.Content.Players
             {
                 EcoRed.SincronizarDevoracion(Player);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardPlayer", exRegistro); }
         }
 
         // ================================================================
@@ -486,7 +486,7 @@ namespace AethonMod.Content.Players
                 if (eterno != null && eterno.Hambre > 0f)
                     return (int)Math.Min(100f, MathF.Floor(eterno.Hambre * 100f));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardPlayer", exRegistro); }
             return Math.Min(100, MomentosHambre * 10);
         }
 
@@ -610,7 +610,7 @@ namespace AethonMod.Content.Players
                     var s = held.GetGlobalItem<ShardLevelItem>();
                     if (s != null) return s.Level;
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardPlayer", exRegistro); }
             }
             if (soloSostenido) return 0;
 
@@ -624,7 +624,7 @@ namespace AethonMod.Content.Players
                     var s = inv.GetGlobalItem<ShardLevelItem>();
                     if (s != null) return s.Level;
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardPlayer", exRegistro); }
                 break; // la PRIMERA copia del inventario manda
             }
             return 0;
@@ -798,7 +798,7 @@ namespace AethonMod.Content.Players
                 // Armor penetration +2% cada 5 niveles (Máximo 50%)
                 Player.GetArmorPenetration(DamageClass.Magic) += WeaponScaling.ArmorPenBonus(nivel) * factor;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardPlayer", exRegistro); }
         }
 
         /// <summary>
@@ -924,7 +924,7 @@ namespace AethonMod.Content.Players
                 else if (idx >= 0)
                     Player.DelBuff(idx);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardPlayer", exRegistro); }
         }
 
         // ================================================================
@@ -994,7 +994,7 @@ namespace AethonMod.Content.Players
                 }
                 else { _iraHoldDerecho = 0; _iraCargandoHold = false; }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardPlayer", exRegistro); }
 
             // EL BUFF DEL RELOJ — desde el nivel 100, siempre visible
             MantenerBuffDeLaIra();
@@ -1079,7 +1079,7 @@ namespace AethonMod.Content.Players
             // v6.51.12 — EL RELOJ LARGO DEL CORO: un tick de juego más
             // sin hadas (la garantía de las 2 h lo lee
             // AethonMenorPareja — y ArrancarPlaga lo devuelve a cero).
-            try { if (TicksSinCoro < int.MaxValue - 1) TicksSinCoro++; } catch { }
+            try { if (TicksSinCoro < int.MaxValue - 1) TicksSinCoro++; } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardPlayer", exRegistro); }
 
             // v6.51.0 — LOS ATAQUES COMBINADOS DEL DESPERTAR (el sol
             // rúnico y los agujeros negros de los ojos): el coordinador
@@ -1088,7 +1088,7 @@ namespace AethonMod.Content.Players
             {
                 Content.Systems.AtaquesCombinadosSistema.Tick(Player);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardPlayer", exRegistro); }
 
             try
             {
@@ -1284,7 +1284,7 @@ namespace AethonMod.Content.Players
                 // — el que quede vivo de partidas viejas se despide
                 // solo en el primer tick.)
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardPlayer", exRegistro); }
         }
 
         /// <summary>
@@ -1364,6 +1364,41 @@ namespace AethonMod.Content.Players
         {
             int idx = MuertesInteriorTipos.IndexOf(npcType);
             return idx >= 0 ? MuertesInteriorCuenta[idx] : 0;
+        }
+
+        // ================================================================
+        //  v6.175 — LAS INVOCACIONES DEL PILAR: cuántas veces se ha
+        //  invocado a CADA jefe dentro del mundo interior (la letra del
+        //  Devorador: «en el momento en el que sea invocado por segunda
+        //  vez se hace una animación espacial… el grimorio del eterno lo
+        //  devora por completo»). Persiste igual que los kills.
+        // ================================================================
+        public System.Collections.Generic.List<int> InvocacionesInteriorTipos = new System.Collections.Generic.List<int>();
+        public System.Collections.Generic.List<int> InvocacionesInteriorCuenta = new System.Collections.Generic.List<int>();
+
+        /// <summary>La cuenta de invocaciones interior de ESTE jefe.</summary>
+        public int InvocacionesInteriorDe(int npcType)
+        {
+            int idx = InvocacionesInteriorTipos.IndexOf(npcType);
+            return idx >= 0 ? InvocacionesInteriorCuenta[idx] : 0;
+        }
+
+        /// <summary>UNA INVOCACIÓN MÁS (devuelve la cuenta nueva; 1 si es
+        /// la primera).</summary>
+        public int MarcarInvocacionInterior(int npcType)
+        {
+            try
+            {
+                int idx = InvocacionesInteriorTipos.IndexOf(npcType);
+                if (idx < 0)
+                {
+                    InvocacionesInteriorTipos.Add(npcType);
+                    InvocacionesInteriorCuenta.Add(1);
+                    return 1;
+                }
+                return ++InvocacionesInteriorCuenta[idx];
+            }
+            catch { return 1; }
         }
 
         /// <summary>v6.137 — UN KILL MÁS en la arena (devuelve la cuenta
@@ -1567,7 +1602,7 @@ namespace AethonMod.Content.Players
                         if (idx99 >= 0) entregados++;
                     }
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardPlayer", exRegistro); }
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Cosmetics.FormaAscendidaDosItem>());
                 entregados += EntregarSiNoTiene(ModContent.ItemType
@@ -1703,7 +1738,7 @@ namespace AethonMod.Content.Players
                         new Microsoft.Xna.Framework.Color(255, 240, 180));
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardPlayer", exRegistro); }
         }
 
         /// <summary>
@@ -1775,6 +1810,10 @@ namespace AethonMod.Content.Players
                 // por jefe — el poder +25% por muerte persiste).
                 tag["muertesInteriorTipos"] = MuertesInteriorTipos;
                 tag["muertesInteriorCuenta"] = MuertesInteriorCuenta;
+                // v6.175 — LAS INVOCACIONES DEL PILAR (la segunda llamada
+                // del Devorador desata la ASPIRADORA del grimorio)
+                tag["invocInteriorTipos"] = InvocacionesInteriorTipos;
+                tag["invocInteriorCuenta"] = InvocacionesInteriorCuenta;
                 // v6.50.115 — EL FESTÍN DEL GUARDIÁN (el easter egg de la
                 // Mazmorra: una vez por portador)
                 tag["guardianDevorado"] = GuardianMazmorraDevorado;
@@ -1814,7 +1853,7 @@ namespace AethonMod.Content.Players
                 // v6.170 — LAS HISTORIAS DEL CRONISTA (lo que ya narró)
                 tag["loreDesbloqueado"] = LoreDesbloqueado;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardPlayer", exRegistro); }
         }
 
         public override void LoadData(TagCompound tag)
@@ -1845,6 +1884,10 @@ namespace AethonMod.Content.Players
                 LoreDesbloqueado = tag.GetInt("loreDesbloqueado");
                 MuertesInteriorTipos = new System.Collections.Generic.List<int>(tag.GetList<int>("muertesInteriorTipos"));
                 MuertesInteriorCuenta = new System.Collections.Generic.List<int>(tag.GetList<int>("muertesInteriorCuenta"));
+                // v6.175 — LAS INVOCACIONES DEL PILAR (ausente = lista
+                // vacía: los guardados viejos estrenan su Devorador)
+                InvocacionesInteriorTipos = new System.Collections.Generic.List<int>(tag.GetList<int>("invocInteriorTipos"));
+                InvocacionesInteriorCuenta = new System.Collections.Generic.List<int>(tag.GetList<int>("invocInteriorCuenta"));
                 // v6.50.115 — EL FESTÍN DEL GUARDIÁN (ausente = false: aún
                 // no ocurrió — el guardado viejo estrena el easter egg)
                 GuardianMazmorraDevorado = tag.GetBool("guardianDevorado");
@@ -1899,7 +1942,7 @@ namespace AethonMod.Content.Players
                     CorazonEstelar > 0 || AlmaVeloz > 0 || PunoTitan > 0)
                     AlmaLegacyPendiente = true;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardPlayer", exRegistro); }
         }
     }
 }

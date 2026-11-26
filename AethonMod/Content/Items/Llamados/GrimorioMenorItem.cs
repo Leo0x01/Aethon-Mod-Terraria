@@ -162,7 +162,7 @@ namespace AethonMod.Content.Items.Llamados
                     new Rectangle(11, 13, 1, 1), Color.White * 0.90f,
                     0f, Vector2.Zero, MathF.Max(1f, 1.35f * scale), SpriteEffects.None, 0f);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioMenorItem", exRegistro); }
         }
 
         // ================================================================

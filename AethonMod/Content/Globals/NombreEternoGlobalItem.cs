@@ -197,7 +197,7 @@ namespace AethonMod.Content.Globals
                         SpriteEffects.None, 0f);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("NombreEternoGlobalItem", exRegistro); }
         }
     }
 }

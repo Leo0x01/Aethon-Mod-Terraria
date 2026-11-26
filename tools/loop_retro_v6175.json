@@ -1,0 +1,49 @@
+{
+ "cs_archivos": 472,
+ "cs_lineas": 193224,
+ "catch_vacio": 6,
+ "catch_total": 1124,
+ "catch_registrado": 701,
+ "rand_en_dibujo": 10,
+ "alloc_en_dibujo": 8,
+ "rand_top": {
+  "JuicioDosSoles.cs": 5,
+  "ElCronista.cs": 3,
+  "PrimerTrazoHeld.cs": 1,
+  "AlasAuroraHalo.cs": 1
+ },
+ "alloc_top": {
+  "PrimerTrazoFajo.cs": 7,
+  "AethonMenorOscuroPet.cs": 1
+ },
+ "Immediate": 60,
+ "vfx_archivos": 77,
+ "vfx_lineas": 48895,
+ "loc_es": 1841,
+ "loc_en": 2026,
+ "loc_faltan_en": 2,
+ "loc_faltan_es": 187,
+ "loc_en_igual_es": 1279,
+ "claves_faltantes_es": [
+  "Altar.",
+  "Armas.DagaInvocada",
+  "Armas.EscuadronMejora",
+  "Buffs.AuraVacioBuff.Trabajando",
+  "Cronista.ChatLore",
+  "Duende.Burla",
+  "Duende.Miedo",
+  "Hambre.",
+  "Hambre.Nervioso.",
+  "Items.",
+  "Items.AuraDeJuicio2Item.",
+  "Items.CetroDagasEterno.",
+  "Items.FormaEternaItem.",
+  "Items.MundoInteriorEternoItem.",
+  "Items.TrioAlbedrio",
+  "Pergamino."
+ ],
+ "claves_faltantes_es_n": 16,
+ "png_n": 513,
+ "png_invalidos": [],
+ "_fuente": "loop_retro_v6175.py"
+}

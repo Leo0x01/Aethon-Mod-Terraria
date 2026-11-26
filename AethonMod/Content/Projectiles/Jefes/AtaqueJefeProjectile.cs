@@ -3061,7 +3061,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                         }
                         finally { HazLib.Cerrar(); }
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AtaqueJefeProjectile", exRegistro); }
                     // (el Cerrar de HazLib deja SU lote aditivo abierto: se
                     // cierra aquí para que la FASE 2 haga su Begin limpia —
                     // el mismo estado en que la 1.5 no hubiera corrido)

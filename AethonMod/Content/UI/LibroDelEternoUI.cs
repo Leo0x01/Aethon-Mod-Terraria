@@ -137,7 +137,7 @@ namespace AethonMod.Content.UI
                 if (Pestana == 1 && AltarOfrendasUI.Abierta) AltarOfrendasUI.ForzarCierre();
                 else if (Pestana == 2 && PrismaInteriorUI.Abierta) PrismaInteriorUI.ForzarCierre();
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LibroDelEternoUI", exRegistro); }
             if (_estado != null) _estado.Visible = false;
             _iface.SetState(null);
             Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuClose);
@@ -304,7 +304,7 @@ namespace AethonMod.Content.UI
                             SpriteEffects.None, 0f);
                     }
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LibroDelEternoUI", exRegistro); }
 
                 // LA PULSACIÓN DEL OJO (la vida del icono: el destello
                 // violeta que respira)
@@ -333,7 +333,7 @@ namespace AethonMod.Content.UI
                     Main.LocalPlayer.mouseInterface = true;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LibroDelEternoUI", exRegistro); }
         }
     }
 
@@ -883,7 +883,7 @@ namespace AethonMod.Content.UI
                 //  cursor, el de verdad, en su sitio.
                 // ============================================================
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LibroDelEternoUI", exRegistro); }
             finally
             {
                 // v6.174 — EL FLANCO SE COMPLETA SIEMPRE (con o sin
@@ -974,7 +974,7 @@ namespace AethonMod.Content.UI
                         <global::AethonMod.Content.Players.ShardPlayer>();
                     if (sp != null) selloCronista = sp.LoreDesbloqueado;
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LibroDelEternoUI", exRegistro); }
             }
             foreach (var sec in secciones)
             {
@@ -1177,7 +1177,7 @@ namespace AethonMod.Content.UI
                     (int)(cx + iris.X - radio * 0.34f - 4), (int)(cy + iris.Y - radio * 0.34f - 4),
                     8, 8), new Color(255, 246, 220) * (0.8f * alpha));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LibroDelEternoUI", exRegistro); }
         }
     }
     // ====================================================================
@@ -1339,7 +1339,12 @@ namespace AethonMod.Content.UI
             cy = Boton(sb, pag, rec, cyBoton, At("BotonConsagrar"), TintaVioleta, out GeoConsagrar, clicNuevo,
                 () => AltarOfrendasUI.ClicEnConsagrar(), apagado: !hayArma);
             if (GeoConsagrar.Width > 0)
-                ancla = new Rectangle(GeoConsagrar.X, GeoConsagrar.Bottom + 1, GeoConsagrar.Width, 1);
+                // v6.175 — LA VENTANA PEGADA AL SLOT (la letra: «la ventana
+                // flotante en el slot consagrar… están muy separadas de los
+                // slots, las ventanas flotantes deben estar pegadas al slot
+                // justo debajo de él»): el ancla es EL SLOT DE LA OFRENDA,
+                // no el botón de abajo — la ventana nace justo bajo el hueco
+                ancla = new Rectangle(GeoSlot.X, GeoSlot.Bottom + 2, GeoSlot.Width, 1);
 
             // ── GANA + CÓMO CONSEGUIR ESENCIAS ──
             cy += 4f;
@@ -1478,7 +1483,6 @@ namespace AethonMod.Content.UI
             cy = Linea(At("TrioAlbedrioPista"), cy, 0.72f, TintaApagado);
 
             float anchoEtiqueta = 78f;
-            float anchoChip = (maxAncho - anchoEtiqueta - 12f) / 3f;
             for (int i = 0; i < 3 && Cabe(cy, 28f, rec); i++)
             {
                 Item ra = trio.Ranuras != null && i < trio.Ranuras.Length ? trio.Ranuras[i] : null;
@@ -1488,21 +1492,29 @@ namespace AethonMod.Content.UI
                 LibroLineas.Texto(sb, et, new Vector2(x0, cy + 13f), llena ? Tinta : TintaApagado, 0.76f, 0f, 0.5f);
                 for (int j = 0; j < 3; j++)
                 {
-                    Rectangle chip = new Rectangle((int)(x0 + anchoEtiqueta + j * (anchoChip + 6f)), (int)cy,
-                        (int)anchoChip, 26);
-                    GeoAlbedrio[i, j] = chip;
+                    // ========================================================
+                    //  v6.175 — EL CHECKLIST SIMPLE (la letra: «el checklist
+                    //  de las armas del trio eterno es demasiado grando, o
+                    //  sea es una linea morada, hazlo simple, que el
+                    //  cuadradito solo cambie de color y se rellene de
+                    //  morado»): los CHIPS anchos MUEREN (la caja grande
+                    //  con marco leía como «una línea morada») — queda SOLO
+                    //  el cuadradito cosido: apagado vacío · viva = RELLENO
+                    //  DE MORADO + su marco violeta. El texto al lado.
+                    // ========================================================
+                    Rectangle casilla = new Rectangle((int)(x0 + anchoEtiqueta + j * 118f), (int)cy + 4, 18, 18);
+                    GeoAlbedrio[i, j] = casilla;
                     bool viva = llena && trio.Inteligencia != null && i < trio.Inteligencia.Length &&
                         trio.Inteligencia[i] == j;
-                    bool hovC = llena && chip.Contains(Main.mouseX, Main.mouseY);
-                    sb.Draw(TextureAssets.MagicPixel.Value, chip, viva ? TintaVioleta * 0.22f : PapelSombra * 0.7f);
-                    LibroMarco.Marco(sb, chip, !llena ? TintaApagado * 0.35f : viva || hovC ? TintaVioleta : TintaOro * 0.45f);
-                    Rectangle casilla = new Rectangle(chip.X + 5, chip.Y + 5, 16, 16);
-                    sb.Draw(TextureAssets.MagicPixel.Value, casilla, PapelSombra * 0.6f);
-                    LibroMarco.Marco(sb, casilla, viva ? TintaVioleta : TintaApagado * 0.7f);
-                    if (viva) LibroMarco.Palomita(sb, casilla, TintaVioleta);
+                    bool hovC = llena && casilla.Contains(Main.mouseX, Main.mouseY);
+                    // EL CUADRADITO: vacío (papel) o RELLENO de morado
+                    sb.Draw(TextureAssets.MagicPixel.Value, casilla,
+                        viva ? TintaVioleta * 0.85f : PapelSombra * 0.7f);
+                    LibroMarco.Marco(sb, casilla,
+                        !llena ? TintaApagado * 0.35f : viva || hovC ? TintaVioleta : TintaApagado * 0.7f);
                     string txt = Language.GetTextValue("Mods.AethonMod.Items.TrioAlbedrio" + j);
-                    float escT = LibroLineas.EscalaQueCabe(txt, 0.76f, chip.Width - 30f);
-                    LibroLineas.Texto(sb, txt, new Vector2(casilla.Right + 6f, chip.Center.Y),
+                    float escT = LibroLineas.EscalaQueCabe(txt, 0.76f, 92f);
+                    LibroLineas.Texto(sb, txt, new Vector2(casilla.Right + 6f, casilla.Center.Y),
                         !llena ? TintaApagado : viva ? TintaVioleta : Tinta, escT, 0f, 0.5f);
                     if (hovC && (clicNuevo || clicDerNuevo) && !selectorVivo)
                         AltarOfrendasUI.ClicEnAlbedrio(i, j);
@@ -1510,10 +1522,16 @@ namespace AethonMod.Content.UI
                 cy += 32f;
             }
 
-            // ── EL SELECTOR DEL TRÍO: nace DEBAJO de todo ──
-            if (abrirPara != int.MinValue)
-                SelectorFlotante.Abrir(new Rectangle(pag.X + pag.Width / 2 - 141, (int)cy + 4, 282, 1), true,
+            // ── EL SELECTOR DEL TRÍO: PEGADO A LA RANURA CLICADA ──
+            // v6.175 (la letra: «el slot de las armas del trio eterno…
+            // deben estar pegadas al slot justo debajo de él»): nace
+            // DEBAJO DE LA RANURA que la abrió, no al final de la página
+            if (abrirPara != int.MinValue && GeoTrio[abrirPara].Width > 0)
+            {
+                Rectangle s = GeoTrio[abrirPara];
+                SelectorFlotante.Abrir(new Rectangle(s.X, s.Bottom + 2, s.Width, 1), true,
                     At("SelectorTrioTitulo"), abrirPara, 3);
+            }
             return 0f;
         }
     }
@@ -1549,8 +1567,19 @@ namespace AethonMod.Content.UI
             {
                 if (!(y < recorte.Y + recorte.Height && y + alto > recorte.Y)) return;
                 float ancho = fuente.MeasureString(linea.ToString()).X * esc;
+                // v6.175 — EL DESBORDE DE LA PALABRA LARGA (la letra:
+                // «algunos textos se desbordan»): una línea sin espacios
+                // que excede el ancho SE ENCOGE para caber (jamás sale del
+                // papel) — la escala vive solo en el dibujado, el reflow
+                // de siempre no cambia
+                float escV = esc;
+                if (ancho > maxAncho && ancho > 0f)
+                {
+                    escV = esc * (maxAncho / ancho);
+                    ancho = maxAncho;
+                }
                 float xc = pagina.X + (pagina.Width - ancho) * 0.5f;
-                Texto(sb, linea.ToString(), new Vector2(xc, y), c, esc);
+                Texto(sb, linea.ToString(), new Vector2(xc, y), c, escV);
             }
             foreach (string pal in palabras)
             {
@@ -1753,7 +1782,7 @@ namespace AethonMod.Content.UI
                     { yaVive = true; break; }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LibroDelEternoUI", exRegistro); }
             cy = Boton(sb, pag, rec, cy, yaVive
                 ? Language.GetTextValue("Mods.AethonMod.PrismaInterior.YaVive")
                 : Language.GetTextValue("Mods.AethonMod.PrismaInterior.BotonInvocar"),
@@ -1821,7 +1850,7 @@ namespace AethonMod.Content.UI
 
             // EL BOTÓN LANZAR (la oleada del festín)
             bool festinVivo = false;
-            try { festinVivo = Systems.GrimorioFuriaSistema.Activo; } catch { }
+            try { festinVivo = Systems.GrimorioFuriaSistema.Activo; } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LibroDelEternoUI", exRegistro); }
             cy = Boton(sb, pag, rec, cy + 2f, festinVivo
                 ? Language.GetTextValue("Mods.AethonMod.PrismaInterior.OleadaCorre")
                 : Language.GetTextValue("Mods.AethonMod.PrismaInterior.OleadaLanzar", NivelElegido),
@@ -1843,9 +1872,18 @@ namespace AethonMod.Content.UI
             else
             {
                 // LA VITRINA: desde cy hasta el borde útil de la página.
+                // v6.175 — EL DESBORDE VERTICAL (la letra: «algunos textos
+                // se desbordan»): la vitrina NUNCA pasa del borde inferior
+                // de la página — se ENCOGE a lo que quede (antes forzaba
+                // 60 px y rebosaba el papel)
                 int topVitrina = (int)cy;
                 int altoVitrina = (pag.Y + pag.Height - 14) - topVitrina;
-                if (altoVitrina < 60) altoVitrina = 60;   // mínimo legible
+                if (altoVitrina < 60)
+                {
+                    // no cabe: se dibuja la fila inicial a nivel de texto y
+                    // el recorte de filas hace el resto (nada rebosa)
+                    altoVitrina = Math.Max(0, altoVitrina);
+                }
                 Rectangle vitrina = new Rectangle((int)xizq - 4, topVitrina, (int)maxAncho + 8, altoVitrina);
                 GeoVitrina = vitrina;
 
@@ -1883,7 +1921,7 @@ namespace AethonMod.Content.UI
                     int nivelPoder = Math.Min(10, 1 + kills);
                     float mult = Globals.JefeInteriorGlobalNPC.Multiplicador(kills);
                     string nombreJefe = "???";
-                    try { nombreJefe = Terraria.Lang.GetNPCNameValue(tipoJefe); } catch { }
+                    try { nombreJefe = Terraria.Lang.GetNPCNameValue(tipoJefe); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LibroDelEternoUI", exRegistro); }
                     if (string.IsNullOrEmpty(nombreJefe)) nombreJefe = "???";
                     // EL NOMBRE: medido para su mitad; EL PODER: para la suya.
                     string poder = Language.GetTextValue(

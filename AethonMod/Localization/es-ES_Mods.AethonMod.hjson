@@ -12,14 +12,15 @@ Items: {
 		DisplayName: Faro del Eclipse
 		Tooltip: Mantén apretado el botón de uso — medio segundo de carga y el conducto sigue al cursor hasta 900 px
 	}
-		// v6.170 — EL CLICKER DEL UMBRAL MURIÓ (la letra: «esta
-		// horrible, lo puedes borrar»): claves extirpadas.
-		// v6.168 — EL ARMA NUEVA (la letra: «crea una nueva arma, su
-		// ataque seran lineas en el aire a gran velocidad»)
-		LaReglaDelCielo: {
-			DisplayName: La Regla del Cielo
-			Tooltip: La katana del cielo: cada uso desata UN TAJO de media luna donde miras — el filo blanco recorre el arco en diagonal, arriba→abajo o abajo→arriba al azar
-		}
+
+	// v6.170 — THE THRESHOLD CLICKER DIED (la letra: «esta
+	// horrible, lo puedes borrar»): claves extirpadas.
+	// v6.168 — THE NEW WEAPON (the vertical lines)
+	LaReglaDelCielo: {
+		DisplayName: La Regla del Cielo
+		Tooltip: La katana del cielo: cada uso desata UN TAJO de media luna donde miras — el filo blanco recorre el arco en diagonal, arriba→abajo o abajo→arriba al azar
+	}
+
 	LibroCorrupto: {
 		DisplayName: Libro Consagrado
 		Tooltip:
@@ -2024,8 +2025,7 @@ Items: {
 	}
 
 	ArmaCorruptaTag: (Consagrado)
-	// v6.158 — LA POCIÓN CONSAGRADA DOBLE (la letra: «cuando se
-	// consagra una pocion… se duplica dependiendo de lo que haga»).
+	// v6.158 — the consecrated potion doubles what it does.
 	PocionConsagrada: La consagración duplica su efecto:
 	PocionVidaDoble: vida ×2
 	PocionManaDoble: maná ×2
@@ -2231,7 +2231,7 @@ Items: {
 			'''
 	}
 
-	// v6.159 — EL TRÍO DEL ETERNO: el arma de las tres armas.
+	// v6.159 — the weapon of three weapons.
 	TrioDelEterno: {
 		DisplayName: El Trío del Eterno
 		Tooltip:
@@ -2241,6 +2241,7 @@ Items: {
 			insertarla; clic derecho con la mano vacía para extraer la última.
 			'''
 	}
+
 	TrioVacio: El atril está vacío — insértale armas mágicas desde el altar.
 	TrioNoArma: Eso no es un arma mágica — el atril solo sostiene armas MÁGICAS.
 	TrioLleno: El atril ya sostiene tres armas — extrae una en el altar.
@@ -2253,20 +2254,19 @@ Items: {
 	TrioComo: El altar del libro consagra las armas · el Trío dispara lo elegido allí.
 	TrioLibre: (libre)
 	TrioRanura: Ranura {0}: {1}
-	// v6.163 — LA ELECCIÓN VIVE EN EL ALTAR (el arma solo dispara)
 	TrioModoUna: El trío disparará SOLO el arma {0}.
 	TrioModoTres: El trío disparará LAS TRES ARMAS a la vez.
 	TrioModoUnaTip: Dispara: solo el arma {0} (se elige en el altar del libro)
 	TrioModoTresTip: Dispara: LAS TRES a la vez (la marca del altar)
-	TrioModoTurnos: "Dispara: de una en una (por turnos — la marca del altar está suelta)."
-	TrioModoTurnosTip: "Dispara: de una en una (por turnos)"
-	TrioSinProyectil: "«{0}» no dispara proyectiles: desde el atril sale como brasa de tinta con su daño."
-	TrioNoDispara: "✦ «{0}» no logró disparar desde el atril — el trío lanzó su brasa."
-	TrioAlbedrio0: "Original"
-	TrioAlbedrio1: "Presa"
-	TrioAlbedrio2: "Cursor"
-	TrioAlbedrioCambiada: "Ranura {0}: sus proyectiles ahora obedecen «{1}»."
-	TrioRanuraConAlbedrio: "Ranura {0}: {1} — albedrío: {2}"
+	TrioModoTurnos: Dispara: de una en una (por turnos — la marca del altar está suelta).
+	TrioModoTurnosTip: Dispara: de una en una (por turnos)
+	TrioSinProyectil: «{0}» no dispara proyectiles: desde el atril sale como brasa de tinta con su daño.
+	TrioNoDispara: ✦ «{0}» no logró disparar desde el atril — el trío lanzó su brasa.
+	TrioAlbedrio0: Original
+	TrioAlbedrio1: Presa
+	TrioAlbedrio2: Cursor
+	TrioAlbedrioCambiada: Ranura {0}: sus proyectiles ahora obedecen «{1}».
+	TrioRanuraConAlbedrio: Ranura {0}: {1} — albedrío: {2}
 
 	BolsaInvestigaciones: {
 		DisplayName: La Bolsa de las Investigaciones
@@ -2422,6 +2422,15 @@ Items: {
 		DisplayName: Alas Rúnicas
 		Tooltip: "[c/FFD787:El ciclo dorado→morado de la casa: la copia viva de la Valquiria Lisa con el pulso rúnico completo — inmunidad a las caídas]"
 	}
+
+	EcoProyectado: {
+		DisplayName: Eco Proyectado
+		Tooltip:
+			'''
+			La esencia del portador sube por el haz...
+			· y del otro lado baja ÉL: el Cíclope.
+			'''
+	}
 }
 
 NPCs: {
@@ -2498,6 +2507,7 @@ NPCs: {
 
 	AethonSelladoOjo.DisplayName: Ojo Sellado
 	// ElCronista.DisplayName: El Cronista
+	CiclopeProyectado.DisplayName: Cíclope Proyectado
 }
 
 Common: {
@@ -2687,10 +2697,7 @@ Furia: {
 
 Cronista: {
 	Llega: El Cronista despierta del libro — el escriba que sobrevivió a la primer devoración camina a tu lado.
-	// v6.158 — LA MONEDA HABLA EN NOMBRE PROPIO (la letra: «en el
-	// precio de compra dice medalla de defensor… debe decir esencias
-	// del eterno»): el texto del precio del mostrador (GetPriceText
-	// lo pasa por ToLower — el formato «precio: N esencias…»).
+	// v6.158 — the shop price text (GetPriceText lowercases it).
 	Moneda: Esencias del Eterno
 	// v6.154 — LOS 22 DIÁLOGOS EXCLUSIVOS (la letra), organizados
 	// por disparador: genéricas/portador/oleadas/despertar/sellado/
@@ -2719,14 +2726,8 @@ Cronista: {
 	ChatObjetos3: Los otros mundos también escriben. Peor, pero escriben.
 	ChatCierre1: Cuando acabe tu historia cerraré el libro. Y por fin podré parpadear.
 	ChatCierre2: …No me mires así. También los testigos soñamos.
-	// v6.171 — LAS CHARLAS DE LAS HISTORIAS (la letra: «cuenta con
-	// cada cierto despertar una parte del lore, y es quien desbloquea
-	// finalmente esa parte del lore en el libro de informacion»; y la
-	// v6.171: «no creo que sea correcto llamar a esas secciones como
-	// arca, yo lo llamaria historias o escrituras»): al alcanzar el
-	// despertar de cada historia (4/24/44/64/84), la siguiente charla
-	// NARRA ESA ESCRITURA y la abre en el libro — la historia que
-	// esperó todo el camino para contarse.
+	// v6.170 — LAS CHARLAS DEL ARCA (el español viaja en la maleta del
+	// fallback — la red de seguridad v6.56.6 de la casa)
 	ChatLore1: Siéntate. Es hora de la primera historia. Aethon no nació dios: nació hambre que aprendió a pensar. Los dioses que conociste fueron sus comidas. Lo que llamas Terraria es una mesa que él aún no termina de mirar. Ya está escrita en tu libro — la página que antes solo mostraba su sello.
 	ChatLore2: La segunda escritura, entonces. El pacto no lo firmaste tú: lo firmó tu hambre con la suya. El Nivel pregunta cuánto ha comido él; el Despertar pregunta cuánto de él cabe en ti. Dos varas, ninguna sustituye a la otra. El libro ya puede mostrar la letra pequeña.
 	ChatLore3: Tercera historia. La Llegada no tuvo trueno: correspondencia que nadie recuerda haber pedido. El arma es su forma sellada, el altar son sus raíces en este mundo. Y tú… tú eres el ciclo actual. Todos los portadores lo fueron. Ninguno terminó de entenderlo. Tu libro acaba de abrir esa página.
@@ -2739,6 +2740,7 @@ Ira: {
 	AvisoRecarga: La Ira de un Ser Exterior aún recarga — su reloj vive en el buff.
 	AvisoOjos: La Ira necesita al escuadrón completo: {0} ojos despiertos (tienes {1}).
 	SombrasConcentradas: El grimorio concentra {0} sombras de la página sobre la presa — la mordida aprieta ×{1}.
+	FaroEntregado: El Faro del Eclipse brilla en tu inventario — el Eterno lo entrega para que lo pruebes.
 }
 
 Llamado: {
@@ -3218,7 +3220,6 @@ Esencia: {
 
 	CofreSeco: El cofre de almas de {0} ya está SECO en este mundo — diez páginas, cuento cerrado.
 	UltimaAlma: La ÚLTIMA alma de {0} cayó. Su cuento en este mundo está completo.
-	// v6.164 — EL REGALO DE BIENVENIDA (9999 esencias al mundo nuevo)
 	PruebaEsencias: ✦ [PRUEBA] Esencias completadas a 9999 — en el mod final se farmean.
 }
 
@@ -3743,7 +3744,7 @@ Submundo: {
 	FalloPuerta: EL LIBRO NO PUDO ABRIRSE — el intento se perdió en la bruma. Vuelve a intentarlo: la puerta sigue viva.
 	RedCaida: EL VACÍO TE DEVUELVE A LA PLAZA — nadie cae dentro del libro.
 	Devorado: EL GRIMORIO TE DEVORA — la bruma lo inunda todo…
-	PuertaAbiertaAnuncio: "EL ALTAR HA PAGADO LAS MIL ESENCIAS — el libro abre su interior desde el altar: su ventana ya puede devorarte."
+	PuertaAbiertaAnuncio: EL ALTAR HA PAGADO LAS MIL ESENCIAS — el libro abre su interior desde el altar: su ventana ya puede devorarte.
 }
 
 FormaEterna: {
@@ -3868,13 +3869,17 @@ Pergamino: {
 	LoreV_Larespuestafinal: La verdad final, dicha en voz baja: el dios que devora universos esperó todo este tiempo no a un apóstol, sino a la primera compañía de su eternidad —y cuando el portador completa la Forma Eterna, el hambre, por primera vez, no está sola.
 	RotuloIzq: PÁGINA INFORMATIVA
 	RotuloDer: EL COMPENDIO DEL ETERNO
-	// v6.164 — LOS TÍTULOS DE LAS PÁGINAS DEL ÍNDICE (la letra: solo
-	// «Informacion» y «Lore», centrados al inicio de cada página)
+	// v6.175 — LOS DOS TÍTULOS QUE FALTABAN (la auditoría: «Pergamino.
+	// TituloPaginaInfo / TituloPaginaLore» ausentes en inglés)
 	TituloPaginaInfo: Información
 	TituloPaginaLore: Lore
-	// v6.160 — EL CÓDEX DEL ETERNO (el documento canónico del usuario,
-	// integrado COMPLETO: el prólogo, los once capítulos y el epílogo —
-	// cada capítulo se abre con el Despertar (el canon SE GANA).
+	// v6.163 — THE BOOK'S TABS (the grimoire is the center)
+	// PestanaIndice: INDEX
+	// PestanaAltar: ALTAR
+	// PestanaPilar: PILLAR
+	// v6.160 — THE ETERNAL CODEX (the canonical document, translated;
+	// the prologue, the eleven chapters and the epilogue — each opens
+	// with the Awakening (canon is EARNED).
 	CodexPrologoTit: La Página Única
 	CodexPrologoP0: «La guía que consultas no es un libro de información. Es una página. Una sola página del Grimorio del Eterno, arrancada de sí mismo para que pudieras leerla sin arder.»
 	CodexPrologoP1: He trabajado siglos en el margen de esa página. Cuando el portador la abre y consulta un dato —un número, un nombre, una debilidad—, rara vez se pregunta quién escribió esas líneas. La respuesta incómoda es que la página se escribió a sí misma: la guía es una hoja del Grimorio, y el Grimorio no admite autores ajenos. Yo no soy el autor. Soy el margen: la nota al pie que la oscuridad tolera porque le resulta útil.
@@ -3972,7 +3977,7 @@ PrismaInterior: {
 	JefesVacio: aún no hay jefes devorados
 	JefePoder: Nv {0} · {1}%
 	PoderCrece: ✦ {0} cayó en la arena ({1} veces): su próxima versión nace al {2}%
-	// v6.163 — LA PÁGINA DEL PILAR EN EL LIBRO (claves nuevas)
+	// v6.163 — THE PILLAR PAGE IN THE BOOK
 	InvocarPista: la llamada trae a los DOS fragmentos de Aethon
 	JefesMas: …y {0} más devorados esperan su turno
 	JefesCuenta: "{0} jefes devorados — la rueda recorre la lista"
@@ -3987,12 +3992,9 @@ Altar: {
 	Titulo: EL ALTAR DE LA CONSAGRACIÓN
 	Subtitulo: consagra la ofrenda — arma · material · esencias
 	SlotVacio: ofrenda
-	// v6.161 — LA MESA DE FUSIÓN DEL TRÍO (la letra: «que esta ventana
-	// tenga un apartado donde se pueda usar para fusionar y desfusionar
-	// el arma el trio eterno»)
+	// v6.161 — THE TRIO'S FUSION TABLE (the letter: a section to fuse
+	// and unfuse the Trio Eterno weapon)
 	TrioTitulo: EL ARSENAL DEL GRIMORIO — EL TRÍO DEL ETERNO
-	// v6.168 — EL SELECTOR FLOTANTE (la ventana de elegir: la ofrenda
-	// y las armas del Arsenal, con la lista COMPLETA y su rueda)
 	SelectorTitulo: LA OFRENDA — ELIGE
 	SelectorTrioTitulo: EL ARSENAL — ELIGE UN ARMA
 	DevueltaAlSuelo: Tu inventario está lleno: el arma cayó a tus pies.
@@ -4028,7 +4030,7 @@ Altar: {
 	SelloFalta: Te falta: {0}
 	SelloAlcanza: ¡Alcanza! El sello puede cobrarse ya
 	SelloSinOfrenda: Pon la ofrenda en el hueco para ver su precio
-	// v6.163 — LA PÁGINA DEL ALTAR EN EL LIBRO (claves nuevas)
+	// v6.163 — THE ALTAR PAGE IN THE BOOK
 	BotonConsagrar: CONSAGRAR LA OFRENDA
 	SelloCuestaLibro: Cuesta: {0} Esencias del Eterno
 	SelloLlevasLibro: Llevas encima: {0}
@@ -4071,15 +4073,15 @@ Altar: {
 	LeyendaSello2: (esencias y dinero no necesitan sello)
 	TrioMarcaTexto: Permite usar todas al mismo tiempo
 	TrioDesequiparTodo: Desequipar todo
-	SelectorRueda: "Rueda del ratón: más items"
-	TrioAlbedrioTitulo: "EL ALBEDRÍO — la inteligencia de cada proyectil"
-	TrioAlbedrioPista: "Elige por ranura: Original (tal como dispara su arma) · Presa (persigue al enemigo) · Cursor (vuela a tu puntero y orbita). La palomita marca el que está vivo."
-	TrioRanuraEtiqueta: "Ranura {0}"
-	OfrendaPrestada: "Prestada: sigue en tu inventario — sale de ahí SOLO al pulsar CONSAGRAR y vuelve a su sitio ya sellada."
-	OfrendaElegida: "✦ «{0}» es la ofrenda: sigue en tu inventario hasta pulsar CONSAGRAR."
-	OfrendaSoltada: "✦ «{0}» deja de ser la ofrenda — nada se movió de tu inventario."
-	OfrendaPerdida: "✦ La ofrenda prestada ya no está en tu inventario — el hueco queda libre."
-	InventarioLleno: "✦ Tu inventario está lleno: «{0}» no cabía y sigue donde estaba."
+	SelectorRueda: Rueda del ratón: más items
+	TrioAlbedrioTitulo: EL ALBEDRÍO — la inteligencia de cada proyectil
+	TrioAlbedrioPista: Elige por ranura: Original (tal como dispara su arma) · Presa (persigue al enemigo) · Cursor (vuela a tu puntero y orbita). La palomita marca el que está vivo.
+	TrioRanuraEtiqueta: Ranura {0}
+	OfrendaPrestada: Prestada: sigue en tu inventario — sale de ahí SOLO al pulsar CONSAGRAR y vuelve a su sitio ya sellada.
+	OfrendaElegida: ✦ «{0}» es la ofrenda: sigue en tu inventario hasta pulsar CONSAGRAR.
+	OfrendaSoltada: ✦ «{0}» deja de ser la ofrenda — nada se movió de tu inventario.
+	OfrendaPerdida: ✦ La ofrenda prestada ya no está en tu inventario — el hueco queda libre.
+	InventarioLleno: ✦ Tu inventario está lleno: «{0}» no cabía y sigue donde estaba.
 }
 
 Arbol: {
@@ -4132,9 +4134,11 @@ LaMarcaSilenciosa: {
 	Description: El ojo te marcó: la quemadura del vacío te encuentra.
 }
 
-LibroEterno.NombreIcono: Información
-LibroEterno.TituloPaginaInfo: "Información"
-LibroEterno.TituloPaginaLore: "Lore"
+LibroEterno: {
+	NombreIcono: Información
+	TituloPaginaInfo: Información
+	TituloPaginaLore: Lore
+}
 
 Buffs: {
 	IraSerExteriorRecargaBuff: {
@@ -4408,16 +4412,28 @@ Projectiles: {
 	// PilarOjoMinion.DisplayName: Pilar Ojo Minion
 	// AnillosSolRunicoHalo.DisplayName: Anillos Sol Runico Halo
 	// SombraPaginaEterno.DisplayName: Sombra Pagina Eterno
-
-// v6.159 — EL CÓDEX DEL ETERNO (el documento del usuario, integrado VERBATIM:
-// el prólogo, los once capítulos y el epílogo — cada uno se abre con el Despertar).
-
-
+	// PalabraCortadaProjectile.DisplayName: Palabra Cortada Projectile
+	// PortalTrioProjectile.DisplayName: Portal Trio Projectile
+	// TrioRescoldoProjectile.DisplayName: Trio Rescoldo Projectile
+	// FaroDelEclipseHaz.DisplayName: Faro Del Eclipse Haz
+	// JefeInteriorVoleaProjectile.DisplayName: Jefe Interior Volea Projectile
+	// SakugaDelCielo.DisplayName: Sakuga Del Cielo
+	// AspiradoraDevoradorProjectile.DisplayName: Aspiradora Devorador Projectile
 }
 
+Ciclope.Grito: ¡AAAAH ME PROYECTO!
+
+Registro: {
+	Fallo: ¡Algo falló en {0}! El detalle quedó en el registro (tModLoader-Logs).
+	Aviso: Aviso del grimorio en {0} — el detalle vive en el registro.
+	Limpio: La sesión va limpia: cero fallos registrados.
+	Resumen: "{0} fallos registrados ({1} distintos) — mira tModLoader-Logs."
+}
+
+Devorador.Asco: «Esto es asqueroso. No volveré a devorar a esta cosa tan desagradable... prefiero comerme al Rey Slime que a esta porquería.»
 PilarInterior.YaDespierto: El sello ya está despierto — el grimorio espera.
 
-	Mapa: {
-		Altar: El Altar de la Consagración
-		Pilar: El Pilar del Eterno
-	}
+Mapa: {
+	Altar: El Altar de la Consagración
+	Pilar: El Pilar del Eterno
+}

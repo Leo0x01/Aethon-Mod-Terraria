@@ -10,40 +10,38 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Weapons.Regla
 {
     // =====================================================================
-    //  LaReglaDelCielo — v6.170 — LA KATANA DEL CIELO (la letra: «yo
-    //  necesito tajos, tajos iguales a los de las katanas en los
-    //  animes […] intenta recrealor en el arma la regla del cielo»).
+    //  LaReglaDelCielo — v6.175 — RECREADA DESDE CERO (la letra: «el
+    //  tajo es una linea muy buena completamente liza, intenta
+    //  investigar como son los tajos de los animes y otros mods y
+    //  recrea el arma desde cero con una nueva animacion de tajo
+    //  supercompleja»).
     //
-    //  LA RECONVERSIÓN: la línea vertical de la v6.168 MUERE — el
-    //  ataque es LA MEDIA LUNA DEL KATANA DE ANIME (investigada: la
-    //  «glowing crescent» cel-shaded de bordes afilados): un arco de
-    //  ~110° que nace EN EL CURSOR, inclinado en DIAGONAL (~35°, el
-    //  gesto del espadachín), con el filo blanco-caliente y el halo
-    //  azul eléctrico, revelado de punta a punta en 4 ticks (LA
-    //  VELOCIDAD de la hoja) y una vida ultracorta de 13 ticks (el
-    //  corte OCURRE, no se desarrolla).
+    //  EL ARMA NUEVA dispara SAKUGADELCIELO — el tajo de DIECISÉIS
+    //  capas del canon investigado (la secuencia de cine: LA
+    //  ANTICIPACIÓN con su estrella de hoja y su tensión · EL FRAME
+    //  DE IMPACTO monocromo con su panel de tinta y su sacudida · LA
+    //  LUNA ÚNICA con DESPLAZAMIENTO CROMÁTICO (las lunas roja y cian
+    //  fantasma) y su CORO DE ECO (3 arcos re-revelados) y LAS LÍNEAS
+    //  DE VELOCIDAD · EL RASTRO con LA CICATRIZ de tinta que se
+    //  desvanece lento y LOS PETALOS). EL CORTE ya no golpea al nacer:
+    //  golpea EN EL FRAME DE IMPACTO — la anticipación existe, el
+    //  castigo también.
     //
-    //  EL SENTIDO DE LA HOJA (la letra de la v6.168 vive): el tajo
-    //  corre ARRIBA→ABAJO o ABAJO→ARRIBA al azar — el arco se voltea
-    //  según el gesto.
+    //  EL SENTIDO DE LA HOJA (la v6.168 vive) y EL CRUZADO cada cuarto
+    //  uso (la X: dos lunas cruzadas ±0.42 rad, doble impacto) siguen
+    //  siendo la firma del arma.
     //
-    //  EL SPRITE: LA REGLA — una katana de cielo (la hoja larga y
-    //  delgada con su guarda estelar), forjada con LA SUPERFORJA de
-    //  la casa (la letra: «siempre se te olvida usar la sforja para
-    //  creacion de pixel art»).
-    //
-    //  EL DAÑO: la media luna corta UNA VEZ al nacer — todo lo que
-    //  vive en la BANDA del arco (la boca de la luna) recibe el tajo
-    //  (GolpeMotor, el contrato del Tajo Astral).
+    //  EL CABLE: el centro del arco ES la posición del proyectil (viaja
+    //  solo por la red de vanilla — nada de localAI) · ai[0] = modo ·
+    //  ai[1] = inclinación hacia la presa ×1000 · ai[2] = sentido.
     // =====================================================================
     public class LaReglaDelCielo : ModItem
     {
-        /// <summary>El radio de la media luna (px — «largas en
-        /// longitud» viva como el ALCANCE del arco).</summary>
+        /// <summary>El radio de la media luna (px).</summary>
         private const float RADIO = 150f;
 
-        /// <summary>v6.172 — EL CONTADOR DEL COMBO (0..3): al llegar a
-        /// 4 usos el próximo tajo es EL CRUZADO (la X doble).</summary>
+        /// <summary>EL CONTADOR DEL COMBO (0..3): al llegar a 4 usos el
+        /// próximo tajo es EL CRUZADO (la X doble — el golpe ×1.45).</summary>
         private static int _combo;
 
         public override string Texture => "AethonMod/Content/Weapons/Regla/LaReglaDelCielo";
@@ -62,7 +60,7 @@ namespace AethonMod.Content.Weapons.Regla
             Item.rare = ItemRarityID.Cyan;
             Item.value = Terraria.Item.buyPrice(0, 20, 0, 0);
             Item.shoot = ModContent.ProjectileType
-                <global::AethonMod.Content.Projectiles.Regla.LineaDelCielo>();
+                <global::AethonMod.Content.Projectiles.Regla.SakugaDelCielo>();
             Item.shootSpeed = 1f;
         }
 
@@ -70,20 +68,14 @@ namespace AethonMod.Content.Weapons.Regla
             Vector2 posicion, Vector2 velocidad, int tipo, int dano, float retroceso)
         {
             // ============================================================
-            //  LA SIEMBRA DE LA MEDIA LUNA: el tajo nace EN EL CURSOR
-            //  (la letra v6.168 vive) con su geometría completa:
+            //  LA SIEMBRA DEL CINE: el tajo nace EN EL CURSOR (la posición
+            //  del proyectil ES el centro del arco — viaja solo por el
+            //  cable de vanilla):
+            //   · ai[0] = el MODO (0 normal · 4 cruzado)
             //   · ai[1] = la INCLINACIÓN EXTRA hacia la presa ×1000
-            //     (v6.171: SIN localAI[3] — es float[3], la lección
-            //     de la casa; VIAJA por el cable vía NewProjectile)
-            //   · ai[2] = el SENTIDO de la hoja (0 baja · 1 sube — al azar)
-            //   · localAI[0..1] = el CENTRO del arco (el cursor)
-            //   · localAI[2] = el RADIO
+            //   · ai[2] = el SENTIDO de la hoja (0 baja · 1 sube)
             // ============================================================
             bool sube = Main.rand.NextBool();
-            // v6.172 — EL CONTADOR DEL COMBO (ai[0]): cada CUARTO uso
-            // desata EL TAJO CRUZADO (la X del doble corte anime —
-            // TajoLib.TajoCruzado). El contador vive en el ítem (es
-            // el gesto local del portador).
             _combo = (_combo + 1) % 4;
             bool cruzado = _combo == 0;
             // LA ABRAZADA A LA PRESA: un blanco cerca del cursor
@@ -103,14 +95,8 @@ namespace AethonMod.Content.Weapons.Regla
                 tipo, dano, 0f, player.whoAmI, cruzado ? 4f : 0f,
                 inclinacionExtra * 1000f, sube ? 1f : 0f);
             if (idx >= 0 && idx < Main.maxProjectiles && Main.projectile[idx].active)
-            {
-                Projectile p = Main.projectile[idx];
-                p.localAI[0] = Main.MouseWorld.X;
-                p.localAI[1] = Main.MouseWorld.Y;
-                p.localAI[2] = RADIO;
-                p.originalDamage = Item.damage;
-            }
-            // EL SONIDO DEL DESEMBRAINE (el silbido corto de la hoja)
+                Main.projectile[idx].originalDamage = Item.damage;
+            // EL SONIDO DEL DESENVAINAR (el silbido corto de la hoja)
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item72.WithPitchOffset(0.55f)
                 .WithVolumeScale(0.28f), player.Center);
             return false;

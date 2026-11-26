@@ -130,7 +130,7 @@ namespace AethonMod.Content.Weapons.Definitivas
                         },
                         player.Center);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RenglonFinal", exRegistro); }
             }
             return false;
         }
@@ -230,7 +230,7 @@ namespace AethonMod.Content.Weapons.Definitivas
                             SoundID.Item122.WithPitchOffset(-0.30f).WithVolumeScale(1.05f),
                             Projectile.Center);
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RenglonFinal", exRegistro); }
                 }
 
                 Projectile renglon = Projectile.NewProjectileDirect(
@@ -311,7 +311,7 @@ namespace AethonMod.Content.Weapons.Definitivas
                 catch { VFXCore.CerrarLoteSiAbierto(); }
                 finally { VFXCore.RestaurarLoteVanilla(); }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RenglonFinal", exRegistro); }
             return false;
         }
     }
@@ -513,7 +513,7 @@ namespace AethonMod.Content.Weapons.Definitivas
                             SoundID.Item14.WithPitchOffset(-0.25f).WithVolumeScale(0.9f),
                             Projectile.Center);
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RenglonFinal", exRegistro); }
 
                     // EL ANILLO DE TINTA: 18 polvos dorados y violetas.
                     for (int i = 0; i < 18; i++)
@@ -771,7 +771,7 @@ namespace AethonMod.Content.Weapons.Definitivas
                 catch { VFXCore.CerrarLoteSiAbierto(); }
                 finally { VFXCore.RestaurarLoteVanilla(); }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RenglonFinal", exRegistro); }
             return false;
         }
     }

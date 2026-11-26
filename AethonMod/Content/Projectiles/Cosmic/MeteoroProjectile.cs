@@ -138,7 +138,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     if (Vector2.DistanceSquared(npc.Center, Projectile.Center) > alcance * alcance) continue;
                     Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 3f, true);
                     if (Main.netMode != NetmodeID.MultiplayerClient)
-                        try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 180); } catch { }
+                        try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 180); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("MeteoroProjectile", exRegistro); }
                 }
             }
 
@@ -151,7 +151,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Terraria.Audio.SoundEngine.PlaySound(
                         SoundID.Item14.WithPitchOffset(-0.25f + _idx * 0.06f), Projectile.Center);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("MeteoroProjectile", exRegistro); }
                 PyraLib.Sparks(Projectile.Center, Vector2.Zero, 14, PyraPalettes.SolarFire,
                     Seed + 5, out ParticleData[] ascuas);
                 if (ascuas != null)

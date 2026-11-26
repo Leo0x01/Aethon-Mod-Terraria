@@ -345,7 +345,7 @@ namespace AethonMod.Content.NPCs
                     }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioDormido", exRegistro); }
             return null;
         }
 
@@ -446,10 +446,10 @@ namespace AethonMod.Content.NPCs
                 Main.QueueMainThreadAction(() =>
                 {
                     try { Main.player[Main.myPlayer].SetTalkNPC(-1, true); }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioDormido", exRegistro); }
                 });
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioDormido", exRegistro); }
         }
 
         // ================================================================
@@ -488,7 +488,7 @@ namespace AethonMod.Content.NPCs
                             SpriteEffects.None, 0f);
                     }
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioDormido", exRegistro); }
                 return false;
             }
 
@@ -521,7 +521,7 @@ namespace AethonMod.Content.NPCs
             if (NPC.ai[2] <= 0f)
             {
                 try { DibujarZzz(spriteBatch, screenPos); }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioDormido", exRegistro); }
             }
 
             // === 3. EL LIBRO: se dibuja AQUÍ (violeta SIEMPRE — el aura
@@ -537,7 +537,7 @@ namespace AethonMod.Content.NPCs
                 spriteBatch.Draw(tex, NPC.Center - screenPos, null, color,
                     NPC.rotation, tex.Size() * 0.5f, 1f, SpriteEffects.None, 0f);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrimorioDormido", exRegistro); }
 
             return false; // el libro SE dibuja solo (con su aura)
         }

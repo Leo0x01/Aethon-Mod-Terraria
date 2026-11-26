@@ -960,6 +960,9 @@ namespace AethonMod.Content.Items.Bolsas
             // v6.174 — EL FARO DEL ECLIPSE (el rayo concentrado ORIGINAL:
             // 26 capas sobre TajoLib + VFXCore, el conducto sigue al cursor).
             l.Add((ModContent.ItemType<Weapons.Investigaciones.FaroDelEclipse>(), 1));
+            // v6.175 — EL ECO PROYECTADO (la llamada del Cíclope Proyectado
+            // — la recreación del vídeo «Me Proyecte» de Chopilas).
+            l.Add((ModContent.ItemType<Items.NPCs.EcoProyectado>(), 3));
             // v6.86 — R5 — EL ALTAR DE OFRENDAS (el altar que consagra
             // la ofrenda por el Eterno).
             l.Add((ModContent.ItemType<Items.Altar.AltarOfrendasItem>(), 1));

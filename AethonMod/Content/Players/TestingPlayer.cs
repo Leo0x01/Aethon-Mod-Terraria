@@ -67,7 +67,36 @@ namespace AethonMod.Content.Players
                             new Microsoft.Xna.Framework.Color(196, 150, 255));
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TestingPlayer", exRegistro); }
+
+            // ==============================================================
+            //  v6.175 — EL FARO DEL ECLIPSE, DIRECTO A LA MANO (la letra:
+            //  «creaste un arma nueva, no olvides que debes darsela al
+            //  jugador siempre de forma directa, ya que no pude probar
+            //  esta arma»): el Faro nace en el inventario del portador
+            //  en cuanto entra al mundo — SIEMPRE que no lo lleve (una
+            //  por jugador; la receta de 5 maderas sigue de alternativa).
+            // ==============================================================
+            try
+            {
+                int tipoFaro = ModContent.ItemType
+                    <global::AethonMod.Content.Weapons.Investigaciones.FaroDelEclipse>();
+                bool llevaFaro = false;
+                for (int k = 0; k < 58; k++)
+                {
+                    Item it = Player.inventory[k];
+                    if (it != null && !it.IsAir && it.type == tipoFaro) { llevaFaro = true; break; }
+                }
+                if (!llevaFaro)
+                {
+                    Player.QuickSpawnItem(Player.GetSource_FromThis(), tipoFaro, 1);
+                    if (Player.whoAmI == Main.myPlayer && !Main.dedServ)
+                        Main.NewText(Terraria.Localization.Language.GetTextValue(
+                                "Mods.AethonMod.Ira.FaroEntregado"),
+                            new Microsoft.Xna.Framework.Color(255, 200, 120));
+                }
+            }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TestingPlayer", exRegistro); }
 
             // v6.50.10 — ARMADURA: PlayerLoader.OnEnterWorld NO envuelve el
             // hook en try/catch (IL-verificado contra el tML 2026.07.3.0 —
@@ -158,7 +187,7 @@ namespace AethonMod.Content.Players
                         new Microsoft.Xna.Framework.Color(255, 216, 107));
             }
             }
-            catch { } // v6.50.10 — la armadura de arriba
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TestingPlayer", exRegistro); } // v6.50.10 — la armadura de arriba
         }
 
         /// <summary>Entrega el ítem si no se tiene; devuelve 1 si se entregó.</summary>

@@ -132,7 +132,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             Terraria.Audio.SoundEngine.PlaySound(
                                 SoundID.Item88.WithPitchOffset(-0.2f), Projectile.Center);
                         }
-                        catch { }
+                        catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AbrazoNebulosaProjectile", exRegistro); }
                     }
                 }
                 else
@@ -246,7 +246,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Terraria.Audio.SoundEngine.PlaySound(
                         SoundID.Item93.WithPitchOffset(0.35f), pos);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AbrazoNebulosaProjectile", exRegistro); }
                 RiftLib.ChispasAnomalia(pos, 6, PaletaEstrellas, Seed + k * 13, out ParticleData[] motas);
                 if (motas != null)
                     for (int i = 0; i < motas.Length; i++)

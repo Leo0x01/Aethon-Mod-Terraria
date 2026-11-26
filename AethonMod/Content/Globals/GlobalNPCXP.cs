@@ -280,7 +280,7 @@ namespace AethonMod.Content.Globals
                                 EcoSistema.SusurrarCincoEstrellas(player);
                             }
                         }
-                        catch { }
+                        catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GlobalNPCXP", exRegistro); }
                     }
 
                 }
@@ -298,7 +298,7 @@ namespace AethonMod.Content.Globals
                 if (npc.boss || OleadaNPC.JefeVerdadero(npc))
                     EcoSistema.AnunciarJefeMuerto(npc, player);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GlobalNPCXP", exRegistro); }
         }
 
         private Player FindKiller(NPC npc)

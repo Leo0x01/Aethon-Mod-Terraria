@@ -49,7 +49,7 @@ namespace AethonMod.Content.Players
                     lista.Add(Niveles[i]);
                 tag["arbolNiveles"] = lista;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SkillTreePlayer", exRegistro); }
         }
 
         public override void LoadData(TagCompound tag)
@@ -131,7 +131,7 @@ namespace AethonMod.Content.Players
                 // J — EL ECO DE AETHON (keystone): +1 espacio de minion.
                 Player.maxMinions += Niveles[9];
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SkillTreePlayer", exRegistro); }
         }
     }
 

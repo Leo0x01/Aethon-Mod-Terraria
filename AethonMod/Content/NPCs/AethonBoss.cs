@@ -322,7 +322,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
         {
             float solW = 80f;
             try { solW = Terraria.GameContent.TextureAssets.Sun.Value.Width; }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonBoss", exRegistro); }
             double t = Main.dayTime ? Math.Max(0.0, Math.Min(Main.dayLength, Main.time)) : Main.dayLength * 0.5;
             float x = (float)(t / 54000.0 * (Main.screenWidth + solW * 2f)) - solW;
             double parab = t < 27000.0
@@ -3161,7 +3161,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     Main.BestiaryTracker.Kills.RegisterKill(NPC);
                     Main.BestiaryTracker.Kills.RegisterKill(hermano);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonBoss", exRegistro); }
 
                 // EL NACIMIENTO DEL RECUERDO COMPLETO: en el punto exacto
                 // del abrazo, con la vida entera y la presa heredada.
@@ -3587,7 +3587,7 @@ public const int SUB_APARICION = 10;    // el sol en el centro: el pilar + el de
                     // respaldo calla por _yaDropeo: el botín ya cayó.
                     NPC.life = 0;
                     NPC.netUpdate = true;
-                    try { NPC.checkDead(); } catch { }
+                    try { NPC.checkDead(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonBoss", exRegistro); }
                 }
 
                 // v6.50.79 — LA DESPEDIDA DE VERDAD (la cura del jefe

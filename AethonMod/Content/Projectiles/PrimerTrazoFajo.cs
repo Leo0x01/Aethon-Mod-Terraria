@@ -197,9 +197,7 @@ namespace AethonMod.Content.Projectiles
                 Largo = reader.ReadSingle();
                 ((ModProjectile)this).Projectile.localAI[0] = (reader.ReadBoolean() ? 1f : 0f);
             }
-            catch
-            {
-            }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PrimerTrazoFajo", exRegistro); }
         }
 
         public override bool PreDraw(ref Color lightColor)

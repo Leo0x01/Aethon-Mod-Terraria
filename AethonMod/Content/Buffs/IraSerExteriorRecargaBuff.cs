@@ -48,7 +48,7 @@ namespace AethonMod.Content.Buffs
                 // ira masivo que barre con todo». SIN teclas.
                 tip = "Ataque de ira masivo que barre con todo.";
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("IraSerExteriorRecargaBuff", exRegistro); }
         }
 
         // ================================================================
@@ -173,10 +173,10 @@ namespace AethonMod.Content.Buffs
                                 SpriteEffects.None, 0f);
                         }
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("IraSerExteriorRecargaBuff", exRegistro); }
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("IraSerExteriorRecargaBuff", exRegistro); }
             return true;   // nosotros lo dibujamos TODO (vanilla no repite)
         }
 

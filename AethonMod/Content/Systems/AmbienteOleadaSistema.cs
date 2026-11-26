@@ -156,7 +156,7 @@ namespace AethonMod.Content.Systems
                     p.Write(activo);
                     p.Send(); // broadcast: TODOS los clientes
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AmbienteOleadaSistema", exRegistro); }
             }
         }
 
@@ -419,11 +419,7 @@ namespace AethonMod.Content.Systems
                     DibujarBrumaDelAstro(pos, w * 0.5f * escala, t);
                 }
             }
-            catch
-            {
-                // Programación defensiva: el dibujo del cielo JAMÁS puede
-                // tumbar el frame (la casa).
-            }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AmbienteOleadaSistema", exRegistro); }
         }
 
         /// <summary>
@@ -509,7 +505,7 @@ namespace AethonMod.Content.Systems
                 TextureAssets.Sun = TextureAssets.Sun3; // EL SOL ECLIPSE de vanilla
                 _solPuesto = true;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AmbienteOleadaSistema", exRegistro); }
         }
 
         /// <summary>El sol de siempre vuelve a su ranura (idempotente).</summary>
@@ -520,7 +516,7 @@ namespace AethonMod.Content.Systems
             {
                 if (_solOriginal != null) TextureAssets.Sun = _solOriginal;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AmbienteOleadaSistema", exRegistro); }
             _solPuesto = false;
         }
 
@@ -552,11 +548,7 @@ namespace AethonMod.Content.Systems
             {
                 Terraria.On_Main.DrawSunAndMoon -= TintarAstros;
             }
-            catch
-            {
-                // Programación defensiva: el detach del hook jamás puede
-                // impedir que la desactivación del mod continúe (la casa).
-            }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AmbienteOleadaSistema", exRegistro); }
             DevolverSolPrestado();
             _solOriginal = null;
             _clienteFestin = false;

@@ -172,7 +172,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         OndaLib.Kick(3.2f, 10);
                         OndaLib.Flash(ColorVioleta, 0.22f, 8, Projectile.Center);
                         try { Terraria.Audio.SoundEngine.PlaySound(SoundID.Item9.WithPitchOffset(-0.7f), Projectile.Center); }
-                        catch { }
+                        catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SembradorPulsarProjectile", exRegistro); }
                         RiftLib.ChispasAnomalia(Projectile.Center, 12, Paleta, Seed + 77, out ParticleData[] motas);
                         if (motas != null)
                             for (int i = 0; i < motas.Length; i++)
@@ -232,7 +232,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 6f, true);
                 // La estrella muerta quema hacia dentro (20 s — el debuff de la casa).
                 if (Main.netMode != NetmodeID.MultiplayerClient)
-                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 1200); } catch { }
+                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 1200); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SembradorPulsarProjectile", exRegistro); }
                 // Los haces respetan SUS i-frames también tras el anclaje.
                 _ultimoGolpe[npc.whoAmI] = (int)_age;
             }
@@ -266,7 +266,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Content.Systems.GolpeMotor.Golpear(Projectile, npc, dmg, 1.5f, true);
                 // El plasma del haz reaviva la quemadura.
                 if (Main.netMode != NetmodeID.MultiplayerClient)
-                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 240); } catch { }
+                    try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 240); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SembradorPulsarProjectile", exRegistro); }
             }
         }
 
@@ -277,7 +277,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
             // La corteza EVAPORA: la estrella se despide (también cuando el
             // Sembrador se la come por el tope de 3).
             try { Terraria.Audio.SoundEngine.PlaySound(SoundID.Item12.WithPitchOffset(0.2f), Projectile.Center); }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SembradorPulsarProjectile", exRegistro); }
             RiftLib.ChispasAnomalia(Projectile.Center, 10, Paleta, Seed + 99, out ParticleData[] motas);
             if (motas != null)
                 for (int i = 0; i < motas.Length; i++)

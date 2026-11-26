@@ -192,7 +192,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             toCenter.Normalize();
                             npc.velocity += toCenter * 0.8f;
                         }
-                        try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 240); } catch { }
+                        try { npc.AddBuff(ModContent.BuffType<Content.Buffs.QuemaduraCosmica>(), 240); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CosmicBlackHoleProjectile", exRegistro); }
                     }
                     // v6.50 — GolpeMotor (el cauce del motor: crítica real,
                     // varianza, on-hit y sync MP del propio motor).
@@ -386,7 +386,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Projectile.Center, new Vector2(1f, 0f), 7f, 10, 20, 0.45f,
                     "AethonCosmicBlackHoleFinalBlast"));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CosmicBlackHoleProjectile", exRegistro); }
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item88, Projectile.Center);
 
             // Presets — colapso gravitatorio cósmico (magenta + blanco)

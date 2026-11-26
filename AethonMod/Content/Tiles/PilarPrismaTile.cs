@@ -262,7 +262,7 @@ namespace AethonMod.Content.Tiles
                         glow.Size() * 0.5f,
                         new Vector2(2.6f, 3.4f), SpriteEffects.None, 0f);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PilarPrismaTile", exRegistro); }
 
                 // v6.152 — EL OJO-MINION MURIÓ (la letra: «crearlo de
                 // nuevo con otra forma, que no tenga ningun ojo»): el
@@ -270,7 +270,7 @@ namespace AethonMod.Content.Tiles
                 // EL ARO ABIERTO (la puerta por donde se sale del
                 // interior). El spawn del ojo murió con el prisma viejo.
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PilarPrismaTile", exRegistro); }
         }
     }
 }

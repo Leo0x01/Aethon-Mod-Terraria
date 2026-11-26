@@ -195,7 +195,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         },
                         Projectile.Center);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayoConvergenteProjectile", exRegistro); }
             }
 
             // === v6.51.3 → v6.51.4 — LA BRUMA DE LA GESTACIÓN (la
@@ -310,7 +310,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                         { MaxInstances = 2, Volume = 1f },
                         Projectile.Center);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayoConvergenteProjectile", exRegistro); }
 
                 // (LA BRUMA DORADA DEL NACIMIENTO la exhila EL PROPIO SOL en
                 //  su primer tick de vida — con su intensidad por anillos y
@@ -417,7 +417,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                           Pitch = Modo == MODO_SUPREMO ? -0.25f : 0f },
                         Projectile.Center);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayoConvergenteProjectile", exRegistro); }
                 // v6.51.8 — EL RUGIDO MURIÓ (la letra: «al parecer los 2
                 //     agujeros negros runicos supremos hace ruido de
                 //     jefes al aparecer, bueno no deben hacer ningun
@@ -499,10 +499,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             semilla + 29, time * 0.85f, 4,
                             alpha: (0.24f + 0.26f * conver + 0.10f * contraccion));
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayoConvergenteProjectile", exRegistro); }
                 finally
                 {
-                    try { Main.spriteBatch.End(); } catch { }
+                    try { Main.spriteBatch.End(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayoConvergenteProjectile", exRegistro); }
                     VFXCore.CerrarLoteSiAbierto();
                 }
 
@@ -625,10 +625,10 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             semilla + 83, time * 1.1f, 4,
                             alpha: 0.26f + 0.30f * conver + 0.10f * contraccion);
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayoConvergenteProjectile", exRegistro); }
                     finally
                     {
-                        try { Main.spriteBatch.End(); } catch { }
+                        try { Main.spriteBatch.End(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayoConvergenteProjectile", exRegistro); }
                         VFXCore.CerrarLoteSiAbierto();
                     }
                 }

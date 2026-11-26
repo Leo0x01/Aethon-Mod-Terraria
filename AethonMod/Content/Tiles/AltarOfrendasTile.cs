@@ -203,7 +203,7 @@ namespace AethonMod.Content.Tiles
                 if (arriba != null && arriba.HasTile && arriba.TileType == (ushort)Type) oy = j - 1;
                 Systems.AltarUnicoSistema.Registrar(ox, oy);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltarOfrendasTile", exRegistro); }
         }
 
         /// <summary>v6.137 — EL ALTAR APAGADO: si NO es el activo, su
@@ -345,7 +345,7 @@ namespace AethonMod.Content.Tiles
                 if (Main.netMode == NetmodeID.Server)
                     NetMessage.SendTileSquare(-1, ox, oy, 3, 4);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltarOfrendasTile", exRegistro); }
         }
 
         public override bool CanDrop(int i, int j)

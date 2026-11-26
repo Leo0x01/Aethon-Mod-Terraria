@@ -490,9 +490,9 @@ namespace AethonMod.Content.VFX
                         _campo = null;
                         try
                         {
-                            Main.QueueMainThreadAction(() => { try { viejo.Dispose(); } catch { } });
+                            Main.QueueMainThreadAction(() => { try { viejo.Dispose(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CalorLib", exRegistro); } });
                         }
-                        catch { }
+                        catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CalorLib", exRegistro); }
                     }
                     _campo = new RenderTarget2D(gd, cw, ch, false,
                         SurfaceFormat.Color, DepthFormat.None, 0,
@@ -855,7 +855,7 @@ namespace AethonMod.Content.VFX
                 if (Filters.Scene[NombreFiltro] != null)
                     Filters.Scene.Deactivate(NombreFiltro);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CalorLib", exRegistro); }
         }
 
         /// <summary>LA MUERTE SUAVE DEL CAMPO (v6.81: con bandera — solo se
@@ -877,7 +877,7 @@ namespace AethonMod.Content.VFX
                 if (_filtro != null)
                     _filtro.GetShader().Shader.Parameters["uCAFuerza"].SetValue(0f);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CalorLib", exRegistro); }
             try
             {
                 GraphicsDevice gd = Main.graphics?.GraphicsDevice;
@@ -895,7 +895,7 @@ namespace AethonMod.Content.VFX
                     limpio = true;
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CalorLib", exRegistro); }
             return limpio;
         }
 
@@ -1011,7 +1011,7 @@ namespace AethonMod.Content.VFX
                 if (Filters.Scene[NombreFiltro] != null)
                     Filters.Scene.Deactivate(NombreFiltro);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CalorLib", exRegistro); }
             _filtro = null;
             _filtroActivo = false;
             _texRuido = null;
@@ -1031,10 +1031,10 @@ namespace AethonMod.Content.VFX
                     Main.QueueMainThreadAction(() =>
                     {
                         try { target.Dispose(); }
-                        catch { }
+                        catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CalorLib", exRegistro); }
                     });
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CalorLib", exRegistro); }
             }
         }
     }

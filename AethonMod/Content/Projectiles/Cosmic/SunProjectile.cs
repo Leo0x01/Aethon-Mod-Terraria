@@ -1238,7 +1238,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     Projectile.Center, new Vector2(1f, 0f), 8f, 12, 18, 0.45f,
                     "AethonSunNova"));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SunProjectile", exRegistro); }
 
             // === NOVA FINAL: explosión masiva de fuego (dusts, capa frontal) ===
             // v6.50.17 — NACEN EN ANILLO (la misma regla anti-bola-sólida):

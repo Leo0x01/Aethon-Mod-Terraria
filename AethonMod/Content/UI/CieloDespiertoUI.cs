@@ -188,7 +188,7 @@ namespace AethonMod.Content.UI
                 Utils.DrawBorderString(sb, pista, new Vector2(x + w / 2f, y + h - 14f),
                     TintaApagado, 0.80f, 0.5f, 0.4f);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CieloDespiertoUI", exRegistro); }
             return true;
         }
 
@@ -271,7 +271,7 @@ namespace AethonMod.Content.UI
                             esc, SpriteEffects.None, 0f);
                     }
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CieloDespiertoUI", exRegistro); }
 
                 // EL NOMBRE y el estado (recortados a la columna angosta).
                 string nombre = Recortar(Language.GetTextValue(j.Clave), 178f);
@@ -327,7 +327,7 @@ namespace AethonMod.Content.UI
                     Main.DefaultSamplerState, DepthStencilState.None, TijerasUI,
                     null, Main.UIScaleMatrix);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CieloDespiertoUI", exRegistro); }
 
             // === LA RUEDA DEL RATÓN (solo con el cursor EN el panel) ===
             int rueda = Mouse.GetState().ScrollWheelValue;
@@ -368,7 +368,7 @@ namespace AethonMod.Content.UI
                     SamplerState.LinearClamp, DepthStencilState.None,
                     RasterizerState.CullCounterClockwise, null, Main.UIScaleMatrix);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CieloDespiertoUI", exRegistro); }
 
             // LA BARRA DE DESPLAZAMIENTO (el indicador de posición).
             if (maxScroll > 0f)
@@ -463,7 +463,7 @@ namespace AethonMod.Content.UI
                         sx += 20f;
                         mostrados++;
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CieloDespiertoUI", exRegistro); }
                 }
 
                 // v6.93 — SIN ESTADO «CORRUPTA»: pagada por el banco ✓ o
@@ -613,7 +613,7 @@ namespace AethonMod.Content.UI
                         var sello = it.GetGlobalItem<Globals.CorruptoGlobalItem>();
                         if (sello != null && sello.Corrompido) corrupta = true;
                     }
-                    catch { }
+                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CieloDespiertoUI", exRegistro); }
                 }
             }
             return lleva;

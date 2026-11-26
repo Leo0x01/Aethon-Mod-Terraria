@@ -486,7 +486,7 @@ namespace AethonMod.Content.VFX
                     Terraria.Audio.SoundEngine.PlaySound(
                         SoundID.Item8.WithPitchOffset(fuerza > 1.1f ? -0.75f : -0.65f), origin);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RiftLib", exRegistro); }
             }
 
             // LA RÁFAGA de chispas de anomalía (solo cliente).

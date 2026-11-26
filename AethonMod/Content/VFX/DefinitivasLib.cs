@@ -154,7 +154,7 @@ namespace AethonMod.Content.VFX
         /// <summary>El Sonar blindado de la casa (jamás tumba el frame).</summary>
         public static void Sonar(Terraria.Audio.SoundStyle estilo, Vector2 pos)
         {
-            try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); } catch { }
+            try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DefinitivasLib", exRegistro); }
         }
 
         // (v6.81 — DeGolpe purgado con la Bolsa del Crecimiento: sus 7

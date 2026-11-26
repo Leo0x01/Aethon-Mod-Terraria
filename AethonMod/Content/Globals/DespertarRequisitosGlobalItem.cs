@@ -143,7 +143,7 @@ namespace AethonMod.Content.Globals
                 //  (el jugo de siempre — decoración pura).
                 // ============================================================
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DespertarRequisitosGlobalItem", exRegistro); }
         }
 
     }

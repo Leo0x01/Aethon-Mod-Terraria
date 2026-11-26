@@ -246,7 +246,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             if (Main.netMode != NetmodeID.Server)
             {
-                try { Terraria.Audio.SoundEngine.PlaySound(SoundID.Item14, at); } catch { }
+                try { Terraria.Audio.SoundEngine.PlaySound(SoundID.Item14, at); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("StellarCometMinion", exRegistro); }
                 for (int i = 0; i < 18; i++)
                 {
                     float ang = Main.rand.NextFloat(0f, MathHelper.TwoPi);
@@ -321,7 +321,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
         {
             // materia estelar CALIENTE (la firma opuesta a la medusa)
-            try { target.AddBuff(BuffID.OnFire, 200); } catch { }
+            try { target.AddBuff(BuffID.OnFire, 200); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("StellarCometMinion", exRegistro); }
             if (Main.netMode == NetmodeID.Server) return;
             for (int i = 0; i < 4; i++)
             {

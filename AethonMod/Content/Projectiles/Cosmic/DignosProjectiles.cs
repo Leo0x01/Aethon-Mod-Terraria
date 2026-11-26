@@ -141,7 +141,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
                     0, 0f, Main.myPlayer, modo, fuerza);
                 fx.timeLeft = vida;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DignosProjectiles", exRegistro); }
         }
 
         public override void AI()

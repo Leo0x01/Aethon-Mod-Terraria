@@ -143,10 +143,7 @@ namespace AethonMod.Content.Globals
                 if (nivelesGanados > 0)
                     OnLevelUp(item, nivelesGanados, cruzoHito, nivelHito);
             }
-            catch
-            {
-                // Silenciar: nunca lanzar desde GrantXP.
-            }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardLevelItem", exRegistro); }
         }
 
         /// <summary>
@@ -238,10 +235,7 @@ namespace AethonMod.Content.Globals
                     }
                 }
             }
-            catch
-            {
-                // Silenciar: nunca lanzar desde OnLevelUp.
-            }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardLevelItem", exRegistro); }
         }
 
         /// <summary>
@@ -282,7 +276,7 @@ namespace AethonMod.Content.Globals
                 writer.Write(XP);
                 writer.Write(PrimeraCincoEstrellas);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardLevelItem", exRegistro); }
         }
 
         public override void NetReceive(Item item, BinaryReader reader)
@@ -319,7 +313,7 @@ namespace AethonMod.Content.Globals
                     if (l % 50 == 0) { cruzoHito = true; nivelHito = l; }
                 OnLevelUp(item, nivelesGanados, cruzoHito, nivelHito);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardLevelItem", exRegistro); }
         }
 
         /// <summary>
@@ -356,7 +350,7 @@ namespace AethonMod.Content.Globals
                 }
                 OnLevelUp(item, niveles, cruzoHito, nivelHito);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardLevelItem", exRegistro); }
         }
 
         public override void SaveData(Item item, TagCompound tag)
@@ -378,7 +372,7 @@ namespace AethonMod.Content.Globals
                 if (PrimeraCincoEstrellas)
                     tag["aethonPrimera5"] = true;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardLevelItem", exRegistro); }
         }
 
         public override void LoadData(Item item, TagCompound tag)

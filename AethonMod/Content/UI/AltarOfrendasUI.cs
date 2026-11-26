@@ -223,7 +223,7 @@ namespace AethonMod.Content.UI
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltarOfrendasUI", exRegistro); }
         }
 
         public static void AlternarPergamino()
@@ -279,7 +279,7 @@ namespace AethonMod.Content.UI
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltarOfrendasUI", exRegistro); }
         }
 
         /// <summary>CLIC DERECHO en el hueco (v6.174, la letra: «el click
@@ -295,7 +295,7 @@ namespace AethonMod.Content.UI
                 SoltarLaOfrenda(true);
                 Terraria.Audio.SoundEngine.PlaySound(habia ? SoundID.Grab : SoundID.MenuTick);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltarOfrendasUI", exRegistro); }
         }
 
         /// <summary>EL DEPÓSITO DE LAS MIL: las esencias del cursor suben a
@@ -374,7 +374,7 @@ namespace AethonMod.Content.UI
                 if (yo == null || !yo.active || !_abierta) return;
                 ConsagrarDesdeElLibro(yo);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltarOfrendasUI", exRegistro); }
         }
 
         private static void Sellar(Item arma)
@@ -608,7 +608,7 @@ namespace AethonMod.Content.UI
                 }
                 else PrestarLaOfrenda(elegido);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltarOfrendasUI", exRegistro); }
         }
 
         /// <summary>EL PRÉSTAMO: el hueco recuerda la referencia viva de la
@@ -691,7 +691,7 @@ namespace AethonMod.Content.UI
                 }
                 MeterEnLaRanura(yo, trio, slotT, enCursor, true);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltarOfrendasUI", exRegistro); }
         }
 
         /// <summary>SACAR el arma de una ranura: al inventario (o al cursor
@@ -731,7 +731,7 @@ namespace AethonMod.Content.UI
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Grab);
                 DecirItem("TrioExtraida", ChatVioleta, slotT + 1);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltarOfrendasUI", exRegistro); }
         }
 
         public static void ClicEnDesequiparTodo()
@@ -758,7 +758,7 @@ namespace AethonMod.Content.UI
                 }
                 if (primera.Length > 0) Decir("InventarioLleno", ChatRojo, primera);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltarOfrendasUI", exRegistro); }
         }
 
         /// <summary>LA MARCA DEL ALTAR (v6.167): las tres a la vez ↔ por
@@ -777,7 +777,7 @@ namespace AethonMod.Content.UI
                 DecirItem(tres ? "TrioModoTres" : "TrioModoTurnos", ChatVioleta);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltarOfrendasUI", exRegistro); }
         }
 
         /// <summary>EL ALBEDRÍO (v6.174, la letra: «crear un selector tipo
@@ -804,7 +804,7 @@ namespace AethonMod.Content.UI
                 DecirItem("TrioAlbedrioCambiada", ChatVioleta, ranura + 1,
                     Language.GetTextValue("Mods.AethonMod.Items.TrioAlbedrio" + nuevo));
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltarOfrendasUI", exRegistro); }
         }
 
         // ================================================================
@@ -843,7 +843,7 @@ namespace AethonMod.Content.UI
                     Decir("OfrendaPerdida", ChatRojo);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltarOfrendasUI", exRegistro); }
         }
 
         /// <summary>¿LA PILA prestada sigue en el inventario (o en el
@@ -882,7 +882,7 @@ namespace AethonMod.Content.UI
                 if (_arma != null && !_arma.IsAir)
                     tag["altarArma"] = ItemIO.Save(_arma);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltarOfrendasUI", exRegistro); }
         }
 
         public override void LoadWorldData(TagCompound tag)

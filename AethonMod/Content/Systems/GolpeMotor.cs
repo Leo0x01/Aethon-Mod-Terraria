@@ -217,7 +217,7 @@ namespace AethonMod.Content.Systems
                 // pero una excepción salta esas devoluciones). La foto es
                 // el valor PRE-cauce: recomponerla es no-op si el motor ya
                 // había devuelto la suya.
-                try { if (npc != null && npc.active) npc.position = npcPos; } catch { }
+                try { if (npc != null && npc.active) npc.position = npcPos; } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GolpeMotor", exRegistro); }
                 return false;
             }
             finally

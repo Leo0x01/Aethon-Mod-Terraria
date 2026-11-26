@@ -68,7 +68,7 @@ namespace AethonMod.Content.Buffs
                 global::AethonMod.Content.Systems.EscuadronUtil.Despedir(
                     ModContent.ProjectileType<global::AethonMod.Content.Projectiles.OjoEternoMinion>());
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("OjoEternoBuff", exRegistro); }
             return true;   // y el buff se cancela (vanilla lo retira)
         }
     }

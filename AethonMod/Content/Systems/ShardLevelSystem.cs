@@ -193,7 +193,7 @@ namespace AethonMod.Content.Systems
                 if (kills != null && kills.GetKillCount(npc) <= 1)
                     return xp * 3;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardLevelSystem", exRegistro); }
             return xp;
         }
 
@@ -230,7 +230,7 @@ namespace AethonMod.Content.Systems
                     ContentSamples.NpcBestiaryRarityStars.TryGetValue(npc.type, out int estrellas))
                     return estrellas;
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardLevelSystem", exRegistro); }
             return FormulaEstrellasVanilla(npc);
         }
 

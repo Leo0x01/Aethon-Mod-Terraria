@@ -81,7 +81,7 @@ namespace AethonMod.Content.VFX
                 for (int i = 0; i < _purgarBuffer.Count; i++)
                     Soltar(_purgarBuffer[i]);
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TelaLib", exRegistro); }
         }
         private static readonly List<int> _purgarBuffer = new List<int>(8);
 
@@ -104,7 +104,7 @@ namespace AethonMod.Content.VFX
                 _tickUltimaPurga = ahora;
                 Purgar();
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TelaLib", exRegistro); }
         }
 
         /// <summary>

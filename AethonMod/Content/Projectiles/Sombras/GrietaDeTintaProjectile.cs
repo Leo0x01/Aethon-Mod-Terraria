@@ -391,7 +391,7 @@ namespace AethonMod.Content.Projectiles.Sombras
                         charge, RiftPaletas.Vacio, 0.85f * fade, Semilla, time);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrietaDeTintaProjectile", exRegistro); }
             Main.spriteBatch.End();
             VFXCore.ReabrirLoteVanilla();
 
@@ -493,7 +493,7 @@ namespace AethonMod.Content.Projectiles.Sombras
 
         private static void Sonar(Terraria.Audio.SoundStyle estilo, Vector2 pos)
         {
-            try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); } catch { }
+            try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("GrietaDeTintaProjectile", exRegistro); }
         }
     }
 
