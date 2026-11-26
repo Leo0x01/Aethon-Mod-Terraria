@@ -97,7 +97,7 @@ namespace AethonMod.Content.UI
             {
                 Player yo = Main.LocalPlayer;
                 if (yo == null || !yo.active || !_abierta) return;
-                nivel = Math.Max(1, Math.Min(10, nivel));
+                nivel = Math.Max(1, nivel);   // v6.177: sin tope — el nivel crece por siempre
                 LanzarLaOleada(yo, nivel);
             }
             catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PrismaInteriorUI", exRegistro); }
@@ -188,7 +188,7 @@ namespace AethonMod.Content.UI
                 if (Systems.GrimorioFuriaSistema.Activo) return;
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item74);
                 Systems.GrimorioFuriaSistema.Provocar(yo,
-                    Math.Max(1, Math.Min(10, nivel)), natural: false);
+                    Math.Max(1, nivel), natural: false);   // v6.177: sin tope
             }
             catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PrismaInteriorUI", exRegistro); }
         }
@@ -212,21 +212,23 @@ namespace AethonMod.Content.UI
 
                 var sp = yo.GetModPlayer<Players.ShardPlayer>();
                 int kills = sp != null ? sp.KillsInteriorDe(tipoJefe) : 0;
-                int nivelIA = Math.Min(10, 1 + kills);
+                // v6.177 — EL NIVEL SIN TOPE (la letra: «ademas en el mundo
+                // interior los jefes no necesitan estar limitados a nivel
+                // 10, que este nivel sea infitino y cuanto mas nivels mas
+                // complicado, mas inteligente y tiene nuevos ataques,
+                // combos y nuevos movimientos, asi como una IA mas
+                // avanzada»): 1 + kills, SIN tope — la escalera de
+                // desbloqueos del motor crece por siempre y la barra
+                // muestra la estatura REAL.
+                int nivelIA = 1 + kills;
 
-                // ============================================================
-                //  v6.175 — LA ASPIRADORA DEL DEVORADOR (la letra: «para ese
-                //  jefe exclusivamente desactiva la devoracion normal, en
-                //  cambio en el momento en el que sea invocado por segunda
-                //  vez se hace una animacion espacial… el grimorio del
-                //  eterno lo devora por completo al mismo tiempo, todas sus
-                //  secciones son separadas y devoradas como una
-                //  aspiradora»): el GUSANO invocado (EoW o el Destructor)
-                //  desde su SEGUNDA invocación no se pelea: el grimorio se
-                //  lo lleva ENTERO con el cine espacial.
-                // ============================================================
-                bool esGusano = tipoJefe == NPCID.EaterofWorldsHead || tipoJefe == NPCID.TheDestroyer;
-                int vecesInvocado = sp != null ? sp.MarcarInvocacionInterior(tipoJefe) : 1;
+                // v6.177 — LA ASPIRADORA YA NO NACE AQUÍ: el vigía
+                // universal de FaucesGlobalNPC.OnSpawn cuenta TODAS las
+                // invocaciones del Devorador (pilar · oleadas · comida de
+                // gusano del mundo real) y arranca el cine espacial SOLO en
+                // la SEGUNDA invocación — el pilar solo viste al jefe de
+                // arena. (La letra: la aspiradora funciona en TODAS partes,
+                // no solo en el interior.)
 
                 // v6.141 — EL ANCLA LEJOS (la letra: «en el mundo interior
                 // los jefes deben aparecer alejados del jugador»): 100
@@ -252,16 +254,6 @@ namespace AethonMod.Content.UI
                     Globals.JefeInteriorGlobalNPC.Sellar(Main.npc[idx], nivelIA);
                     Main.npc[idx].netUpdate = true;
 
-                    // LA SEGUNDA INVOCACIÓN DEL GUSANO: LA ASPIRADORA
-                    if (esGusano && vecesInvocado >= 2)
-                    {
-                        int p = Projectile.NewProjectile(yo.GetSource_FromThis(),
-                            Main.npc[idx].Center, Vector2.Zero,
-                            ModContent.ProjectileType
-                                <global::AethonMod.Content.Projectiles.Sombras.AspiradoraDevoradorProjectile>(),
-                            0, 0f, Main.myPlayer, idx, yo.whoAmI);
-                        if (p >= 0) Main.projectile[p].timeLeft = 700;   // v6.176: el cine nuevo dura más (vigilia de 5 s + flotación + trago)
-                    }
                 }
             }
             catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PrismaInteriorUI", exRegistro); }

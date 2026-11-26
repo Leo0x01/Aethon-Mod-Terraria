@@ -17,11 +17,11 @@
 | **Qué es** | Mod de contenido masivo para **Terraria** vía **tModLoader 2026.09.3.1** |
 | **Lenguaje** | C# (.NET 8, `net8.0`, LangVersion latest) |
 | **Repo** | `https://github.com/Leo0x01/Aethon-Mod-Terraria` (privado durante el desarrollo) |
-| **Versión actual** | **6.176** (vive en `AethonMod/build.txt`, línea `version = 6.176`) |
+| **Versión actual** | **6.177** (vive en `AethonMod/build.txt`, línea `version = 6.177`) |
 | **Última release** | [v6.146](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.146) — md5 `a5fa29117116c8d8c1e0dfad4991819d`, 19.400.025 B, 528 entradas |
 | **Licencia** | Propietaria — © 2026 Leo0x01. VER README §AVISO LEGAL. Nada de terceros. |
 | **Idiomas** | Código y comentarios en **español**; localización del juego en es-MX (primario), es-ES, en-US |
-| **Tamaño** | 456 archivos .cs · 500 png · 78 librerías VFX · 446 herramientas · 49 versiones publicadas en CHANGES.md |
+| **Tamaño** | 486 archivos .cs · 500 png · 79 librerías VFX · 446 herramientas · 50 versiones publicadas en CHANGES.md |
 
 **La premisa**: el jugador es el portador del Grimorio Eterno, un libro vivo
 devorador de jefes. El mod crece POR SESIONES con el usuario (cada versión nace
@@ -296,6 +296,16 @@ de la versión nueva, y los no-regresión (los muertos siguen muertos). Usa
 `tools/parse_tmod.py` (el lector del formato: header tModLoader + índice +
 blobs zlib; los .cs NO viajan — viajan COMPILADOS en la DLL, y los sprites
 viajan como `.rawimg`).
+
+### 4.2.1 LA LECCIÓN DE LA BARRA (v6.177, la letra: «la barra siempre empieza con 1/0»)
+
+`ModBossBar.ModifyInfo` devuelve **true** para que TUS life/lifeMax
+sean los que se dibujen — al devolver **null** la base PISA ambos con
+los de la pieza seguida («life = Clamp(nPC.life…); lifeMax =
+nPC.lifeMax»), y tu cálculo muere en la firma. Y los dos últimos
+parámetros de la firma son **shield y shieldMax** — aunque el nombre
+que les pongas diga otra cosa, un valor ≠ 0 ahí viste UN ESCUDO.
+(Verificado contra el decompile del tML 2026.09.3.1.)
 
 ### 4.3 El publicador
 

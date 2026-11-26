@@ -87,6 +87,70 @@ namespace AethonMod.Content.Projectiles.Jefes
             };
         }
 
+        // ============================================================
+        //  v6.177 — EL MAPA TEMÁTICO VANILLA (la letra: «parecen que los
+        //  jefes en niveles altos dentro del mundo interior tienen el
+        //  mismo ataque de proyectiles luminoso, eso esta mal, el propio
+        //  terraria cuenta con proyectiles originales que pueden ser
+        //  buenos para esos jefes segun el tema, un ejemplo es el
+        //  Devoramundos, en su bioma estan los devoralmas que lanzan un
+        //  proyectil especial»): CADA jefe dispara SUS proyectiles de
+        //  Terraria — verificados contra el decompile del tML real:
+        //   · El gusano de la CORRUPCIÓN escupe la LLAMA MALDITA
+        //     (CursedFlameHostile — la corrupción de los devoralmas)
+        //   · El Cerebro, el ICHOR de la carmesí (IchorSplash)
+        //   · La Abeja, su AGUIJÓN (Stinger) y el de avispas
+        //   · Esqueletrón, la CALAVERA maldita (Skull)
+        //   · La Muralla, la BOLA DE FUEGO del infierno (Fireball)
+        //   · Los MECÁNICOS: el LÁSER DE LA MUERTE (Retinazer, el
+        //     Destructor) · la llama maldita (Spazmatism) · la BOMBA
+        //     del Prime (BombSkeletronPrime)
+        //   · Plantera, sus SEMILLAS y las VENENOSAS
+        //   · Gólem, su bola de fuego solar
+        //   · el Duque, el RAYO DEL TIBURÓN (SharknadoBolt)
+        //   · la Emperatriz, su ESTELA ARCOÍRIS (HallowBossRainbowStreak)
+        //   · el Señor de la Luna: el OJO FANTASMAL y la ESFERA
+        //     (PhantasmalEye · PhantasmalSphere)
+        //   · Deerclops, su FRAGMENTO DE HIELO (DeerclopsRangedProjectile)
+        //   · el Sectario, su BOLA DE FUEGO y su ORBE DE RAYOS
+        //  (El patrón — abanico · anillo · lluvia · espiral — sigue
+        //  siendo de la casa; el PROYECTIL es de Terraria. Los jefes
+        //  sin mapa — los del mod — siguen con el proyectil de la casa.)
+        // ============================================================
+        /// <summary>EL PROYECTIL TEMÁTICO de un jefe (su propio vanilla
+        /// — 0 = el proyectil de la casa).</summary>
+        public static int ProyectilTematico(int tipoJefe, int patron)
+        {
+            int id = tipoJefe switch
+            {
+                NPCID.KingSlime => ProjectileID.Spike,
+                NPCID.EyeofCthulhu => ProjectileID.EyeLaser,
+                NPCID.EaterofWorldsHead or NPCID.EaterofWorldsBody or NPCID.EaterofWorldsTail
+                    => ProjectileID.CursedFlameHostile,
+                NPCID.BrainofCthulhu => ProjectileID.IchorSplash,
+                NPCID.QueenBee => patron == 2 ? ProjectileID.HornetStinger : ProjectileID.Stinger,
+                NPCID.SkeletronHead => ProjectileID.Skull,
+                NPCID.WallofFlesh => ProjectileID.Fireball,
+                NPCID.QueenSlimeBoss => ProjectileID.Spike,
+                NPCID.Retinazer => ProjectileID.DeathLaser,
+                NPCID.Spazmatism => ProjectileID.CursedFlameHostile,
+                NPCID.TheDestroyer => ProjectileID.DeathLaser,
+                NPCID.SkeletronPrime => ProjectileID.BombSkeletronPrime,
+                NPCID.Plantera => patron == 1
+                    ? ProjectileID.PoisonSeedPlantera : ProjectileID.SeedPlantera,
+                NPCID.Golem => ProjectileID.Fireball,
+                NPCID.DukeFishron => ProjectileID.SharknadoBolt,
+                NPCID.HallowBoss => ProjectileID.HallowBossRainbowStreak,
+                NPCID.MoonLordCore or NPCID.MoonLordHead or NPCID.MoonLordHand
+                    => patron == 1 ? ProjectileID.PhantasmalSphere : ProjectileID.PhantasmalEye,
+                NPCID.Deerclops => ProjectileID.DeerclopsRangedProjectile,
+                NPCID.CultistBoss => patron == 3
+                    ? ProjectileID.CultistBossLightningOrbArc : ProjectileID.CultistBossFireBall,
+                _ => 0,
+            };
+            return id;
+        }
+
         public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
 
         public override void SetDefaults()

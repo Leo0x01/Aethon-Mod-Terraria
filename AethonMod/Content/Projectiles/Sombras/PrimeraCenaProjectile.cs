@@ -346,7 +346,12 @@ namespace AethonMod.Content.Projectiles.Sombras
             if (t >= T_FESTIN - 20f && presencia > 0.02f && t >= T_LIBRO)
             {
                 float sale = SombrasLib.DeGolpe(MathHelper.Clamp((t - (T_FESTIN - 20f)) / 30f, 0f, 1f));
-                float festin = MathHelper.Clamp((t - T_FESTIN) / 85f, 0f, 1f);     // la cobertura crece
+                // v6.177 — LA COBERTURA ESPERA A LA EXTENSIÓN (la letra:
+                // «los tentaculos… deben aparecer desde el mismo grimorio y
+                // deben extenderse hacia afuera… LUEGO estos lo cubren e
+                // inicia el resto de la animacion»): la cobertura del preso
+                // crece DESPUÉS de que los brazos terminaron de extenderse
+                float festin = MathHelper.Clamp((t - T_FESTIN - 12f) / 73f, 0f, 1f);   // la cobertura crece
                 float vivoF = vivo ? 1f - 0.75f * poso : 0.25f * (1f - poso);
 
                 // ============================================================
@@ -379,13 +384,26 @@ namespace AethonMod.Content.Projectiles.Sombras
                     Vector2 raiz = posLibro + rumboRaiz * 16f + (k > 0
                         ? new Vector2(MathF.Cos(k * 2.4f) * 12f, MathF.Sin(k * 1.7f) * 8f) : Vector2.Zero);
 
-                    // EL DESTINO: cada sombra ORBITA al preso y SE CIÑE —
-                    // la jaula de N brazos que se aprieta (radio 0.9→0.35)
+                    // ============================================================
+                    //  v6.177 — EL TENTÁCULO NACE DEL LIBRO (la letra: «los
+                    //  tentaculos en esa animacion deben aparecer desde el
+                    //  mismo grimorio y deben extenderse hacia afuera en
+                    //  direcciones al jefe que sera devorado, luego estos lo
+                    //  cubren e inicia el resto de la animacion»). DOS
+                    //  TIEMPOS LIMPIOS — antes «alcance = sale·0.35 +
+                    //  festín·0.65» mezclaba ambos y los brazos nunca se
+                    //  leían creciendo del libro:
+                    //   (1) EXTENDER: la punta viaja DESDE el libro hacia
+                    //       SU puesto alrededor del preso (saleK 0→1).
+                    //   (2) CUBRIR: ya extendidos, la jaula SE CIÑE (el
+                    //       radio cae 0.95→0.35) y lo cubre.
+                    // ============================================================
                     float angOrbita = k * (MathF.PI * 2f / nSombras) + tiempo * (0.9f + 0.12f * k);
-                    float radioOrbita = radioJefe * MathHelper.Lerp(0.90f, 0.35f, festin);
+                    float cina = MathHelper.Clamp((t - (T_FESTIN + 10f + retardo)) / 70f, 0f, 1f);
+                    float radioOrbita = radioJefe * MathHelper.Lerp(0.95f, 0.35f, cina);
                     Vector2 destino = centroJefe + new Vector2(MathF.Cos(angOrbita), MathF.Sin(angOrbita) * 0.72f) * radioOrbita;
-                    float alcance = saleK * 0.35f + festin * 0.65f;
-                    destino = Vector2.Lerp(raiz + rumboRaiz * 42f, destino, alcance);
+                    // (1) EXTENDER: nace EN el libro y CRECE hacia afuera
+                    destino = Vector2.Lerp(raiz + rumboRaiz * 24f, destino, saleK);
                     // EN EL TRAGO: todas cargan la masa a la boca del libro
                     destino = Vector2.Lerp(destino, raiz + rumboRaiz * 18f, inhala * 0.85f);
 

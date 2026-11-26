@@ -16,8 +16,6 @@ Items: {
 	// v6.176 — THE CYCLOPS' WEAPON (the letter: what had to be built
 	// was a weapon — the eye projection of the video).
 	ProyeccionDelCiclope: {
-		DisplayName: Proyección del Cíclope
-		Tooltip: El ojo del Cíclope se proyecta sobre ti: doce latidos de grito y el rayo magenta sale — penetración infinita
 	}
 
 	// v6.170 — THE THRESHOLD CLICKER DIED (la letra: «esta
@@ -2286,6 +2284,67 @@ Items: {
 			'''
 	}
 
+	VisorDelProyectado: {
+		DisplayName: Visor del Proyectado
+		Tooltip:
+			'''
+			Mantén clic para proyectar tus emociones en forma de rayo
+			Presiona {0} para proyectarte de verdad
+			Se vuelve más fuerte con cada jefe derrotado y cada enemigo que cae
+			«Nmms profe, ni anduvimos»
+			'''
+	}
+
+	CartaQueNuncaLeDiste: {
+		DisplayName: La carta que nunca le diste
+		Tooltip: «Lleva tres años doblada en la mochila»
+	}
+
+	CapturaDelVisto: {
+		DisplayName: Captura del visto
+		Tooltip: «Leído a las 2:47 a.m. Nunca hubo respuesta»
+	}
+
+	NoEresTuSoyYo: {
+		DisplayName: El «no eres tú, soy yo»
+		Tooltip: «A partir de aquí todo se pone más difícil»
+	}
+
+	ProyectorDelSalon: {
+		DisplayName: Proyector del salón
+		Tooltip: «Nadie sabe dónde está el cable VGA. El profe pide ayuda»
+	}
+
+	ProyectorDeCine: {
+		DisplayName: Proyector de cine
+		Tooltip: «Función de las 10:40 p.m. Fuiste solo»
+	}
+
+	ProyectorImax: {
+		DisplayName: Proyector IMAX
+		Tooltip: «Tus emociones, ahora en 70 mm y con sonido envolvente»
+	}
+
+	FloresAmarillas: {
+		DisplayName: Flores amarillas que nadie recogió
+		Tooltip: «21 de septiembre. Las dejaste en la entrada»
+	}
+
+	YaLoSupere: {
+		DisplayName: El «ya lo superé»
+		Tooltip: «Tallado en piedra. Igual de falso»
+	}
+
+	HayMasPeces: {
+		DisplayName: Hay más peces en el mar
+		Tooltip: «Te lo dijo tu tía. Este casi te mata»
+	}
+
+	LunaQueTeIbaABajar: {
+		DisplayName: La luna que te ibas a bajar
+		Tooltip: «Al final la bajaste tú solo»
+	}
+
 	BolsaAuras: {
 		// v6.104 → v6.109: THE AURAS BAG — the aura research material
 		// (the two dead banners OUT, the seven lights IN).
@@ -4001,7 +4060,7 @@ Altar: {
 	// and unfuse the Trio Eterno weapon)
 	TrioTitulo: EL ARSENAL DEL GRIMORIO — EL TRÍO DEL ETERNO
 	SelectorTitulo: LA OFRENDA — ELIGE
-	SelectorTrioTitulo: EL ARSENAL — ELIGE UN ARMA
+	SelectorTrioTitulo: ELIGE UN ARMA
 	DevueltaAlSuelo: Tu inventario está lleno: el arma cayó a tus pies.
 	TrioSinTrio: No llevas el Trío del Eterno — tráelo al altar para fusionar sus tres armas.
 	TrioPista: Clic en una ranura vacía para ABRIR EL ARSENAL y elegir · clic derecho en una llena para devolverla al inventario.
@@ -4146,6 +4205,11 @@ LibroEterno: {
 }
 
 Buffs: {
+	RecuperacionProyectada: {
+		DisplayName: Recuperándose de la proyectada
+		Description: Tus emociones se están recargando
+	}
+
 	IraSerExteriorRecargaBuff: {
 		DisplayName: Recarga: Ira de un Ser Exterior
 		Description: La Ira recarga su reloj de 10 minutos.
@@ -4243,6 +4307,8 @@ Buffs: {
 }
 
 Projectiles: {
+	RayoOpticoProyectado.DisplayName: Rayo óptico
+	RayoProyectado.DisplayName: Rayo proyectado
 	AgujeroRunicoPuroProjectile.DisplayName: Agujero Rúnico Puro
 	// AuraJuicio2Ancla.DisplayName: Aura Juicio2 Ancla
 	// CoronaDePlumasProjectile.DisplayName: Corona De Plumas Projectile
@@ -4377,7 +4443,6 @@ Projectiles: {
 	// PortalTrioProjectile.DisplayName: Portal Trio Projectile
 	// TrioRescoldoProjectile.DisplayName: Trio Rescoldo Projectile
 	// FaroDelEclipseHaz.DisplayName: Faro Del Eclipse Haz
-	// ProyeccionCiclopeRayo.DisplayName: Proyeccion Ciclope Rayo
 	// AtaqueFusionProjectile.DisplayName: Ataque Fusion Projectile
 	// AtaqueJefeProjectile.DisplayName: Ataque Jefe Projectile
 	// JefeInteriorVoleaProjectile.DisplayName: Jefe Interior Volea Projectile
@@ -4436,3 +4501,35 @@ Mapa: {
 	Altar: El Altar de la Consagración
 	Pilar: El Pilar del Eterno
 }
+
+Proyectado: {
+	SinTecla: (sin tecla)
+	SinVisor: Sin visor no hay proyectada
+	AunNo: Aún no ({0} s)
+	Listo: Listo para proyectarte
+	Grito: ¡AAAAH ME PROYECTO!
+	Etapa: Etapa: {0} (base {1})
+	Siguiente: Siguiente proyectada: {0} (base {1})
+	Energia: Energía proyectada: {0}/{1} (recarga +{2} %)
+	EnergiaInfinita: Energía proyectada: infinita
+	Mejoras: Proyectadas superadas: {0}/{1}
+	Muertes: Enemigos proyectados: {0} (+{1:0.#} % de {2:0.#} % máximo en esta etapa)
+	Opcionales: Jefes opcionales: {0}/{1} (+{2:0} %)
+	Especial: "[{0}] Rayo proyectado: {1}"
+	Recargando: recargando ({0} s)
+	ListoCorto: listo
+	MasEnergia: +{0} de energía proyectada
+	InfinitaAnuncio: ¡PROYECTADA INFINITA!
+	Efecto: +{0} de energía proyectada máxima
+	EfectoInfinito: Desbloquea la proyectada infinita: el rayo del visor ya no gasta energía
+	EfectoRecarga: +{0:0} % de velocidad de recarga
+	YaSuperada: Esta ya la superaste
+	UnSoloUso: Un solo uso por personaje
+	HudInfinita: PROYECCIÓN INFINITA
+	HudEnfriamiento: X en {0} s
+	Condicion1: Solo si es tu primer jefe mecánico
+	Condicion2: Solo si es tu segundo jefe mecánico
+	Condicion3: Solo si es tu tercer jefe mecánico
+}
+
+Keybinds.RayoProyectado.DisplayName: Rayo proyectado (habilidad del visor)

@@ -197,6 +197,22 @@ namespace AethonMod.Content.Systems
         private static int _pendTicks = 0;         // la espera de la cadena
         private static int _pendIntentos = 0;      // reintentos antes de rendirse
 
+        /// <summary>v6.177 — ¿La EXTENSIÓN de la cadena del Devorador
+        /// sigue pendiente? (la aspiradora lo consulta en LA VIGILIA:
+        /// el cine NO captura al gusano mientras la oleada lo sigue
+        /// alargando — la letra: «no lo devora correctamente»).</summary>
+        public static bool ExtensionDevoradorPendiente => _pendCabeza >= 0;
+
+        /// <summary>v6.177 — LA ASPIRADORA MANDA: cancela la extensión
+        /// pendiente (el cine capturó al gusano ENTERO — que la oleada
+        /// no le cosa piezas a mitad de flotación).</summary>
+        public static void CancelarExtensionDevorador()
+        {
+            _pendCabeza = -1;
+            _pendTicks = 0;
+            _pendIntentos = 0;
+        }
+
         /// <summary>Pieza del Devorador nacida (la llama Marcar): el censo se refresca.</summary>
         public static void PiezaDevoradorNacio(float mult)
         {

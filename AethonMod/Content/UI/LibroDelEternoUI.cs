@@ -1277,9 +1277,14 @@ namespace AethonMod.Content.UI
             bool apagado = false)
         {
             var fuente = FontAssets.MouseText.Value;
-            float esc = LibroLineas.EscalaQueCabe(t ?? "", 0.88f, 208f);
-            Rectangle b = new Rectangle((int)(pag.X + pag.Width / 2f - 110f), (int)cy, 220, 40);
-            bool vivo = Cabe(cy, 40f, rec);
+            // v6.177 — EL BOTÓN GRANDE (la letra: «todos los textos del
+            // altar son muy pequeños» + «los textos de los botones se
+            // desbordan»): escala base 1.05 (antes 0.88) y el texto se
+            // mide CON margen de halo (el contorno vive FUERA del área
+            // medida) — nada desborda jamás y el botón se lee.
+            float esc = LibroLineas.EscalaQueCabe(t ?? "", 1.05f, 202f);
+            Rectangle b = new Rectangle((int)(pag.X + pag.Width / 2f - 113f), (int)cy, 226, 46);
+            bool vivo = Cabe(cy, 46f, rec);
             geo = vivo ? b : Rectangle.Empty;
             bool hov = vivo && !apagado && b.Contains(Main.mouseX, Main.mouseY);
             sb.Draw(TextureAssets.MagicPixel.Value, b,
@@ -1287,11 +1292,11 @@ namespace AethonMod.Content.UI
             LibroMarco.Marco(sb, b, apagado ? TintaApagado * 0.5f : (hov ? cBase : cBase * 0.55f));
             // v6.176 — EL BOTÓN JAMÁS REBOSA (re-medida al momento del
             // trazo — la ventana de la fuente dinámica se cierra aquí)
-            esc = LibroLineas.EscalaQueCabe(t ?? "", esc, 206f);
+            esc = LibroLineas.EscalaQueCabe(t ?? "", esc, 202f);
             LibroLineas.Texto(sb, t ?? "", new Vector2(b.Center.X, b.Center.Y),
                 apagado ? TintaApagado : Tinta, esc, 0.5f, 0.5f);
             if (hov && clicNuevo) alClic?.Invoke();
-            return cy + 48f;
+            return cy + 54f;
         }
 
         /// <summary>LA PÁGINA IZQUIERDA: la ofrenda y su mundo.</summary>
@@ -1330,8 +1335,9 @@ namespace AethonMod.Content.UI
                     LibroLineas.Texto(sb, arma.stack.ToString(),
                         new Vector2(slot.Right - 6f, slot.Bottom - 8f), Tinta, 0.85f, 1f, 0.85f);
             }
-            else
-                LibroLineas.Texto(sb, At("SlotVacio"), slot.Center.ToVector2(), TintaApagado, 0.7f, 0.5f, 0.5f);
+            // v6.177 — EL SLOT LIMPIO (la letra: «en el slot de ofrendas
+            // deberia estar el slot de ofrenda sin textos… ese texto es
+            // innecesario»): el hueco vacío queda VACÍO de verdad.
 
             if (hoverSlot && clicDerNuevo) AltarOfrendasUI.ClicDerechoSlot();
             else if (hoverSlot && clicNuevo)
@@ -1340,10 +1346,10 @@ namespace AethonMod.Content.UI
                 else AltarOfrendasUI.ClicEnSlot();                           // dejar / retirar / devorar
             }
             cy += 58f;
-            cy = Linea(At("EtiquetaArma"), cy, 0.82f, Tinta);
-            cy = Linea(At("FiltroArma"), cy, 0.72f, TintaApagado);
+            cy = Linea(At("EtiquetaArma"), cy, 0.92f, Tinta);
+            cy = Linea(At("FiltroArma"), cy, 0.84f, TintaApagado);
             if (AltarOfrendasUI.OfrendaPrestada && Cabe(cy, 44f, rec))
-                cy = Linea(At("OfrendaPrestada"), cy, 0.72f, TintaOro);
+                cy = Linea(At("OfrendaPrestada"), cy, 0.84f, TintaOro);
 
             // ── EL SELLO (el precio A LA VISTA + consagrar) ──
             cy += 6f;
@@ -1354,21 +1360,21 @@ namespace AethonMod.Content.UI
                 {
                     cy = Linea(Language.GetTextValue(A + "DevoraLinea", arma.stack,
                         global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas,
-                        global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta), cy, 0.78f, Tinta);
+                        global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta), cy, 0.88f, Tinta);
                 }
                 else
                 {
                     int coste = global::AethonMod.Content.Globals.CorruptoGlobalItem.CosteCorrupcion(arma);
                     int llevadas = global::AethonMod.Content.Globals.CorruptoGlobalItem
                         .EsenciasEnLaBolsa(Main.LocalPlayer);
-                    cy = Linea(Language.GetTextValue(A + "SelloCuesta", coste), cy, 0.8f, Tinta);
-                    cy = Linea(Language.GetTextValue(A + "SelloLlevas", llevadas), cy, 0.78f, TintaApagado);
+                    cy = Linea(Language.GetTextValue(A + "SelloCuesta", coste), cy, 0.9f, Tinta);
+                    cy = Linea(Language.GetTextValue(A + "SelloLlevas", llevadas), cy, 0.88f, TintaApagado);
                     if (llevadas < coste)
-                        cy = Linea(Language.GetTextValue(A + "SelloFalta", coste - llevadas), cy, 0.78f, TintaRojo);
+                        cy = Linea(Language.GetTextValue(A + "SelloFalta", coste - llevadas), cy, 0.88f, TintaRojo);
                 }
             }
             else
-                cy = Linea(At("SelloSinOfrenda"), cy, 0.78f, TintaApagado);
+                cy = Linea(At("SelloSinOfrenda"), cy, 0.88f, TintaApagado);
             float cyBoton = cy + 4f;
             cy = Boton(sb, pag, rec, cyBoton, At("BotonConsagrar"), TintaVioleta, out GeoConsagrar, clicNuevo,
                 () => AltarOfrendasUI.ClicEnConsagrar(), apagado: !hayArma);
@@ -1386,16 +1392,16 @@ namespace AethonMod.Content.UI
             {
                 Titulo(sb, At("GanaTitulo"), pag, cy, out cy);
                 cy = Linea(Language.GetTextValue(A + "GanaEsencias",
-                    global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta), cy, 0.76f, Tinta);
-                cy = Linea(At("GanaConsagrada"), cy, 0.76f, Tinta);
+                    global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta), cy, 0.88f, Tinta);
+                cy = Linea(At("GanaConsagrada"), cy, 0.88f, Tinta);
                 cy += 4f;
             }
             if (Cabe(cy, 120f, rec))
             {
                 Titulo(sb, At("ComoTitulo"), pag, cy, out cy);
-                cy = Linea(At("ComoCriaturas"), cy, 0.74f, TintaApagado);
-                cy = Linea(At("ComoJefes"), cy, 0.74f, TintaApagado);
-                cy = Linea(At("ComoOleadas"), cy, 0.74f, TintaApagado);
+                cy = Linea(At("ComoCriaturas"), cy, 0.86f, TintaApagado);
+                cy = Linea(At("ComoJefes"), cy, 0.86f, TintaApagado);
+                cy = Linea(At("ComoOleadas"), cy, 0.86f, TintaApagado);
             }
 
             // ── EL MUNDO INTERIOR (la puerta cuando las mil están) ──
@@ -1409,7 +1415,7 @@ namespace AethonMod.Content.UI
                 else
                     cy = Linea(Language.GetTextValue(A + "MundoProgreso",
                         global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas,
-                        global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta), cy, 0.78f, Tinta);
+                        global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta), cy, 0.88f, Tinta);
             }
 
             // ── EL SELECTOR DE LA OFRENDA: nace DEBAJO del botón CONSAGRAR ──
@@ -1435,11 +1441,11 @@ namespace AethonMod.Content.UI
             var trio = global::AethonMod.Content.Weapons.Investigaciones.TrioDelEterno.Del(Main.LocalPlayer);
             if (trio == null)
             {
-                Linea(At("TrioSinTrio"), cy, 0.82f, TintaApagado);
+                Linea(At("TrioSinTrio"), cy, 0.92f, TintaApagado);
                 return 0f;
             }
             bool selectorVivo = SelectorFlotante.Abierta;    // el libro ya no nos da clics: cinturón y tirantes
-            cy = Linea(At("TrioPista"), cy, 0.76f, Tinta);
+            cy = Linea(At("TrioPista"), cy, 0.88f, Tinta);
             cy += 12f;
 
             // ── LAS TRES RANURAS COSIDAS AL PAPEL ──
@@ -1461,7 +1467,7 @@ namespace AethonMod.Content.UI
                         tex.Size() * 0.5f, esc, SpriteEffects.None, 0f);
                 }
                 else
-                    LibroLineas.Texto(sb, (i + 1).ToString(), s.Center.ToVector2(), TintaApagado, 0.9f, 0.5f, 0.5f);
+                    LibroLineas.Texto(sb, (i + 1).ToString(), s.Center.ToVector2(), TintaApagado, 1.0f, 0.5f, 0.5f);
 
                 // EL GESTO: izquierdo con el cursor vacío = ELEGIR · con un arma al cursor = DEJARLA · derecho = DEVOLVER
                 if (hov && !selectorVivo)
@@ -1492,7 +1498,7 @@ namespace AethonMod.Content.UI
             sb.Draw(TextureAssets.MagicPixel.Value, marca, marcada ? TintaVioleta * 0.85f : PapelSombra * 0.9f);
             LibroMarco.Marco(sb, marca, marcada || hovM ? TintaVioleta : TintaApagado * 0.6f);
             LibroLineas.Texto(sb, At("TrioMarcaTexto"), new Vector2(marca.Right + 8, marca.Center.Y),
-                marcada ? TintaVioleta : hovTxt ? Tinta : TintaApagado, 0.82f, 0f, 0.5f);
+                marcada ? TintaVioleta : hovTxt ? Tinta : TintaApagado, 0.92f, 0f, 0.5f);
             if ((hovM || hovTxt) && (clicNuevo || clicDerNuevo) && !selectorVivo)
                 AltarOfrendasUI.ClicEnMarcaTres();
             cy += 34f;
@@ -1504,7 +1510,7 @@ namespace AethonMod.Content.UI
             sb.Draw(TextureAssets.MagicPixel.Value, btnTodo, hovTodo ? TintaOro * 0.30f : PapelSombra * 0.9f);
             LibroMarco.Marco(sb, btnTodo, hovTodo ? TintaOro : TintaApagado * 0.6f);
             LibroLineas.Texto(sb, At("TrioDesequiparTodo"), btnTodo.Center.ToVector2(),
-                hovTodo ? Tinta : TintaApagado, 0.82f, 0.5f, 0.5f);
+                hovTodo ? Tinta : TintaApagado, 0.92f, 0.5f, 0.5f);
             if (hovTodo && clicNuevo && !selectorVivo) AltarOfrendasUI.ClicEnDesequiparTodo();
             cy += 40f;
 
@@ -1519,7 +1525,7 @@ namespace AethonMod.Content.UI
             // ================================================================
             cy += 4f;
             Titulo(sb, At("TrioAlbedrioTitulo"), pag, cy, out cy, 0.8f);
-            cy = Linea(At("TrioAlbedrioPista"), cy, 0.72f, TintaApagado);
+            cy = Linea(At("TrioAlbedrioPista"), cy, 0.84f, TintaApagado);
 
             float anchoEtiqueta = 78f;
             for (int i = 0; i < 3 && Cabe(cy, 28f, rec); i++)
@@ -1528,7 +1534,7 @@ namespace AethonMod.Content.UI
                 bool llena = ra != null && !ra.IsAir;
                 float x0 = pag.X + 18f;
                 string et = Language.GetTextValue(A + "TrioRanuraEtiqueta", i + 1);
-                LibroLineas.Texto(sb, et, new Vector2(x0, cy + 13f), llena ? Tinta : TintaApagado, 0.76f, 0f, 0.5f);
+                LibroLineas.Texto(sb, et, new Vector2(x0, cy + 13f), llena ? Tinta : TintaApagado, 0.86f, 0f, 0.5f);
                 for (int j = 0; j < 3; j++)
                 {
                     // ========================================================
@@ -1552,7 +1558,7 @@ namespace AethonMod.Content.UI
                     LibroMarco.Marco(sb, casilla,
                         !llena ? TintaApagado * 0.35f : viva || hovC ? TintaVioleta : TintaApagado * 0.7f);
                     string txt = Language.GetTextValue("Mods.AethonMod.Items.TrioAlbedrio" + j);
-                    float escT = LibroLineas.EscalaQueCabe(txt, 0.76f, 92f);
+                    float escT = LibroLineas.EscalaQueCabe(txt, 0.86f, 88f);
                     LibroLineas.Texto(sb, txt, new Vector2(casilla.Right + 6f, casilla.Center.Y),
                         !llena ? TintaApagado : viva ? TintaVioleta : Tinta, escT, 0f, 0.5f);
                     if (hovC && (clicNuevo || clicDerNuevo) && !selectorVivo)
@@ -1656,7 +1662,7 @@ namespace AethonMod.Content.UI
             // glifo y la tinta leía clara. Ahora el grosor ESCALA con
             // el texto y el blanco pierde un punto de alfa: separa, no
             // lava.
-            Color halo = new Color(255, 250, 236) * 0.82f;
+            Color halo = new Color(255, 250, 236) * 0.75f;   // v6.177: un punto más manso (la letra: «demasiado claros»)
             float o = Math.Clamp(esc * 1.15f, 0.55f, 1.1f);
             sb.DrawString(fuente, texto, p + new Vector2(o, 0f), halo, 0f, Vector2.Zero, esc, SpriteEffects.None, 0f);
             sb.DrawString(fuente, texto, p + new Vector2(-o, 0f), halo, 0f, Vector2.Zero, esc, SpriteEffects.None, 0f);
@@ -1789,9 +1795,11 @@ namespace AethonMod.Content.UI
             bool apagado = false)
         {
             string txt = t ?? "";
-            float esc = LibroLineas.EscalaQueCabe(txt, 0.88f, 208f);
-            Rectangle b = new Rectangle((int)(pag.X + pag.Width / 2f - 110f), (int)cy, 220, 40);
-            bool vivo = cy + 40f <= rec.Bottom;
+            // v6.177 — EL BOTÓN GRANDE (el pilar con la misma cura del
+            // altar: escala 1.05 · medido con margen de halo · 46 de alto)
+            float esc = LibroLineas.EscalaQueCabe(txt, 1.05f, 202f);
+            Rectangle b = new Rectangle((int)(pag.X + pag.Width / 2f - 113f), (int)cy, 226, 46);
+            bool vivo = cy + 46f <= rec.Bottom;
             geo = vivo ? b : Rectangle.Empty;
             bool hov = vivo && !apagado && b.Contains(Main.mouseX, Main.mouseY);
             sb.Draw(TextureAssets.MagicPixel.Value, b,
@@ -1801,11 +1809,11 @@ namespace AethonMod.Content.UI
             // TRAZO (la fuente MouseText de vanilla es dinámica — puede
             // crecer entre la medida y el dibujo; medir pegado al trazo
             // cierra la ventana y las tijeras del pase lo blindan).
-            esc = LibroLineas.EscalaQueCabe(txt, esc, 206f);
+            esc = LibroLineas.EscalaQueCabe(txt, esc, 202f);
             LibroLineas.Texto(sb, txt, new Vector2(b.Center.X, b.Center.Y),
                 apagado ? TintaApagado : Tinta, esc, 0.5f, 0.5f);
             if (hov && clicNuevo) alClic?.Invoke();
-            return cy + 48f;
+            return cy + 54f;
         }
 
         /// <summary>LA PÁGINA IZQUIERDA: la salida y las invocaciones.</summary>
@@ -1848,14 +1856,14 @@ namespace AethonMod.Content.UI
                 : Language.GetTextValue("Mods.AethonMod.PrismaInterior.BotonInvocar"),
                 TintaVioleta, out GeoInvocar, clicNuevo,
                 () => { if (!yaVive) PrismaInteriorUI.ClicEnInvocar(); }, yaVive);
-            cy = Linea(Language.GetTextValue("Mods.AethonMod.PrismaInterior.InvocarPista"), cy, 0.76f, TintaApagado);
+            cy = Linea(Language.GetTextValue("Mods.AethonMod.PrismaInterior.InvocarPista"), cy, 0.88f, TintaApagado);
 
             // EL SELLADO (la vía del dios completo)
             cy += 8f;
             Titulo(sb, Language.GetTextValue("Mods.AethonMod.PrismaInterior.SelladoTitulo"), pag, cy, out cy);
             cy = Boton(sb, pag, rec, cy, Language.GetTextValue("Mods.AethonMod.PrismaInterior.BotonSellado"),
                 TintaRojo, out GeoSellado, clicNuevo, () => PrismaInteriorUI.ClicEnSellado());
-            cy = Linea(Language.GetTextValue("Mods.AethonMod.PrismaInterior.SelladoPista"), cy, 0.76f, TintaApagado);
+            cy = Linea(Language.GetTextValue("Mods.AethonMod.PrismaInterior.SelladoPista"), cy, 0.88f, TintaApagado);
             return 0f;
         }
 
@@ -1899,14 +1907,14 @@ namespace AethonMod.Content.UI
                 hovMas ? TintaOro : TintaApagado, 1.15f, 0.5f, 0.5f);
             string nivelTxt = Language.GetTextValue(
                 "Mods.AethonMod.PrismaInterior.OleadaNivel", NivelElegido, maxNivel);
-            float escN = LibroLineas.EscalaQueCabe(nivelTxt, 0.92f, 180f);
+            float escN = LibroLineas.EscalaQueCabe(nivelTxt, 1.02f, 172f);
             LibroLineas.Texto(sb, nivelTxt, new Vector2(sel.Center.X, sel.Center.Y),
                 bloqueado ? TintaApagado : Tinta, escN, 0.5f, 0.5f);
             if (hovMenos && clicNuevo) { NivelElegido--; Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick); }
             if (hovMas && clicNuevo) { NivelElegido++; Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick); }
             cy += 40f;
             cy = Linea(Language.GetTextValue("Mods.AethonMod.PrismaInterior.OleadaPista", maxNivel),
-                cy, 0.76f, TintaApagado);
+                cy, 0.88f, TintaApagado);
 
             // EL BOTÓN LANZAR (la oleada del festín)
             bool festinVivo = false;
@@ -1924,7 +1932,7 @@ namespace AethonMod.Content.UI
             int nJefes = devorados != null ? devorados.Count : 0;
             // LA CUENTA TOTAL (encima de la vitrina: antes nacía BAJO la página)
             if (nJefes > 0)
-                cy = Linea(Language.GetTextValue("Mods.AethonMod.PrismaInterior.JefesCuenta", nJefes), cy, 0.76f, TintaApagado);
+                cy = Linea(Language.GetTextValue("Mods.AethonMod.PrismaInterior.JefesCuenta", nJefes), cy, 0.88f, TintaApagado);
             if (nJefes == 0)
             {
                 cy = Linea(Language.GetTextValue("Mods.AethonMod.PrismaInterior.JefesVacio"), cy, 0.8f, TintaApagado);
@@ -1978,7 +1986,9 @@ namespace AethonMod.Content.UI
                         (hovF ? TintaVioleta : PapelSombra) * (hovF ? 0.30f : 0.55f));
                     LibroMarco.Marco(sb, fila, hovF ? TintaVioleta : TintaOro * 0.35f);
                     int kills = sp.KillsInteriorDe(tipoJefe);
-                    int nivelPoder = Math.Min(10, 1 + kills);
+                    // v6.177 — SIN TOPE (la letra: «que este nivel sea
+                    // infitino»): la estatura del jefe es la REAL — 1+kills
+                    int nivelPoder = 1 + kills;
                     float mult = Globals.JefeInteriorGlobalNPC.Multiplicador(kills);
                     string nombreJefe = "???";
                     try { nombreJefe = Terraria.Lang.GetNPCNameValue(tipoJefe); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LibroDelEternoUI", exRegistro); }
@@ -1986,9 +1996,9 @@ namespace AethonMod.Content.UI
                     // EL NOMBRE: medido para su mitad; EL PODER: para la suya.
                     string poder = Language.GetTextValue(
                         "Mods.AethonMod.PrismaInterior.JefePoder", nivelPoder, (int)(mult * 100f));
-                    float escP = LibroLineas.EscalaQueCabe(poder, 0.76f, 92f);
+                    float escP = LibroLineas.EscalaQueCabe(poder, 0.86f, 96f);
                     float anchoNom = maxAncho - 104f;
-                    float escNom = LibroLineas.EscalaQueCabe(nombreJefe, 0.86f, anchoNom);
+                    float escNom = LibroLineas.EscalaQueCabe(nombreJefe, 0.96f, anchoNom);
                     LibroLineas.Texto(sb, nombreJefe, new Vector2(fila.X + 10f, fila.Center.Y),
                         hovF ? TintaVioleta : Tinta, escNom, 0f, 0.5f);
                     LibroLineas.Texto(sb, poder, new Vector2(fila.Right - 10f, fila.Center.Y),

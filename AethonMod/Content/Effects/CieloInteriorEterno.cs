@@ -319,17 +319,29 @@ namespace AethonMod.Content.Effects
                             Color tintaLejos = new Color(30, 18, 52);
                             DibujarTira(sb, espina, 22f, 46f, tintaLejos,
                                 (0.60f + 0.20f * latido) * a, flujo: tK * 0.026f + k * 0.19f);
-                            // v6.176 — LA BRUMA DE LA BASE (la letra: «cada
-                            // tentaculo de fondo debe tener en su base una
-                            // bruma de esa forma no se ve cortado el
-                            // tentaculo»): la punta se DISUELVE en niebla de
-                            // SU MISMA tinta — el tentáculo se apaga, no se
-                            // corta. (Puff en el lote ABIERTO de la capa —
-                            // el contrato de BrumaFX.)
-                            BrumaFX.Puff(espina[espina.Length - 1],
-                                64f + 24f * VFXCore.Hash01(sem, 5, 923),
-                                tintaLejos, sem * 3, t,
-                                alpha: 0.26f * a, quality: 0.5f);
+// v6.177 — LA TUMBA DE NIEBLA (la letra: «cuando digo en el
+                            // fondo del mundo interior me refiero al fondo del
+                            // paisaje, esos tentaculos que se ven a los lejos
+                            // en el paisaje en el fondo necesitan brumas en el
+                            // fondo para que no se vean cortados»): UN solo
+                            // puff a ras de la punta era un velo tímido — el
+                            // borde se leía cortado DEBAJO. Ahora TRES masas a
+                            // lo largo del rumbo final SEPULTAN la punta: en
+                            // ella · bajo ella · más ancha y floja más abajo.
+                            // El tentáculo se APAGA en la bruma, no termina.
+                            Vector2 punta = espina[espina.Length - 1];
+                            Vector2 rumboFin = espina.Length > 1
+                                ? (punta - espina[espina.Length - 2]).SafeNormalize(Vector2.UnitY)
+                                : Vector2.UnitY;
+                            float radioTumba = 78f + 923f * VFXCore.Hash01(sem, 5, 26);
+                            for (int b = 0; b < 3; b++)
+                            {
+                                Vector2 posB = punta + rumboFin * (radioTumba * 0.62f * b);
+                                BrumaFX.Puff(posB,
+                                    radioTumba * (1f - 0.16f * b) + (b > 0 ? 30f : 0f),
+                                    tintaLejos, sem * 3 + b * 7, t + b * 0.31f,
+                                    alpha: (0.46f - 0.05f * b) * a, quality: 0.55f);
+                            }
                         }
                     }
 
@@ -437,13 +449,29 @@ namespace AethonMod.Content.Effects
                             Vector2[] espina = SombrasLib.Columna(raiz, cabeza, tK, sem, 18, 0.19f);
                             DibujarTira(sb, espina, 22f, 52f, new Color(38, 24, 66),
                                 (0.50f + 0.16f * latido) * a, flujo: tK * 0.020f + k * 0.21f);
-                            // v6.176 — LA BRUMA DE LA BASE (misma letra): la
-                            // tinta media se deshace en SU niebla al llegar a
-                            // la punta — nada termina cortado.
-                            BrumaFX.Puff(espina[espina.Length - 1],
-                                80f + 28f * VFXCore.Hash01(sem, 5, 941),
-                                new Color(38, 24, 66), sem * 3, t,
-                                alpha: 0.30f * a, quality: 0.5f);
+// v6.177 — LA TUMBA DE NIEBLA (la letra: «cuando digo en el
+                            // fondo del mundo interior me refiero al fondo del
+                            // paisaje, esos tentaculos que se ven a los lejos
+                            // en el paisaje en el fondo necesitan brumas en el
+                            // fondo para que no se vean cortados»): UN solo
+                            // puff a ras de la punta era un velo tímido — el
+                            // borde se leía cortado DEBAJO. Ahora TRES masas a
+                            // lo largo del rumbo final SEPULTAN la punta: en
+                            // ella · bajo ella · más ancha y floja más abajo.
+                            // El tentáculo se APAGA en la bruma, no termina.
+                            Vector2 punta = espina[espina.Length - 1];
+                            Vector2 rumboFin = espina.Length > 1
+                                ? (punta - espina[espina.Length - 2]).SafeNormalize(Vector2.UnitY)
+                                : Vector2.UnitY;
+                            float radioTumba = 96f + 941f * VFXCore.Hash01(sem, 5, 32);
+                            for (int b = 0; b < 3; b++)
+                            {
+                                Vector2 posB = punta + rumboFin * (radioTumba * 0.62f * b);
+                                BrumaFX.Puff(posB,
+                                    radioTumba * (1f - 0.16f * b) + (b > 0 ? 30f : 0f),
+                                    new Color(38, 24, 66), sem * 3 + b * 7, t + b * 0.31f,
+                                    alpha: (0.48f - 0.05f * b) * a, quality: 0.6f);
+                            }
                         }
                     }
                 }
@@ -543,13 +571,29 @@ namespace AethonMod.Content.Effects
                             DibujarTira(sb, espina, 34f, 104f, new Color(58, 36, 96),
                                 (0.78f + 0.14f * latido) * a, flujo: tK * 0.030f + k * 0.29f,
                                 grosorCentroAlt: 66f);
-                            // v6.176 — LA BRUMA DE LA BASE (misma letra): el
-                            // titán es TINTA GRUESA — su punta se disuelve en
-                            // la niebla más ancha del telón.
-                            BrumaFX.Puff(espina[espina.Length - 1],
-                                118f + 42f * VFXCore.Hash01(sem, 5, 959),
-                                new Color(58, 36, 96), sem * 3, t,
-                                alpha: 0.34f * a, quality: 0.6f);
+// v6.177 — LA TUMBA DE NIEBLA (la letra: «cuando digo en el
+                            // fondo del mundo interior me refiero al fondo del
+                            // paisaje, esos tentaculos que se ven a los lejos
+                            // en el paisaje en el fondo necesitan brumas en el
+                            // fondo para que no se vean cortados»): UN solo
+                            // puff a ras de la punta era un velo tímido — el
+                            // borde se leía cortado DEBAJO. Ahora TRES masas a
+                            // lo largo del rumbo final SEPULTAN la punta: en
+                            // ella · bajo ella · más ancha y floja más abajo.
+                            // El tentáculo se APAGA en la bruma, no termina.
+                            Vector2 punta = espina[espina.Length - 1];
+                            Vector2 rumboFin = espina.Length > 1
+                                ? (punta - espina[espina.Length - 2]).SafeNormalize(Vector2.UnitY)
+                                : Vector2.UnitY;
+                            float radioTumba = 138f + 959f * VFXCore.Hash01(sem, 5, 46);
+                            for (int b = 0; b < 3; b++)
+                            {
+                                Vector2 posB = punta + rumboFin * (radioTumba * 0.62f * b);
+                                BrumaFX.Puff(posB,
+                                    radioTumba * (1f - 0.16f * b) + (b > 0 ? 30f : 0f),
+                                    new Color(58, 36, 96), sem * 3 + b * 7, t + b * 0.31f,
+                                    alpha: (0.52f - 0.05f * b) * a, quality: 0.65f);
+                            }
                         }
                     }
                 }

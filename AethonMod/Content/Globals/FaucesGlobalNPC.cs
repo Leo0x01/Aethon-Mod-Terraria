@@ -474,11 +474,14 @@ namespace AethonMod.Content.Globals
             catch { return 1; }
         }
 
-        /// <summary>v6.175 — ¿Es un GUSANO INVOCADO por el pilar? (la
-        /// letra del Devorador: «para ese jefe exclusivamente desactiva
-        /// la devoracion normal» — la devoración del gusano invocado es
-        /// SOLO la ASPIRADORA de la segunda invocación; su muerte normal
-        /// cae con loot SIN cine de festín).
+        /// <summary>v6.175 → v6.177 — ¿Es un GUSANO INVOCADO? (la letra
+        /// del Devorador: «para ese jefe exclusivamente desactiva la
+        /// devoracion normal» — y la sesión 30: la aspiradora de la
+        /// SEGUNDA invocación es la ÚNICA devoración de este jefe, EN
+        /// TODAS PARTES: interior, oleadas y mundo real). TODO EoW y
+        /// TODO Destructor queda FUERA del festín clásico y de la
+        /// primera cena: su muerte cae NORMAL (loot) — solo el cine
+        /// espacial de la 2ª invocación se los lleva.</summary>
         public static bool EsGusanoInvocado(NPC npc)
         {
             try
@@ -487,9 +490,43 @@ namespace AethonMod.Content.Globals
                 if (!EsSegmentoDeGusano(npc) &&
                     npc.type != NPCID.EaterofWorldsHead && npc.type != NPCID.TheDestroyer)
                     return false;
-                return npc.TryGetGlobalNPC<JefeInteriorGlobalNPC>(out var ji) && ji.EsInterior;
+                // v6.177 — SIN SELLO TAMBIÉN: la devoración normal del
+                // Devorador está muerta EN TODOS los mundos (la letra:
+                // «el grimorio toma a todo el Devoramundos… solo la
+                // segunda vez que sea invocado»)
+                return true;
             }
             catch { return false; }
+        }
+
+        /// <summary>v6.177 — LA PURGA DE LA MESA (la letra: «asegurate
+        /// de que en el momento en el que el grimorio del eterno devora
+        /// a cualquier jefe, toda actividad del jefe cese» + «todos los
+        /// jefes devorados mientras son devorados deben callar en todos
+        /// los sentidos»): al ARRANCAR cualquier devoración (cena ·
+        /// festín · aspiradora), los proyectiles hostiles que vuelan a
+        /// menos de `radio` del preso SE APAGAN con una mota — nada del
+        /// jefe sigue volando mientras el libro come.</summary>
+        public static void PurgarProyectilesDelJefe(NPC jefe, float radio = 1000f)
+        {
+            if (jefe == null || Main.netMode == NetmodeID.MultiplayerClient) return;
+            try
+            {
+                for (int i = 0; i < Main.maxProjectiles; i++)
+                {
+                    Projectile p = Main.projectile[i];
+                    if (p == null || !p.active || p.friendly) continue;
+                    if (p.Center.DistanceSQ(jefe.Center) > radio * radio) continue;
+                    if (!Main.dedServ)
+                    {
+                        Dust d = Dust.NewDustPerfect(p.Center, 60,
+                            new Vector2(0f, -0.6f), 120, new Color(60, 30, 90), 1.1f);
+                        d.noGravity = true;
+                    }
+                    p.Kill();
+                }
+            }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FaucesGlobalNPC", exRegistro); }
         }
 
         /// <summary>v6.176 — EL DESCONGELADO: la aspiradora terminó (o
@@ -519,6 +556,9 @@ namespace AethonMod.Content.Globals
             if (jefe == null || !jefe.active || portador == null) return;
             if (Main.netMode == NetmodeID.MultiplayerClient) return;
             if (!jefe.TryGetGlobalNPC<FaucesGlobalNPC>(out var g) || g.DevorarEstado != 0) return;
+            // v6.177 — LA PURGA: el preso CALLA EN TODO SENTIDO (nada
+            // suyo sigue volando mientras el libro come)
+            PurgarProyectilesDelJefe(jefe);
 
             // EL REGISTRO ANTES DEL ESPECTÁCULO (la «solo la primera vez»):
             // aunque el cine se interrumpiera, este tipo ya NO repite
@@ -646,6 +686,8 @@ namespace AethonMod.Content.Globals
             g.DevorarEstilo = estilo;
             g.DevorarTick = 0;
             g.FaseFestin = 0;
+            // v6.177 — LA PURGA: el preso calla en TODO sentido
+            PurgarProyectilesDelJefe(dueño);
 
             dueño.life = 1;
             dueño.active = true;
@@ -1048,6 +1090,58 @@ namespace AethonMod.Content.Globals
         {
             try
             {
+                // ============================================================
+                //  v6.177 — EL RELOJ DEL DEVORAMUNDOS (la letra: «ten en
+                //  cuenta que la animacion de devorar al Devoramundos es
+                //  que el grimorio toma a todo el Devoramundos lo separa
+                //  por secciones y lo aspira como una aspiradora, esta
+                //  animacion se debe hacer solo la segunda vez que el
+                //  Devoramundos sea invocado» + «la aspiradora por algun
+                //  motivo solo parecer funcionar en el mundo interior»):
+                //  EL VIGÍA UNIVERSAL — cada CABEZA de Devorador (EoW o
+                //  Destructor) que NACE en el mundo cuenta UNA
+                //  invocación del portador más cercano (pilar del
+                //  interior · oleadas de hambre · comida de gusano en
+                //  el mundo real: TODO cuenta). La SEGUNDA invocación
+                //  EXACTA arranca el cine espacial (la vigilía del
+                //  AspiradoraDevorador espera a que la cadena se
+                //  genere por completo). La primera y la tercera en
+                //  adelante: pelea normal, muerte normal con botín —
+                //  el grimorio NO se come a este jefe por las malas
+                //  (ver EsGusanoInvocado: la devoración normal del
+                //  gusano está MUERTA en todas partes).
+                // ============================================================
+                if (npc.type == NPCID.EaterofWorldsHead || npc.type == NPCID.TheDestroyer)
+                {
+                    if (Main.netMode == NetmodeID.MultiplayerClient) return;
+                    Player portador = null;
+                    float mejorD = 3000f * 3000f;
+                    for (int i = 0; i < Main.maxPlayers; i++)
+                    {
+                        Player p = Main.player[i];
+                        if (p == null || !p.active || p.dead) continue;
+                        float d = p.Center.DistanceSQ(npc.Center);
+                        if (d < mejorD) { mejorD = d; portador = p; }
+                    }
+                    if (portador != null)
+                    {
+                        var sp = portador.GetModPlayer<Players.ShardPlayer>();
+                        int veces = sp != null ? sp.MarcarInvocacionInterior(npc.type) : 1;
+                        if (veces == 2)   // SOLO la segunda: la letra manda
+                        {
+                            int p = Projectile.NewProjectile(npc.GetSource_FromAI(),
+                                npc.Center, Vector2.Zero,
+                                ModContent.ProjectileType
+                                    <global::AethonMod.Content.Projectiles.Sombras.AspiradoraDevoradorProjectile>(),
+                                0, 0f, portador.whoAmI, npc.whoAmI, portador.whoAmI);
+                            if (p >= 0) Main.projectile[p].timeLeft = 700;
+                            Terraria.Audio.SoundEngine.PlaySound(
+                                SoundID.Item122.WithPitchOffset(-0.6f).WithVolumeScale(0.7f), npc.Center);
+                        }
+                    }
+                    return;   // la cabeza del gusano no sigue por el guardián
+                }
+
                 if (npc.type != NPCID.DungeonGuardian) return;         // solo la puerta de la mazmorra
                 if (Main.netMode == NetmodeID.MultiplayerClient) return;   // la autoridad decide
 

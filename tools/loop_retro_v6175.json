@@ -1,9 +1,9 @@
 {
- "cs_archivos": 474,
- "cs_lineas": 193912,
+ "cs_archivos": 486,
+ "cs_lineas": 195733,
  "catch_vacio": 0,
- "catch_total": 1132,
- "catch_registrado": 715,
+ "catch_total": 1139,
+ "catch_registrado": 723,
  "rand_en_dibujo": 0,
  "alloc_en_dibujo": 8,
  "rand_top": {},
@@ -12,10 +12,10 @@
   "AethonMenorOscuroPet.cs": 1
  },
  "Immediate": 60,
- "vfx_archivos": 77,
- "vfx_lineas": 48895,
- "loc_es": 1849,
- "loc_en": 1849,
+ "vfx_archivos": 79,
+ "vfx_lineas": 48943,
+ "loc_es": 1901,
+ "loc_en": 1901,
  "loc_faltan_en": 0,
  "loc_faltan_es": 0,
  "loc_en_igual_es": 1282,
@@ -38,7 +38,7 @@
   "Pergamino."
  ],
  "claves_faltantes_es_n": 16,
- "png_n": 513,
+ "png_n": 523,
  "png_invalidos": [],
  "_fuente": "loop_retro_v6175.py"
 }

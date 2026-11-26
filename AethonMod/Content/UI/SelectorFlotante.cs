@@ -52,7 +52,7 @@ namespace AethonMod.Content.UI
         private const int Columnas = 6;
         private const int Celda = 44;
         private const int FilasVisibles = 5;         // por defecto: 30 candidatos a la vista
-        private const int AltoTitulo = 34;
+        private const int AltoTitulo = 44;   // v6.177: el título GRANDE (la letra: «un texto muy pequeño y no se puede leer»)
         private const int AltoPie = 22;               // la pista de la rueda (solo si hay scroll)
 
         // EL ESTADO (cliente puro): el ancla (el control que la abrió),
@@ -194,7 +194,9 @@ namespace AethonMod.Content.UI
                 LibroMarco.Marco(sb, r, TintaOro * 0.8f);
 
                 // EL TÍTULO (la letra de cada bandeja — medido para caber)
-                float escT = LibroLineas.EscalaQueCabe(_titulo, 0.8f, r.Width - 24f);
+                // v6.177 — EL TÍTULO SE LEE (la letra: «esta tiene un
+                // texto muy pequeño y no se puede leer»): escala base 1.0
+                float escT = LibroLineas.EscalaQueCabe(_titulo, 1.0f, r.Width - 24f);
                 LibroLineas.Texto(sb, _titulo, new Vector2(r.Center.X, r.Y + AltoTitulo * 0.5f),
                     TintaVioleta, escT, 0.5f, 0.5f);
                 // el filete del título (el estilo del libro)
@@ -264,7 +266,7 @@ namespace AethonMod.Content.UI
                         tex.Size() * 0.5f, esc, SpriteEffects.None, 0f);
                     if (it.stack > 1)
                         LibroLineas.Texto(sb, it.stack.ToString(),
-                            new Vector2(celda.Right - 3f, celda.Bottom - 5f), Tinta, 0.68f, 1f, 0.85f);
+                            new Vector2(celda.Right - 3f, celda.Bottom - 5f), Tinta, 0.78f, 1f, 0.85f);
                 }
 
                 // EL NOMBRE DEL ÍTEM bajo el cursor — CON SU PLACA DE PAPEL
@@ -273,7 +275,7 @@ namespace AethonMod.Content.UI
                 if (hover >= 0)
                 {
                     string nombre = _lista[hover].Name;
-                    float escN = LibroLineas.EscalaQueCabe(nombre, 0.8f, 260f);
+                    float escN = LibroLineas.EscalaQueCabe(nombre, 0.92f, 260f);
                     var mN = fuente.MeasureString(nombre) * escN;
                     Rectangle placa = new Rectangle(
                         (int)(r.Center.X - mN.X * 0.5f - 10f),
@@ -295,7 +297,7 @@ namespace AethonMod.Content.UI
                     string vacio = Language.GetTextValue(_paraTrio
                         ? "Mods.AethonMod.Items.TrioSinConsagradas"
                         : "Mods.AethonMod.Items.BandejaVacia");
-                    float escV = LibroLineas.EscalaQueCabe(vacio, 0.78f, r.Width - 30f);
+                    float escV = LibroLineas.EscalaQueCabe(vacio, 0.9f, r.Width - 30f);
                     LibroLineas.Texto(sb, vacio, new Vector2(r.Center.X, vitrina.Center.Y),
                         TintaApagado, escV, 0.5f, 0.5f);
                 }
@@ -304,7 +306,7 @@ namespace AethonMod.Content.UI
                 if (_filas > _filasVis)
                 {
                     string pista = Language.GetTextValue("Mods.AethonMod.Altar.SelectorRueda");
-                    float escP = LibroLineas.EscalaQueCabe(pista, 0.66f, r.Width - 24f);
+                    float escP = LibroLineas.EscalaQueCabe(pista, 0.78f, r.Width - 24f);
                     LibroLineas.Texto(sb, pista, new Vector2(r.Center.X, r.Bottom - 4f),
                         TintaApagado, escP, 0.5f, 1f);
                 }

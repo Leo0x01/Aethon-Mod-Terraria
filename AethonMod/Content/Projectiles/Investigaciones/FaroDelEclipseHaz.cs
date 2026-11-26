@@ -9,58 +9,62 @@ using AethonMod.Content.VFX;
 namespace AethonMod.Content.Projectiles.Investigaciones
 {
     // ======================================================================
-    //  FaroDelEclipseHaz — v6.174 — EL HAZ CONCENTRADO ORIGINAL DE LA CASA
-    //  (la letra: «crea un arma de rayo concentrado original con las
-    //  librerías/VFX/texturas del proyecto, lo más impresionante posible,
-    //  con al menos 10 a 20 capas de VFX»).
+    //  FaroDelEclipseHaz — v6.174 → v6.177 — EL ATAQUE REDISEÑADO DE RAÍZ.
     //
-    //  LA CONDUCTA: 24 ticks de carga (el anillo que se cierra sobre el
-    //  faro) y después EL HAZ: un conducto de 900 px que sigue al cursor
-    //  (giro suave 0,35), golpea a todo lo que viva en la línea y muere al
-    //  soltar el botón. La geometría viaja en los ai (edad, ángulo, largo):
-    //  el dueño manda, el resto del mundo dibuja lo mismo.
+    //  LA LETRA (sesión 30): «el faro del eclipse, bueno lo que tenias
+    //  que rediseñar era su ataque o proyectil, asi que rediseñalo».
+    //  (La v6.174 hizo un conducto continuo; la v6.176 la TORRE — el
+    //  ataque seguía siendo el conducto de siempre.)
     //
-    //  EL RENDER — 26 CAPAS, todas con primitivas DE LA CASA (TajoLib y
-    //  VFXCore: cero material ajeno, cero shader nuevo):
-    //   LA CARGA   [1] la bola que crece · [2] el anillo que se cierra ·
-    //              [3] la cruz que apunta · [4] los doce polvos que caen ·
-    //              [5] la aguja adelantada · [6] el resplandor en la mano
-    //   LA BOCA    [7] el faro ámbar · [8] la garganta blanca ·
-    //              [9] la cruz de lejos
-    //   EL CONDUCTO [10-15] seis cintas EMBEBIDAS por la MALLA CONTINUA
-    //              (90→5 px: violeta, ámbar, blanco) · [16-19] cuatro
-    //              espirales serpenteadas · [20] los tres pulsos que
-    //              viajan a la punta · [21] las chispas del conducto
-    //   EL IMPACTO [22] la luna del eclipse · [23] el corazón ·
-    //              [24] la cruz · [25] los dos anillos de choque
-    //   LA PANTALLA [26] el velo ámbar
+    //  EL ATAQUE NUEVO — EL ECLIPSE QUE BARRE (el faro DE VERDAD):
+    //   1. EL DISPARO: el faro lanza EL DISCO NEGRO (la luna del
+    //      eclipse) hacia donde apuntas — vuela con su estela y golpea.
+    //   2. EL NACIMIENTO: al llegar (o a los 300 px) se CLAVA en el
+    //      aire, se ABRE y nace EL ECLIPSE: el disco negro rodeado por
+    //      su CORONA PICADA (los picos de ámbar de la torre) — un
+    //      eclipse de 3,5 s plantado en el cielo.
+    //   3. EL BARRIDO DEL FARO: del centro del eclipse nace EL HAZ DEL
+    //      FARO que GIRA (una vuelta cada ~1,2 s) barriendo TODO a su
+    //      paso — el faro de verdad: su luz gira y golpea.
+    //   4. LA CORONA VIVA: cada pico de la corona SE ENCIENDE cuando
+    //      el haz lo cruza (la picada del eclipse late al ritmo del
+    //      barrido) + las chispas orbitales.
+    //   5. EL CIERRE: el eclipse IMPLOTA (el disco se traga su corona)
+    //      y deja un destello final.
+    //
+    //  TODO con las librerías de la casa: el haz giratorio es LA PILA
+    //  DE CAPAS (RayoStrip.Filamento ×4 sobre LA MISMA polilínea — la
+    //  ley v6.56.9), la corona picada es VFXCore.Quad con perfil
+    //  determinista (Hash01 — R22) y el disco negro vive en el lote
+    //  ALPHA (la ley del negro: aditivo suma cero — para oscurecer se
+    //  sale del aditivo).
     // ======================================================================
     public class FaroDelEclipseHaz : ModProjectile
     {
         public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
 
-        private const int Carga = 24;
-        private const float Alcance = 900f;
-        private const int Nodos = 48;
+        // === LA LÍNEA DE TIEMPO (60 t = 1 s) ===
+        private const int Vuelo = 26;          // el disco vuela…
+        private const float Distancia = 340f;   // …hasta ~340 px del faro
+        private const int VidaEclipse = 210;    // el eclipse vive 3,5 s
+        private const float LargoHaz = 640f;    // el haz del barrido
+        private const float Giro = 0.088f;      // rad/t (~1 vuelta cada 1,2 s)
 
-        private static readonly Color Corona = new Color(255, 196, 96);
-        private static readonly Color Nucleo = new Color(255, 250, 236);
-        private static readonly Color Tinta = new Color(148, 72, 178);
+        // === LA PALETA DE LA TORRE (la v6.176) ===
+        private static readonly Color Corona = new(255, 196, 96);
+        private static readonly Color CoronaViva = new(255, 232, 170);
+        private static readonly Color Nucleo = new(255, 250, 236);
+        private static readonly Color Tinta = new(148, 72, 178);
+        private static readonly Color Disco = new(14, 8, 22);
 
-        // el telar (estático: cero GC por frame)
-        private static readonly Vector2[] _eje = new Vector2[Nodos + 1];
-        private static readonly float[] _sem = new float[Nodos + 1];
-        private static readonly float[] _alf = new float[Nodos + 1];
-        private static readonly float[] _w = new float[Nodos + 1];
-        private static readonly float[] _f = new float[Nodos + 1];
-        private static readonly Vector2[] _esp = new Vector2[Nodos + 1];
+        private bool _clavado;
 
-        private int _base;
+        public override void SetStaticDefaults() { ProjectileID.Sets.DrawScreenCheckFluff[Type] = 900; }
 
         public override void SetDefaults()
         {
-            Projectile.width = 8;
-            Projectile.height = 8;
+            Projectile.width = 16;
+            Projectile.height = 16;
             Projectile.friendly = true;
             Projectile.hostile = false;
             Projectile.DamageType = DamageClass.Magic;
@@ -68,248 +72,228 @@ namespace AethonMod.Content.Projectiles.Investigaciones
             Projectile.tileCollide = false;
             Projectile.ignoreWater = true;
             Projectile.aiStyle = -1;
-            Projectile.timeLeft = 12;
+            Projectile.timeLeft = Vuelo + VidaEclipse + 40;
             Projectile.usesLocalNPCImmunity = true;
-            Projectile.localNPCHitCooldown = 10;
+            Projectile.localNPCHitCooldown = 18;
+            Projectile.netImportant = true;
         }
+
+        public override bool ShouldUpdatePosition() => !_clavado;
 
         public override void AI()
         {
-            Player p = Main.player[Projectile.owner];
-            if (!p.active) { Projectile.Kill(); return; }
-            Projectile.ai[0]++;
-            if (Projectile.ai[0] == 1) _base = Projectile.damage;
-
-            if (Main.myPlayer == Projectile.owner)
+            // LA FASE 1 — EL VUELO DEL DISCO: hacia donde se apuntó
+            if (!_clavado)
             {
-                // VIVO mientras el botón de uso esté apretado con el faro en la mano
-                bool vivo = p.controlUseItem && !p.dead && !p.CCed && !p.noItems &&
-                    p.HeldItem.shoot == Projectile.type;
-                if (!vivo) { Projectile.Kill(); return; }
-
-                Vector2 boca = p.MountedCenter + new Vector2(p.direction * 10f, -8f);
-                Vector2 alCursor = Main.MouseWorld - boca;
-                float deseado = alCursor.LengthSquared() > 1f ? alCursor.ToRotation() : Projectile.ai[1];
-                if (Projectile.ai[0] <= 1) Projectile.ai[1] = deseado;
-                else Projectile.ai[1] += MathHelper.WrapAngle(deseado - Projectile.ai[1]) * 0.35f;
-
-                float crece = MathHelper.Clamp(Projectile.ai[0] / (float)Carga, 0f, 1f);
-                Projectile.ai[2] = MathHelper.Clamp(alCursor.Length(), 60f, Alcance) * (0.06f + 0.94f * crece);
-
-                if (Projectile.ai[0] == 1) Terraria.Audio.SoundEngine.PlaySound(SoundID.Item43);
-                if (Projectile.ai[0] == Carga) Terraria.Audio.SoundEngine.PlaySound(SoundID.Item157);
-
-                // el uso del ítem late al ritmo del haz (el patrón del prisma)
-                p.channel = true;
-                p.itemAnimation = 2;
-                p.itemTime = 2;
-                p.direction = Math.Cos(Projectile.ai[1]) < 0f ? (sbyte)-1 : (sbyte)1;
-                Projectile.netUpdate = true;
+                Projectile.ai[0]++;
+                if (Projectile.ai[0] >= Vuelo ||
+                    Projectile.Center.DistanceSQ(Main.player[Projectile.owner].Center) > Distancia * Distancia)
+                {
+                    // EL NACIMIENTO DEL ECLIPSE: el disco se CLAVA
+                    _clavado = true;
+                    Projectile.velocity = Vector2.Zero;
+                    Projectile.ai[0] = 0;
+                    Projectile.netUpdate = true;
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Item157.WithPitchOffset(-0.3f), Projectile.Center);
+                    if (Main.netMode != NetmodeID.Server && !Main.dedServ)
+                    {
+                        for (int i = 0; i < 18; i++)
+                        {
+                            Dust d = Dust.NewDustPerfect(Projectile.Center, 90,
+                                Main.rand.NextVector2CircularEdge(1f, 1f) * Main.rand.NextFloat(3f, 8f),
+                                0, default, 1.6f);
+                            d.noGravity = true;
+                        }
+                    }
+                }
+                // el disco viaja con SU cometa (la estela de ámbar)
+                if (Main.netMode != NetmodeID.Server && !Main.dedServ && Projectile.ai[0] % 3 == 0)
+                {
+                    Dust d = Dust.NewDustPerfect(Projectile.Center, 269,
+                        -Projectile.velocity * 0.06f, 0, new Color(255, 196, 96), 1.2f);
+                    d.noGravity = true;
+                }
+                return;
             }
 
-            int d = Math.Max(1, (int)(_base * MathHelper.Clamp(Projectile.ai[0] / (float)Carga, 0.25f, 1f)));
-            if (d != Projectile.damage) Projectile.damage = d;
-            Projectile.timeLeft = 12;
-            Projectile.Center = p.MountedCenter + new Vector2(p.direction * 10f, -8f);
+            // LA FASE 2 — EL ECLIPSE QUE BARRE
+            Projectile.ai[0]++;
+            int t = (int)Projectile.ai[0];
+            if (t > VidaEclipse + 24)
+            {
+                // EL CIERRE: implosión + destello final
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122.WithPitchOffset(0.4f), Projectile.Center);
+                SombrasLib.PurgaVisualMuerte(Projectile.Center, 160f);
+                Projectile.Kill();
+                return;
+            }
+            // EL HAZ GIRA (el barrido del faro)
+            Projectile.ai[2] += Giro;
+            if (Projectile.ai[2] > MathHelper.TwoPi) Projectile.ai[2] -= MathHelper.TwoPi;
+
+            // LA LUZ del haz (el pase de vanilla por la línea del barrido)
+            float ang = Projectile.ai[2];
+            Vector2 dir = new((float)Math.Cos(ang), (float)Math.Sin(ang));
+            DelegateMethods.v3_1 = new Vector3(1.2f, 0.85f, 0.35f) * Intensidad();
+            Utils.PlotTileLine(Projectile.Center, Projectile.Center + dir * LargoHaz, 130f,
+                DelegateMethods.CastLight);
+
+            // EL TIC-TAC del faro: cada vuelta entera suena su campanada
+            if (t > 20 && t % 74 == 0)
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item15.WithPitchOffset(-0.7f).WithVolumeScale(0.6f),
+                    Projectile.Center);
+
+            // LAS CHISPAS ORBITALES (deterministas: R22)
+            if (Main.netMode != NetmodeID.Server && !Main.dedServ && t % 4 == 0)
+            {
+                float fa = Main.GlobalTimeWrappedHourly * 1.8f + Projectile.whoAmI;
+                Vector2 pos = Projectile.Center + new Vector2((float)Math.Cos(fa), (float)Math.Sin(fa) * 0.8f) * (46f + 12f * (float)Math.Sin(fa * 2f));
+                Dust d = Dust.NewDustPerfect(pos, 269, Vector2.Zero, 0, Corona, 1.1f);
+                d.noGravity = true;
+            }
+
+            // EL DISCO se hunde SUAVE mientras vive (la luna que se cierra)
+            if (t > VidaEclipse)
+                Projectile.scale = MathHelper.Lerp(1f, 0.05f, (t - VidaEclipse) / 24f);
+            Projectile.netUpdate = t % 30 == 0;
         }
 
-        private void Geometria(Player p, out Vector2 boca, out Vector2 punta)
+        private float Intensidad()
         {
-            boca = p.MountedCenter + new Vector2(p.direction * 10f, -8f);
-            punta = boca + new Vector2((float)Math.Cos(Projectile.ai[1]), (float)Math.Sin(Projectile.ai[1])) * Projectile.ai[2];
+            int t = (int)Projectile.ai[0];
+            if (!_clavado) return 0f;
+            // nace en 12 t… y se apaga en los últimos 20
+            return MathHelper.Clamp(t / 12f, 0f, 1f) * MathHelper.Clamp((VidaEclipse + 8 - t) / 20f, 0f, 1f);
         }
 
-        /// <summary>EL GOLPE EN LÍNEA: todo lo que viva a menos de ~26 px
-        /// del conducto recibe el tajo (con la inmunidad local de 10 ticks).</summary>
+        /// <summary>EL GOLPE: el disco que vuela + la LÍNEA del barrido.</summary>
         public override bool? Colliding(Rectangle projHitbox, Rectangle targetHitbox)
         {
-            if (Projectile.ai[0] < Carga * 0.5f) return false;
-            Vector2 a, b;
-            Geometria(Main.player[Projectile.owner], out a, out b);
             Vector2 c = targetHitbox.Center.ToVector2();
-            Vector2 ab = b - a;
+            if (!_clavado)
+                return Vector2.Distance(c, Projectile.Center) < 24f + targetHitbox.Width * 0.3f;
+            if (Intensidad() < 0.3f) return false;
+            float ang = Projectile.ai[2];
+            Vector2 dir = new((float)Math.Cos(ang), (float)Math.Sin(ang));
+            Vector2 ab = dir * LargoHaz;
             float l2 = ab.LengthSquared();
-            float t = l2 > 0.0001f ? MathHelper.Clamp(Vector2.Dot(c - a, ab) / l2, 0f, 1f) : 0f;
-            float dist = Vector2.Distance(c, a + ab * t);
-            return dist < 26f + Math.Max(targetHitbox.Width, targetHitbox.Height) * 0.35f;
+            float tproj = l2 > 0.0001f ? MathHelper.Clamp(Vector2.Dot(c - Projectile.Center, ab) / l2, 0f, 1f) : 0f;
+            float dist = Vector2.Distance(c, Projectile.Center + ab * tproj);
+            return dist < 30f + Math.Max(targetHitbox.Width, targetHitbox.Height) * 0.35f;
+        }
+
+        public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
+        {
+            if (Main.dedServ) return;
+            // LA CHISPA del cruce: el haz te marca
+            for (int i = 0; i < 6; i++)
+            {
+                Dust d = Dust.NewDustPerfect(target.Center, 269,
+                    Main.rand.NextVector2Circular(5f, 5f), 0, Corona, 1.4f);
+                d.noGravity = true;
+            }
         }
 
         public override bool PreDraw(ref Color lightColor)
         {
             if (Main.netMode == NetmodeID.Server) return false;
-            Player p = Main.player[Projectile.owner];
-            Vector2 boca, punta;
-            Geometria(p, out boca, out punta);
-            boca -= Main.screenPosition;
-            punta -= Main.screenPosition;
-            float edad = Projectile.ai[0];
-            float carga = MathHelper.Clamp(edad / Carga, 0f, 1f);
-            float latido = 0.9f + 0.1f * (float)Math.Sin(edad * 0.5f);
-            float ang = Projectile.ai[1];
+            float t = Main.GlobalTimeWrappedHourly;
+            Vector2 centro = Projectile.Center - Main.screenPosition;
+            float inten = _clavado ? Intensidad() : 1f;
 
+            // ═══ (1) EL DISCO NEGRO — en el lote ALPHA (la ley del negro) ═══
+            VFXCore.CerrarLoteSiAbierto();
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
+                Main.DefaultSamplerState, DepthStencilState.None, RasterizerState.CullCounterClockwise,
+                null, Main.GameViewMatrix.TransformationMatrix);
             try
             {
-                VFXCore.AbrirAdditive();
-                try
+                float rDisco = (_clavado ? 42f : 13f) * Projectile.scale;
+                Main.spriteBatch.Draw(VFXCore.SoftGlow, centro, null,
+                    Disco * (0.94f * Math.Max(0.35f, inten)), 0f, VFXCore.SoftGlow.Size() * 0.5f,
+                    new Vector2(rDisco * 2f / 128f, rDisco * 2f / 128f), SpriteEffects.None, 0f);
+                // EL FILDETE violeta del disco (el borde que ARDE por dentro)
+                Main.spriteBatch.Draw(VFXCore.SoftGlow, centro, null,
+                    Tinta * (0.34f * inten), 0f, VFXCore.SoftGlow.Size() * 0.5f,
+                    new Vector2((rDisco + 7f) * 2f / 128f, (rDisco + 7f) * 2f / 128f), SpriteEffects.None, 0f);
+            }
+            finally { Main.spriteBatch.End(); }
+
+            VFXCore.AbrirAdditive();
+            try
+            {
+                // ═══ (2) LA CORONA PICADA — los 22 picos deterministas (R22) ═══
+                if (_clavado)
                 {
-                    if (carga < 1f)
+                    int picos = 22;
+                    float angHaz = Projectile.ai[2];
+                    for (int i = 0; i < picos; i++)
                     {
-                        // [1] LA BOLA DE CARGA
-                        Glo(boca, 40f + 80f * carga, TajoLib.Tint(Corona, 0.30f + 0.45f * carga));
-                        // [2] EL ANILLO QUE SE CIERRA
-                        TajoLib.Tajo(boca, 90f * (1f - carga) + 14f, 0f, MathHelper.TwoPi, 1f, 0.8f,
-                            2.5f, Tinta, Nucleo, 7, edad * 0.1f);
-                        // [3] LA CRUZ QUE APUNTA
-                        Cruz(boca, 70f * carga + 8f, TajoLib.Tint(Nucleo, 0.55f * carga), ang);
-                        // [4] LOS DOCE POLVOS QUE CAEN AL FARO
-                        for (int i = 0; i < 12; i++)
-                        {
-                            float fase = (VFXCore.Hash01(i, 3, 1) + edad / 30f) % 1f;
-                            float h2 = VFXCore.Hash01(i, 5, 2);
-                            Vector2 q = boca + new Vector2((float)Math.Cos(h2 * 6.283f),
-                                (float)Math.Sin(h2 * 6.283f)) * 110f * (1f - fase);
-                            Glo(q, 5f, TajoLib.Tint(i % 2 == 0 ? Corona : Tinta, 0.6f * fase));
-                        }
-                        // [5] LA AGUJA ADELANTADA
-                        Glo(boca + new Vector2((float)Math.Cos(ang), (float)Math.Sin(ang)) * 46f * carga,
-                            12f, TajoLib.Tint(Nucleo, 0.7f * carga));
-                        // [6] EL RESPLANDOR EN LA MANO
-                        Glo(p.MountedCenter - Main.screenPosition, 60f * carga, TajoLib.Tint(Corona, 0.25f * carga));
-                    }
-
-                    // [7] EL FARO ÁMBAR · [8] LA GARGANTA BLANCA · [9] LA CRUZ DE LEJOS
-                    Glo(boca, 50f * latido * (0.3f + carga), TajoLib.Tint(Corona, 0.55f));
-                    Glo(boca, 18f * latido, TajoLib.Tint(Nucleo, 0.9f));
-                    Cruz(boca, 170f * carga, TajoLib.Tint(Nucleo, 0.30f * latido), ang);
-
-                    if (carga > 0.05f)
-                    {
-                        Vector2 eje = punta - boca;
-                        Vector2 lado = new Vector2(-eje.Y, eje.X);
-                        float le = lado.Length();
-                        if (le < 0.0001f) le = 1f;
-                        lado /= le;
-                        ConstruirEje(boca, punta, edad);
-
-                        // [10-15] EL CONDUCTO: seis cintas embebidas (la malla continua)
-                        Cinta(90f, Tinta, 0.030f * latido);
-                        Cinta(56f, Tinta, 0.055f);
-                        Cinta(34f, Corona, 0.09f);
-                        Cinta(20f, Corona, 0.15f);
-                        Cinta(11f, Nucleo, 0.30f);
-                        Cinta(5f, Nucleo, 0.95f);
-
-                        // [16-19] LAS CUATRO ESPIRALES QUE SERPENTEAN
-                        for (int s = 0; s < 4; s++)
-                        {
-                            for (int i = 0; i <= Nodos; i++)
-                            {
-                                float u = i / (float)Nodos;
-                                float g = (float)Math.Sin(Math.PI * u);
-                                float onda = (float)Math.Sin(u * 12.566f - edad * 0.8f + s * 1.5708f);
-                                _esp[i] = _eje[i] + lado * onda * 17f * g;
-                                _w[i] = 1.6f;
-                                _f[i] = 0.55f * (0.3f + 0.7f * g);
-                            }
-                            TajoLib.Cinta(_esp, _w, s % 2 == 0 ? Corona : Tinta, _f);
-                        }
-
-                        // [20] LOS TRES PULSOS QUE VIAJAN A LA PUNTA
-                        for (int wv = 0; wv < 3; wv++)
-                        {
-                            float u = (edad / 36f + wv / 3f) % 1f;
-                            Glo(boca + eje * u, 30f, TajoLib.Tint(Nucleo, 0.30f * carga));
-                        }
-
-                        // [21] LAS CHISPAS DEL CONDUCTO
-                        for (int i = 0; i < 10; i++)
-                        {
-                            float h1 = VFXCore.Hash01(i, 11, (int)edad % 7);
-                            float h2 = VFXCore.Hash01(i, 13, 3);
-                            Glo(boca + eje * h1 + lado * (h2 - 0.5f) * 70f, 4f,
-                                TajoLib.Tint(Corona, 0.6f * h2 * carga));
-                        }
-
-                        // [22] LA LUNA DEL ECLIPSE (el creciente de la casa mirando a la boca)
-                        TajoLib.TajoDoble(punta, 36f * latido, ang + MathHelper.Pi + 1.1f,
-                            ang + MathHelper.Pi - 1.1f, 1f, 0.9f, 2.2f, Corona, Nucleo, 3, edad * 0.1f, 0f, 0f);
-                        // [23] EL CORAZÓN · [24] LA CRUZ
-                        Glo(punta, 64f * latido, TajoLib.Tint(Corona, 0.6f));
-                        Glo(punta, 26f, TajoLib.Tint(Nucleo, 0.95f));
-                        Cruz(punta, 150f * latido, TajoLib.Tint(Nucleo, 0.35f), ang);
-                        // [25] LOS DOS ANILLOS DE CHOQUE
-                        for (int k = 0; k < 2; k++)
-                        {
-                            float t = (edad / 30f + k * 0.5f) % 1f;
-                            TajoLib.Tajo(punta, 20f + 130f * t, 0f, MathHelper.TwoPi, 1f, (1f - t) * 0.5f,
-                                2f, Corona, Nucleo, 11 + k, edad * 0.1f);
-                        }
-
-                        // [26] EL VELO ÁMBAR DE LA PANTALLA
-                        float z = Main.GameViewMatrix.Zoom.X;
-                        if (z <= 0.01f) z = 1f;
-                        Vector2 medio = Main.screenPosition + new Vector2(Main.screenWidth / (2f * z),
-                            Main.screenHeight / (2f * z));
-                        Glo(medio, Math.Max(Main.screenWidth, Main.screenHeight) * 1.3f / z,
-                            TajoLib.Tint(Corona, 0.05f * carga));
+                        float a = i * MathHelper.TwoPi / picos +
+                                  0.35f * VFXCore.Hash01(Projectile.whoAmI, i, 71);
+                        float largo = (16f + 30f * VFXCore.Hash01(Projectile.whoAmI, i, 73)) *
+                                      (0.85f + 0.3f * MathF.Sin(t * 2.2f + i * 1.7f));
+                        // EL PICO se ENCIENDE cuando el haz lo CRUZA (la picada viva)
+                        float cruce = MathHelper.Clamp(1f -
+                            Math.Abs(MathHelper.WrapAngle(a - angHaz)) / 0.45f, 0f, 1f);
+                        Color pico = Color.Lerp(Corona * 0.55f, CoronaViva, cruce);
+                        float alpha = (0.45f + 0.55f * cruce) * inten;
+                        VFXCore.Quad(centro + new Vector2((float)Math.Cos(a), (float)Math.Sin(a)) *
+                                     (48f + largo * 0.5f), pico * alpha,
+                            new Vector2(largo, 5f + 3f * VFXCore.Hash01(Projectile.whoAmI, i, 77)), a);
                     }
                 }
-                finally { VFXCore.RestaurarLoteVanilla(); }
+
+                // ═══ (3) EL HAZ GIRATORIO — LA PILA DE CAPAS de la casa ═══
+                if (_clavado && Intensidad() > 0.05f)
+                {
+                    float ang = Projectile.ai[2];
+                    Vector2 dir = new((float)Math.Cos(ang), (float)Math.Sin(ang));
+                    // LA MISMA POLILÍNEA para todas las capas (la ley)
+                    int nodos = 16;
+                    Vector2[] pts = new Vector2[nodos];
+                    for (int i = 0; i < nodos; i++)
+                    {
+                        float f = i / (float)(nodos - 1);
+                        pts[i] = centro + dir * (LargoHaz * f) +
+                                 new Vector2(-dir.Y, dir.X) *
+                                 (MathF.Sin(f * 9.4f + t * 3.1f + Projectile.whoAmI) * 4.2f *
+                                  MathHelper.Clamp(f * 3f, 0f, 1f));
+                    }
+                    RayoStrip.FilamentoEnLote(pts, 66f, Corona * 0.45f, Corona * 0.25f,
+                        0.26f * inten, StormTaper.Center, 0, 0, true, false, false);
+                    RayoStrip.FilamentoEnLote(pts, 34f, Corona, Corona * 0.6f,
+                        0.5f * inten, StormTaper.Center, 0, 0, true, false, false);
+                    RayoStrip.FilamentoEnLote(pts, 18f, CoronaViva, Corona,
+                        0.8f * inten, StormTaper.Center, 0, 0, true, false, false);
+                    RayoStrip.FilamentoEnLote(pts, 7f, Nucleo, CoronaViva,
+                        inten, StormTaper.Center, 0, 0, true, false, false);
+
+                    // LA PUNTA DEL HAZ: el destello que barre el horizonte
+                    Vector2 punta = centro + dir * LargoHaz;
+                    Main.spriteBatch.Draw(VFXCore.SoftGlow, punta, null,
+                        Corona * (0.65f * inten), 0f, VFXCore.SoftGlow.Size() * 0.5f,
+                        new Vector2(1.5f, 1.5f), SpriteEffects.None, 0f);
+                    Main.spriteBatch.Draw(VFXCore.SoftGlow, punta, null,
+                        Nucleo * (0.55f * inten), 0f, VFXCore.SoftGlow.Size() * 0.5f,
+                        new Vector2(0.7f, 0.7f), SpriteEffects.None, 0f);
+                }
+
+                // ═══ (4) LA BOCA DEL ECLIPSE — el corazón del disco ═══
+                Main.spriteBatch.Draw(VFXCore.SoftGlow, centro, null,
+                    Corona * (0.36f * inten), 0f, VFXCore.SoftGlow.Size() * 0.5f,
+                    new Vector2(1.25f, 1.25f), SpriteEffects.None, 0f);
+                if (!_clavado)
+                {
+                    // EL COMETA del vuelo (la luna con su cola)
+                    Vector2 cola = centro - Projectile.velocity * 2.4f;
+                    Main.spriteBatch.Draw(VFXCore.SoftGlow, cola, null,
+                        Corona * 0.4f, 0f, VFXCore.SoftGlow.Size() * 0.5f,
+                        new Vector2(0.8f, 0.8f), SpriteEffects.None, 0f);
+                }
             }
-            catch { try { VFXCore.CerrarLoteSiAbierto(); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FaroDelEclipseHaz", exRegistro); } }
+            finally { VFXCore.RestaurarLoteVanilla(); }
             return false;
-        }
-
-        // ==================================================================
-        //  LOS EMISORES (la malla continua del eje)
-        // ==================================================================
-
-        /// <summary>EL EJE: 49 nodos de la boca a la punta — el conducto
-        /// RESPIRA (un vaivén determinista que crece hacia la punta) y se
-        /// afila solo en los dos extremos.</summary>
-        private static void ConstruirEje(Vector2 a, Vector2 b, float edad)
-        {
-            Vector2 eje = b - a;
-            Vector2 dir = eje.LengthSquared() > 1f ? Vector2.Normalize(eje) : Vector2.UnitX;
-            Vector2 lado = new Vector2(-dir.Y, dir.X);
-            for (int i = 0; i <= Nodos; i++)
-            {
-                float u = i / (float)Nodos;
-                float vaiven = (float)Math.Sin(u * 9.4248f - edad * 0.55f) * 2.2f * u
-                    + (float)Math.Sin(u * 21f + edad * 0.9f) * 0.8f * u;
-                _eje[i] = a + eje * u + lado * vaiven;
-                float g = (float)Math.Sin(Math.PI * u);
-                _sem[i] = 0.35f + 0.65f * Math.Min(1f, g * 3f);
-                _alf[i] = 0.35f + 0.65f * Math.Min(1f, g * 2.5f);
-            }
-        }
-
-        /// <summary>Una cinta del conducto con el semiancho y el alfa del eje.</summary>
-        private static void Cinta(float semiancho, Color color, float alfa)
-        {
-            for (int i = 0; i <= Nodos; i++)
-            {
-                _w[i] = semiancho * _sem[i];
-                _f[i] = alfa * _alf[i];
-            }
-            TajoLib.Cinta(_eje, _w, color, _f);
-        }
-
-        private static void Glo(Vector2 p, float d, Color c)
-        {
-            if (c.A == 0) return;
-            Texture2D t = VFXCore.SoftGlow;
-            Main.spriteBatch.Draw(t, p, null, c, 0f, t.Size() * 0.5f, d / t.Width,
-                SpriteEffects.None, 0f);
-        }
-
-        private static void Cruz(Vector2 p, float largo, Color c, float rot)
-        {
-            if (c.A == 0) return;
-            Main.spriteBatch.Draw(VFXCore.Pixel, p, null, c, rot, new Vector2(0.5f, 0.5f),
-                new Vector2(largo, 2.2f), SpriteEffects.None, 0f);
-            Main.spriteBatch.Draw(VFXCore.Pixel, p, null, c, rot, new Vector2(0.5f, 0.5f),
-                new Vector2(2.2f, largo), SpriteEffects.None, 0f);
         }
     }
 }

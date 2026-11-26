@@ -143,7 +143,13 @@ namespace AethonMod.Content.Projectiles.Sombras
                     _tickEstable = 0;
                 }
                 else if (++_tickEstable >= 90) _tickEstable = 90;
-                bool completo = _tickEstable >= 90;
+                // v6.177 — LA EXTENSIÓN DE LA OLEADA TAMBIÉN CUENTA (la
+                // letra: «no lo devora correctamente» en las oleadas): la
+                // cadena NO está completa mientras la oleada la siga
+                // alargando — el tope de 5 s de la letra manda igual.
+                bool extensionPendiente =
+                    Systems.GrimorioFuriaSistema.ExtensionDevoradorPendiente;
+                bool completo = _tickEstable >= 90 && !extensionPendiente;
                 if (t >= T_ESPERA || (completo && t >= 120f))
                     Capturar();
             }
@@ -173,11 +179,18 @@ namespace AethonMod.Content.Projectiles.Sombras
                     // (la cadena SE LEE separada: +7 px por pieza — el
                     // sim v6.176 lo midió ×1.6 de separación)
                     base_ += new Vector2(((i - (n - 1) * 0.5f) * 7f), 0f) * desenreda;
-                    // EL VAIVÉN INDIVIDUAL: cada pieza SU fase, SU periodo
+                    // v6.177 — EL VAIVÉN DE LA MANADA (la letra: «uno de
+                    // los tentaculos se queda medio rezagado con respecto
+                    // a los otros»): las frecuencias DISTINTAS por pieza
+                    // (i%5, i%3) hacían que unas piezas ondearan MÁS
+                    // LENTO que otras — el tentáculo rezagado. Ahora TODAS
+                    // ondean a la MISMA frecuencia con SU FASE propia
+                    // (el patrón de la casa: la manada se mueve junta,
+                    // cada cuerpo en su momento).
                     float fase = i * 1.73f;
                     base_ += new Vector2(
-                        MathF.Sin(t * (0.19f + 0.013f * (i % 5)) + fase) * 9f,
-                        MathF.Cos(t * (0.16f + 0.011f * (i % 3)) + fase * 1.3f) * 7f) * sube;
+                        MathF.Sin(t * 0.19f + fase) * 9f,
+                        MathF.Cos(t * 0.16f + fase * 1.3f) * 7f) * sube;
                     seg.Center = Vector2.Lerp(seg.Center, base_, 0.16f);
                     seg.velocity = Vector2.Zero;
                 }
@@ -276,6 +289,12 @@ namespace AethonMod.Content.Projectiles.Sombras
             NPC cabeza = Cabeza;
             if (cabeza == null || !cabeza.active) return;
             _capturada = true;
+            // v6.177 — LA OLEADA SUELTA LA CADENA: el cine la captura
+            // ENTERA — que la extensión no le cosa piezas a mitad de vuelo
+            Systems.GrimorioFuriaSistema.CancelarExtensionDevorador();
+            // v6.177 — LA PURGA: el gusano calla en TODO sentido (ni un
+            // proyectil suyo sigue volando mientras el libro aspira)
+            FaucesGlobalNPC.PurgarProyectilesDelJefe(cabeza, 1400f);
             CosecharSecciones(cabeza);
             _posiciones.Clear();
             foreach (int idx in _secciones)

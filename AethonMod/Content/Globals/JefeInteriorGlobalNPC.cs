@@ -119,6 +119,16 @@ namespace AethonMod.Content.Globals
         private int _comboT;              // reloj interno del paso
         private bool _motorExterno;       // lo usan también los jefes de OLEADA
 
+        // === v6.177 — LA ESCALERA SIN TECHO (la letra: «que este nivel
+        //     sea infitino y cuanto mas nivels mas complicado, mas
+        //     inteligente y tiene nuevos ataques, combos y nuevos
+        //     movimientos, asi como una IA mas avanzada») ===
+        private bool _dashDoble;          // nivel 8+: la segunda embestida
+        private int _volea2Cd;            // nivel 10+: la volea doble
+        private int _saltoCd;             // nivel 12+: el salto de sombra
+        private int _saltoTele;           // el telégrafo del salto
+        private int _saltoHacia;          // el jugador del salto
+
         /// <summary>¿El telegraph del dash está VIVO? (lo dibuja PostDraw).</summary>
         public bool TelegraphActivo => _dashTele > 0;
 
@@ -182,11 +192,25 @@ namespace AethonMod.Content.Globals
         //  de la derecha — el total — SIEMPRE es el vivo. Solo dibuja
         //  jefes con el sello interior (el resto de jefes usan la de
         //  vanilla, intacta).
+        //
+        //  v6.177 — LA BARRA QUE NUNCA LLEGÓ (la letra: «las barras de
+        //  vida de los jefes dentro del mundo interior siempre empieza
+        //  con 1/0 y siempre aparece justo asi, eso esta mal, deberia el
+        //  numero reflejar el aumento de vida sin que la barra se
+        //  desborde»). LA AUTOPSIA (contra el decompile del tML real):
+        //  ModifyInfo devuelve TRUE/FALSE/null — y al devolver NULL la
+        //  base PISA nuestros life/lifeMax con los de LA PIEZA seguida
+        //  («life = Clamp(nPC.life,…); lifeMax = nPC.lifeMax») — la suma
+        //  del gusano entero NUNCA llegaba a la pantalla. Y PEOR: los dos
+        //  últimos parámetros NO son «scale» y «dps» — son SHIELD y
+        //  SHIELD_MAX: nuestra «escala de nivel» ponía un ESCUDO fantasma
+        //  (1.015 con tope 0). LA CURA: devolver TRUE — la base YA NO
+        //  pisa nada — y jamás tocar el escudo.
         // ==================================================================
         public class BarraJefeInterior : ModBossBar
         {
             public override bool? ModifyInfo(ref BigProgressBarInfo info,
-                ref float life, ref float lifeMax, ref float scale, ref float dps)
+                ref float life, ref float lifeMax, ref float shield, ref float shieldMax)
             {
                 if (info.npcIndexToAimAt < 0 || info.npcIndexToAimAt >= Main.maxNPCs)
                     return false;
@@ -215,6 +239,11 @@ namespace AethonMod.Content.Globals
                         NPC s = Main.npc[i];
                         if (s == null || !s.active) continue;
                         if (s.type != tipoH && s.type != tipoC && s.type != tipoT) continue;
+                        // v6.177 — SOLO LAS PIEZAS DE ESTA ARENA: otro
+                        // gusano sin sello (una oleada, el mundo real)
+                        // NO se suma a la barra del sellado
+                        if (!s.TryGetGlobalNPC<JefeInteriorGlobalNPC>(out var gs) || !gs.EsInterior)
+                            continue;
                         suma += s.life;
                         sumaMax += s.lifeMax;
                     }
@@ -231,10 +260,11 @@ namespace AethonMod.Content.Globals
                 if (lifeMax <= 0f) lifeMax = 1f;
                 if (life > lifeMax) life = lifeMax;
                 if (life < 0f) life = 0f;
-                // el sello de nivel en la escala: los jefes de nivel alto
-                // muestran su estatura (hasta 1.15× — legible, no gigante)
-                scale = 1f + 0.015f * Math.Min(10, Math.Max(0, g.NivelIA - 1));
-                return null;   // el resto de la pintura es la de la casa
+                // v6.177 — TRUE (la letra: «deberia el numero reflejar
+                // el aumento de vida»): al devolver NULL la base PISABA
+                // nuestra suma con la vida de UNA pieza — ahora la vida
+                // y el total que venimos calculando SON los que se dibujan.
+                return true;
             }
         }
 
@@ -643,7 +673,25 @@ namespace AethonMod.Content.Globals
                 bool puedeDashar = npc.type != NPCID.WallofFlesh && npc.realLife < 0 &&
                     npc.type != NPCID.EaterofWorldsHead && npc.type != NPCID.TheDestroyer;
 
-                // === EL COMBO (nivel 6+): tres pasos encadenados ===
+                // ============================================================
+                //  v6.177 — LA ESCALERA SIN TECHO (la letra: nivel infinito
+                //  con nuevos ataques, combos y movimientos):
+                //   · NIVEL 8+: EL DASH DOBLE — cerrada la embestida, si la
+                //     presa sigue en rango, UNA SEGUNDA inmediata con
+                //     telégrafo corto.
+                //   · NIVEL 10+: LA VOLEA DOBLE — dos voleas seguidas de
+                //     patrones DISTINTOS (abanico→anillo).
+                //   · NIVEL 12+: EL SALTO DE SOMBRA — el jefe se desvanece
+                //     y reaparece DETRÁS de la presa (el telégrafo del
+                //     salto avisa la línea).
+                //   · NIVEL 15+: EL COMBO DE CUATRO PASOS (ver
+                //     EjecutarPasoDeCombo).
+                //   · NIVEL 20+: LA FURIA — todo se acelera 20%.
+                // ============================================================
+                bool furia = nivel >= 20;
+                float acelera = furia ? 0.8f : 1f;
+
+                // === EL COMBO (nivel 6+): tres pasos encadenados (4 con 15+) ===
                 if (nivel >= 6)
                 {
                     if (_comboPaso > 0) { EjecutarPasoDeCombo(npc, presa, nivel); return; }
@@ -651,8 +699,44 @@ namespace AethonMod.Content.Globals
                     else
                     {
                         _comboPaso = 1; _comboT = 0;
-                        _comboCd = Math.Max(210, 480 - 18 * nivel);   // nivel 10: cada ~5 s
+                        _comboCd = (int)(Math.Max(210, 480 - 18 * nivel) * acelera);
                         SonarEn(npc, SoundID.Roar, -0.25f, 0.55f);    // el rugido del combo
+                        npc.netUpdate = true;
+                    }
+                }
+
+                // === EL SALTO DE SOMBRA (nivel 12+): un movimiento NUEVO ===
+                if (nivel >= 12 && puedeDashar)
+                {
+                    if (_saltoTele > 0)
+                    {
+                        // EL TELÉGRAFO: la línea del salto avisa
+                        _saltoTele--;
+                        npc.velocity *= 0.70f;
+                        if (_saltoTele == 0)
+                        {
+                            Player victima = _saltoHacia >= 0 && _saltoHacia < Main.maxPlayers
+                                ? Main.player[_saltoHacia] : null;
+                            if (victima != null && victima.active && !victima.dead)
+                            {
+                                // EL SALTO: reaparece DETRÁS de la presa
+                                Vector2 detras = victima.Center -
+                                    victima.DirectionTo(npc.Center) * 190f;
+                                npc.Center = detras;
+                                npc.velocity = -victima.DirectionTo(npc.Center) * 6f;
+                                npc.netUpdate = true;
+                                SonarEn(npc, SoundID.Item8, 0.35f, 0.6f);
+                                if (furia) { _saltoCd = (int)(190 * 0.8f); }
+                            }
+                        }
+                    }
+                    else if (_saltoCd > 0) _saltoCd--;
+                    else if (Vector2.Distance(npc.Center, presa.Center) > 380f)
+                    {
+                        _saltoCd = Math.Max(340, 700 - 16 * nivel);
+                        _saltoTele = 18;
+                        _saltoHacia = presa.whoAmI;
+                        SonarEn(npc, SoundID.Item117, -0.5f, 0.55f);
                         npc.netUpdate = true;
                     }
                 }
@@ -669,6 +753,17 @@ namespace AethonMod.Content.Globals
                         float velocidad = Math.Min(15.5f, 8.5f + 0.5f * (nivel - 2));
                         npc.velocity = _dashRumbo * velocidad;
                         if (_dashVentana % 4 == 0) npc.netUpdate = true;
+                        // v6.177 — EL DASH DOBLE (nivel 8+): cerrada la
+                        // embestida, si la presa sigue en rango, la SEGUNDA
+                        // embestida NACE INMEDIATA con telégrafo corto
+                        if (_dashVentana == 0 && nivel >= 8 && !_dashDoble &&
+                            Vector2.Distance(npc.Center, presa.Center) > 120f)
+                        {
+                            _dashDoble = true;
+                            _dashTele = 8;
+                            npc.netUpdate = true;
+                        }
+                        else if (_dashVentana == 0) _dashDoble = false;
                     }
                     else if (_dashTele > 0)
                     {
@@ -700,8 +795,17 @@ namespace AethonMod.Content.Globals
                     if (_voleaCd > 0) _voleaCd--;
                     else
                     {
-                        _voleaCd = Math.Max(70, 210 - 10 * (nivel - 3));
+                        _voleaCd = (int)(Math.Max(70, 210 - 10 * (nivel - 3)) * acelera);
                         DispararVolea(npc, presa, nivel, patronForzado: -1, extra: 0);
+                        // v6.177 — LA VOLEA DOBLE (nivel 10+): la segunda
+                        // volea vuela con el patrón CONTRARIO (abanico→anillo)
+                        if (nivel >= 10) _volea2Cd = 26;
+                    }
+                    // LA SEGUNDA VOLEA del par (cuando está agendada)
+                    if (_volea2Cd > 0 && --_volea2Cd == 0)
+                    {
+                        DispararVolea(npc, presa, nivel, patronForzado: 1, extra: 2);
+                        SonarEn(npc, SoundID.Item122, 0.2f, 0.45f);
                     }
                 }
             }
@@ -767,7 +871,33 @@ namespace AethonMod.Content.Globals
                     }
                     if (_comboT == 16)
                         DispararVolea(npc, presa, nivel, patronForzado: 2, extra: 2);
-                    if (_comboT > 30) { _comboPaso = 0; _comboT = 0; }
+                    // v6.177 — EL CUARTO PASO (nivel 15+): EL DASH FINAL
+                    // CERZERO — la embestida que cierra el combo largo
+                    if (_comboT > 30)
+                    {
+                        if (nivel >= 15) { _comboPaso = 4; _comboT = 0; }
+                        else { _comboPaso = 0; _comboT = 0; }
+                    }
+                    break;
+                case 4: // v6.177 — EL DASH FINAL: corto y certero
+                    if (_comboT == 1) { _dashTele = 8; SonarEn(npc, SoundID.Item74, -0.3f, 0.5f); }
+                    if (_dashTele > 0)
+                    {
+                        _dashTele--;
+                        npc.velocity *= 0.70f;
+                        if (_dashTele == 0)
+                        {
+                            _dashVentana = 14;
+                            _dashRumbo = (presa.Center - npc.Center).SafeNormalize(Vector2.UnitX);
+                            SonarEn(npc, SoundID.Item122, 0.45f, 0.7f);
+                        }
+                    }
+                    else if (_dashVentana > 0)
+                    {
+                        _dashVentana--;
+                        npc.velocity = _dashRumbo * Math.Min(17f, 10f + 0.5f * (nivel - 2));
+                    }
+                    else if (_comboT > 30) { _comboPaso = 0; _comboT = 0; }
                     break;
             }
             npc.netUpdate = true;
@@ -779,8 +909,15 @@ namespace AethonMod.Content.Globals
         {
             try
             {
-                int tipo = ModContent.ProjectileType
+                // v6.177 — EL PROYECTIL TEMÁTICO (la letra: cada jefe con SU
+                // proyectil de Terraria — el mismo ataque luminoso para
+                // todos MUERE): el mapa devuelve el vanilla del jefe; 0 =
+                // el proyectil de la casa (los jefes del mod y el default)
+                int tipoCasa = ModContent.ProjectileType
                     <global::AethonMod.Content.Projectiles.Jefes.JefeInteriorVoleaProjectile>();
+                int tipo = global::AethonMod.Content.Projectiles.Jefes.JefeInteriorVoleaProjectile
+                    .ProyectilTematico(npc.type, patronForzado >= 0 ? patronForzado : 2);
+                if (tipo == 0) tipo = tipoCasa;
                 int tema = global::AethonMod.Content.Projectiles.Jefes.JefeInteriorVoleaProjectile.TemaDe(npc.type);
                 int patron = patronForzado >= 0 ? patronForzado
                     : global::AethonMod.Content.Projectiles.Jefes.JefeInteriorVoleaProjectile.PatronDe(npc.type);
