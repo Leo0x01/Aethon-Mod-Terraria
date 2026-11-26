@@ -58,6 +58,7 @@ namespace AethonMod.Content.Projectiles.Investigaciones
         private static readonly Color Disco = new(14, 8, 22);
 
         private bool _clavado;
+        private float _hastaElMuro;          // v6.178: LA PUNTA contra el mundo (para el choque)
 
         public override void SetStaticDefaults() { ProjectileID.Sets.DrawScreenCheckFluff[Type] = 900; }
 
@@ -130,6 +131,18 @@ namespace AethonMod.Content.Projectiles.Investigaciones
             // EL HAZ GIRA (el barrido del faro)
             Projectile.ai[2] += Giro;
             if (Projectile.ai[2] > MathHelper.TwoPi) Projectile.ai[2] -= MathHelper.TwoPi;
+
+            // v6.178 — LA PUNTA CONTRA EL MUNDO (el escáner de vanilla,
+            // el mismo del rayo continuo): ¿hasta dónde llega el barrido
+            // antes de pegar contra el muro? — para el CHOQUE de punta.
+            if (_clavado && t % 6 == 0)
+            {
+                float angTmp = Projectile.ai[2];
+                Vector2 dirTmp = new((float)Math.Cos(angTmp), (float)Math.Sin(angTmp));
+                float[] pasos = new float[3];
+                Collision.LaserScan(Projectile.Center, dirTmp, 10f, LargoHaz, pasos);
+                _hastaElMuro = (pasos[0] + pasos[1] + pasos[2]) / 3f;
+            }
 
             // LA LUZ del haz (el pase de vanilla por la línea del barrido)
             float ang = Projectile.ai[2];
@@ -222,7 +235,12 @@ namespace AethonMod.Content.Projectiles.Investigaciones
             VFXCore.AbrirAdditive();
             try
             {
-                // ═══ (2) LA CORONA PICADA — los 22 picos deterministas (R22) ═══
+                // ═══ (2) LA CORONA PICADA — los 22 picos deterministas (R22)
+                //     v6.178 — LA CURA DEL FANTASMA: los picos dibujaban con
+                //     VFXCore.Quad (que solo ACUMULA al buffer — sin Flush
+                //     NUNCA se veían: la corona del eclipse era INVISIBLE
+                //     desde la v6.177, la mitad del faro faltante). Ahora
+                //     dibujan DIRECTO al lote aditivo abierto. ═══
                 if (_clavado)
                 {
                     int picos = 22;
@@ -238,45 +256,127 @@ namespace AethonMod.Content.Projectiles.Investigaciones
                             Math.Abs(MathHelper.WrapAngle(a - angHaz)) / 0.45f, 0f, 1f);
                         Color pico = Color.Lerp(Corona * 0.55f, CoronaViva, cruce);
                         float alpha = (0.45f + 0.55f * cruce) * inten;
-                        VFXCore.Quad(centro + new Vector2((float)Math.Cos(a), (float)Math.Sin(a)) *
-                                     (48f + largo * 0.5f), pico * alpha,
-                            new Vector2(largo, 5f + 3f * VFXCore.Hash01(Projectile.whoAmI, i, 77)), a);
+                        Vector2 posPico = centro + new Vector2((float)Math.Cos(a), (float)Math.Sin(a)) *
+                                          (48f + largo * 0.5f);
+                        Main.spriteBatch.Draw(VFXCore.SoftGlow, posPico, null,
+                            pico * alpha, a, VFXCore.SoftGlow.Size() * 0.5f,
+                            new Vector2(largo / 64f, (5f + 3f * VFXCore.Hash01(Projectile.whoAmI, i, 77)) / 64f),
+                            SpriteEffects.None, 0f);
                     }
                 }
 
-                // ═══ (3) EL HAZ GIRATORIO — LA PILA DE CAPAS de la casa ═══
+                // ═══ (3) EL HAZ GIRATORIO — v6.178: LA TÉCNICA DEL RAYO
+                //     DE VERDAD (la letra: «el ataque del faro tambien se
+                //     ve horrible, parece que le faltan VFX y muchos VFX»):
+                //     las SEIS CAPAS del plano del arma real + LA ESTELA
+                //     DEL BARRIDO + LA CAMPANADA + EL CHOQUE DE PUNTA —
+                //     el faro de verdad, con MUCHOS VFX. ═══
                 if (_clavado && Intensidad() > 0.05f)
                 {
                     float ang = Projectile.ai[2];
                     Vector2 dir = new((float)Math.Cos(ang), (float)Math.Sin(ang));
-                    // LA MISMA POLILÍNEA para todas las capas (la ley)
-                    int nodos = 16;
-                    Vector2[] pts = new Vector2[nodos];
-                    for (int i = 0; i < nodos; i++)
-                    {
-                        float f = i / (float)(nodos - 1);
-                        pts[i] = centro + dir * (LargoHaz * f) +
-                                 new Vector2(-dir.Y, dir.X) *
-                                 (MathF.Sin(f * 9.4f + t * 3.1f + Projectile.whoAmI) * 4.2f *
-                                  MathHelper.Clamp(f * 3f, 0f, 1f));
-                    }
-                    RayoStrip.FilamentoEnLote(pts, 66f, Corona * 0.45f, Corona * 0.25f,
-                        0.26f * inten, StormTaper.Center, 0, 0, true, false, false);
-                    RayoStrip.FilamentoEnLote(pts, 34f, Corona, Corona * 0.6f,
-                        0.5f * inten, StormTaper.Center, 0, 0, true, false, false);
-                    RayoStrip.FilamentoEnLote(pts, 18f, CoronaViva, Corona,
-                        0.8f * inten, StormTaper.Center, 0, 0, true, false, false);
-                    RayoStrip.FilamentoEnLote(pts, 7f, Nucleo, CoronaViva,
-                        inten, StormTaper.Center, 0, 0, true, false, false);
+                    float largoVivo = _hastaElMuro > 4f ? MathF.Min(LargoHaz, _hastaElMuro) : LargoHaz;
+                    bool choca = _hastaElMuro > 4f && _hastaElMuro < LargoHaz - 6f;
 
-                    // LA PUNTA DEL HAZ: el destello que barre el horizonte
-                    Vector2 punta = centro + dir * LargoHaz;
-                    Main.spriteBatch.Draw(VFXCore.SoftGlow, punta, null,
-                        Corona * (0.65f * inten), 0f, VFXCore.SoftGlow.Size() * 0.5f,
-                        new Vector2(1.5f, 1.5f), SpriteEffects.None, 0f);
-                    Main.spriteBatch.Draw(VFXCore.SoftGlow, punta, null,
-                        Nucleo * (0.55f * inten), 0f, VFXCore.SoftGlow.Size() * 0.5f,
-                        new Vector2(0.7f, 0.7f), SpriteEffects.None, 0f);
+                    // (3a) LA ESTELA DEL BARRIDO — los fantasmas del haz en
+                    //      los ángulos que YA barrió (el rastro de luz que
+                    //      persigue al faro: el giro SE LEE)
+                    for (int g = 1; g <= 5; g++)
+                    {
+                        float aG = ang - g * 0.14f * Math.Sign(Giro);
+                        Vector2 dirG = new((float)Math.Cos(aG), (float)Math.Sin(aG));
+                        float fG = (1f - g * 0.16f) * inten * 0.55f;
+                        if (fG <= 0.03f) continue;
+                        Main.spriteBatch.Draw(VFXCore.SoftGlow,
+                            centro + dirG * (largoVivo * 0.5f), null,
+                            Corona * (fG * 0.24f), aG, VFXCore.SoftGlow.Size() * 0.5f,
+                            new Vector2(largoVivo / 64f * 0.96f, 0.55f + 0.5f * (1f - g * 0.16f)),
+                            SpriteEffects.None, 0f);
+                    }
+
+                    // (3b) EL HAZ EN SÍ — la técnica de las seis capas (la
+                    //      del arma real — HazProyectadoLib, la casa)
+                    if (HazProyectadoLib.TexturasVivas)
+                    {
+                        HazProyectadoLib.Parametros p = default;
+                        p.Inicio = centro;
+                        p.Direccion = dir;
+                        p.Largo = largoVivo;
+                        p.Ancho = 66f;
+                        p.Tiempo = t * 1.35f + Projectile.whoAmI;
+                        p.Intensidad = inten;
+                        p.Destello = 0.55f * inten;
+                        p.Impacto = choca;
+                        p.VelocidadFlujo = 14f;
+                        p.Ondulacion = 0.7f;
+                        p.Turbulencia = 0.6f;
+                        p.Colores = new HazProyectadoLib.Paleta
+                        { Exterior = Corona * 0.8f, Medio = Corona, Nucleo = CoronaViva };
+                        HazProyectadoLib.Dibujar(p);
+                    }
+                    else
+                    {
+                        // EL FALLBACK de la pila de siempre
+                        int nodos = 16;
+                        Vector2[] pts = new Vector2[nodos];
+                        for (int i = 0; i < nodos; i++)
+                        {
+                            float f = i / (float)(nodos - 1);
+                            pts[i] = centro + dir * (largoVivo * f) +
+                                     new Vector2(-dir.Y, dir.X) *
+                                     (MathF.Sin(f * 9.4f + t * 3.1f + Projectile.whoAmI) * 4.2f *
+                                      MathHelper.Clamp(f * 3f, 0f, 1f));
+                        }
+                        RayoStrip.FilamentoEnLote(pts, 66f, Corona * 0.45f, Corona * 0.25f,
+                            0.26f * inten, StormTaper.Center, 0, 0, true, false, false);
+                        RayoStrip.FilamentoEnLote(pts, 34f, Corona, Corona * 0.6f,
+                            0.5f * inten, StormTaper.Center, 0, 0, true, false, false);
+                        RayoStrip.FilamentoEnLote(pts, 18f, CoronaViva, Corona,
+                            0.8f * inten, StormTaper.Center, 0, 0, true, false, false);
+                        RayoStrip.FilamentoEnLote(pts, 7f, Nucleo, CoronaViva,
+                            inten, StormTaper.Center, 0, 0, true, false, false);
+                    }
+
+                    // (3c) EL CHOQUE DE PUNTA: cuando el barrido pega contra
+                    //      el mundo — la punta ARDE con su doble estallido
+                    Vector2 punta = centro + dir * largoVivo;
+                    if (choca)
+                    {
+                        float late = 1f + 0.22f * MathF.Sin(t * 11.3f);
+                        Main.spriteBatch.Draw(VFXCore.SoftGlow, punta, null,
+                            CoronaViva * (0.75f * inten), 0f, VFXCore.SoftGlow.Size() * 0.5f,
+                            new Vector2(2.1f * late, 2.1f * late), SpriteEffects.None, 0f);
+                        Main.spriteBatch.Draw(VFXCore.SoftGlow, punta, null,
+                            Nucleo * (0.6f * inten), 0f, VFXCore.SoftGlow.Size() * 0.5f,
+                            new Vector2(0.9f * late, 0.9f * late), SpriteEffects.None, 0f);
+                        // las chispas del muro (deterministas: R22)
+                        if ((int)Main.GameUpdateCount % 5 == 0)
+                            for (int s = 0; s < 3; s++)
+                            {
+                                float aS = VFXCore.Hash01(Projectile.whoAmI, s, (int)(Main.GameUpdateCount / 5));
+                                Vector2 vS = (-dir).RotatedBy((aS - 0.5f) * 2.4f) * (1.5f + 3f * aS);
+                                Dust dS = Dust.NewDustPerfect(punta + dir * 6f, 269,
+                                    vS, 0, Corona, 1.3f);
+                                dS.noGravity = true;
+                            }
+                    }
+                }
+
+                // ═══ (4) LA CAMPANADA DE CADA VUELTA — el anillo que nace
+                //     del centro cuando el haz pasa por arriba (el pulso
+                //     del faro: cada vuelta se VE, no solo se oye) ═══
+                if (_clavado && Intensidad() > 0.05f)
+                {
+                    float fase = Projectile.ai[2] / MathHelper.TwoPi;
+                    float anillo = fase - MathF.Floor(fase);
+                    if (anillo < 0.55f)
+                    {
+                        float progreso = anillo / 0.55f;
+                        float r = 52f + progreso * 150f;
+                        float a = (1f - progreso) * (1f - progreso) * 0.55f * inten;
+                        VFXCore.RingQuad(centro, r, 0f, Corona * a);
+                        VFXCore.RingQuad(centro, r * 0.72f, 0f, CoronaViva * (a * 0.5f));
+                    }
                 }
 
                 // ═══ (4) LA BOCA DEL ECLIPSE — el corazón del disco ═══

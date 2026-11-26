@@ -255,10 +255,37 @@ namespace AethonMod.Content.Projectiles.Investigaciones
         public override bool PreDraw(ref Color lightColor)
         {
             if (Main.netMode == NetmodeID.Server) return false;
-            if (Tiempo >= TiempoCarga && Tiempo < 351f && Intensidad() > 0.01f)
+            // v6.178 — EL RAYO GRANDE CON LA TÉCNICA DEL ARMA REAL (la
+            // letra: «lo que me importa es el ataque que hace debes copiar
+            // su tecnica»): las seis capas del plano — Ancho 100, flujo
+            // 16, ondulación 1, turbulencia 1 — con texturas de la casa.
+            if (HazProyectadoLib.TexturasVivas && Tiempo >= TiempoCarga && Tiempo < 351f
+                && Intensidad() > 0.01f)
             {
-                // EL HAZ ENORME: la misma polilínea de la casa, ancho 100,
-                // ondulación y turbulencia de cine (la X de la proyección)
+                VFXCore.AbrirAdditive();
+                try
+                {
+                    HazProyectadoLib.Parametros p = default;
+                    p.Inicio = Projectile.Center - Main.screenPosition;
+                    p.Direccion = Projectile.velocity.SafeNormalize(Vector2.UnitX);
+                    p.Largo = Largo;
+                    p.Ancho = AnchoBase;
+                    p.Tiempo = Tiempo;
+                    p.Intensidad = Intensidad();
+                    p.Destello = Destello() * 0.5f;
+                    p.Impacto = false;
+                    p.VelocidadFlujo = 16f;
+                    p.Ondulacion = 1f;
+                    p.Turbulencia = 1f;
+                    p.Colores = new HazProyectadoLib.Paleta
+                    { Exterior = Exterior, Medio = Medio, Nucleo = Nucleo };
+                    HazProyectadoLib.Dibujar(p);
+                }
+                finally { VFXCore.RestaurarLoteVanilla(); }
+            }
+            else if (Tiempo >= TiempoCarga && Tiempo < 351f && Intensidad() > 0.01f)
+            {
+                // EL FALLBACK (texturas tardando): la pila de siempre
                 Vector2[] pts = RayoOpticoProyectado.PolylineDelHaz(
                     Projectile.Center - Main.screenPosition, Projectile.velocity, Largo,
                     Main.GlobalTimeWrappedHourly * 16f, Projectile.whoAmI, amplitud: 9f, largoOnda: 130f);

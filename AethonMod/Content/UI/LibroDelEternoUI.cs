@@ -1293,7 +1293,16 @@ namespace AethonMod.Content.UI
             // v6.176 — EL BOTÓN JAMÁS REBOSA (re-medida al momento del
             // trazo — la ventana de la fuente dinámica se cierra aquí)
             esc = LibroLineas.EscalaQueCabe(t ?? "", esc, 202f);
-            LibroLineas.Texto(sb, t ?? "", new Vector2(b.Center.X, b.Center.Y),
+            // v6.178 — LA GARANTÍA ABSOLUTA (misma letra, misma cura):
+            //     el piso de legibilidad + la elipsis — NADA desborda.
+            string txtB = t ?? "";
+            while (esc < 0.72f && txtB.Length > 4)
+            {
+                txtB = txtB.Substring(0, Math.Max(4, txtB.Length - 2)) + "…";
+                esc = LibroLineas.EscalaQueCabe(txtB, 1.05f, 202f);
+            }
+            esc = Math.Max(esc, 0.72f);
+            LibroLineas.Texto(sb, txtB, new Vector2(b.Center.X, b.Center.Y),
                 apagado ? TintaApagado : Tinta, esc, 0.5f, 0.5f);
             if (hov && clicNuevo) alClic?.Invoke();
             return cy + 54f;
@@ -1461,10 +1470,32 @@ namespace AethonMod.Content.UI
                 LibroMarco.Marco(sb, s, hov ? TintaVioleta : llena ? TintaOro : TintaOro * 0.4f);
                 if (llena)
                 {
-                    Texture2D tex = TextureAssets.Item[ra.type].Value;
-                    float esc = Math.Min(50f / tex.Width, 50f / tex.Height);
-                    sb.Draw(tex, s.Center.ToVector2(), null, Color.White, 0f,
-                        tex.Size() * 0.5f, esc, SpriteEffects.None, 0f);
+                    // v6.178 — EL ICONO BLINDADO (la letra: «los 3 slot
+                    //     del arma estan en blanco aunque si tienen el
+                    //     arma»): la persistencia quedó PROBADA viva en
+                    //     el banco headless (DiagnosticoPersistencia —
+                    //     las tres ranuras sobreviven el ciclo entero
+                    //     del disco) — el blanco era del dibujo. El
+                    //     icono vive en try/catch con respaldo (la
+                    //     ranura JAMÁS se ve vacía mintiendo)…
+                    try
+                    {
+                        Texture2D tex = TextureAssets.Item[ra.type].Value;
+                        float esc = Math.Min(46f / tex.Width, 46f / tex.Height);
+                        sb.Draw(tex, s.Center.ToVector2() - new Vector2(0f, 7f), null, Color.White, 0f,
+                            tex.Size() * 0.5f, esc, SpriteEffects.None, 0f);
+                    }
+                    catch (System.Exception exIcono)
+                    { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LibroTrioIcono", exIcono); }
+                    // …y el NOMBRE cosido debajo: la ranura arma se LEE
+                    // con nombre y todo (nada de blanco mudo).
+                    string nombreR = ra.Name ?? "";
+                    if (nombreR.Length > 0)
+                    {
+                        float escN = LibroLineas.EscalaQueCabe(nombreR, 0.78f, 60f);
+                        LibroLineas.Texto(sb, nombreR,
+                            new Vector2(s.Center.X, s.Bottom - 9f), Tinta, escN, 0.5f, 0.5f);
+                    }
                 }
                 else
                     LibroLineas.Texto(sb, (i + 1).ToString(), s.Center.ToVector2(), TintaApagado, 1.0f, 0.5f, 0.5f);
@@ -1810,6 +1841,18 @@ namespace AethonMod.Content.UI
             // crecer entre la medida y el dibujo; medir pegado al trazo
             // cierra la ventana y las tijeras del pase lo blindan).
             esc = LibroLineas.EscalaQueCabe(txt, esc, 202f);
+            // v6.178 — LA GARANTÍA ABSOLUTA (la letra: «el texto en los
+            //     botones del altar se desbordan» — la medición ya
+            //     existía y el usuario TODAVÍA lo vio: si al PISO de
+            //     legibilidad (0.72) el texto no cabe, se RECORTA con
+            //     elipsis hasta que quepa. NADA desborda NUNCA — ni con
+            //     la fuente mutando, ni con el texto más largo del mundo.
+            while (esc < 0.72f && txt.Length > 4)
+            {
+                txt = txt.Substring(0, Math.Max(4, txt.Length - 2)) + "…";
+                esc = LibroLineas.EscalaQueCabe(txt, 1.05f, 202f);
+            }
+            esc = Math.Max(esc, 0.72f);
             LibroLineas.Texto(sb, txt, new Vector2(b.Center.X, b.Center.Y),
                 apagado ? TintaApagado : Tinta, esc, 0.5f, 0.5f);
             if (hov && clicNuevo) alClic?.Invoke();

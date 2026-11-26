@@ -407,8 +407,19 @@ namespace AethonMod.Content.Globals
             //     día: no hay modo guardián que la agarre, ni en la
             //     arena, ni en la oleada, ni en la carnada.
             _prestaNocheInterior = false;
-            if (npc.type == NPCID.SkeletronHead &&
-                Systems.SubmundoGrimorio.Activo && Main.dayTime)
+            // v6.178 — LA NOCHE PRESTADA UNIVERSAL (la letra: «en el mundo
+            //     interior intento invocar al ojo de cuthulu pero este se
+            //     va, eso quiere decir que el mundo interior no cumple mi
+            //     peticion de que debe ser apto para todos los jefes»):
+            //     el interior vive en MEDIODÍA ETERNO y las IA de vanilla
+            //     HUYEN del día (el Ojo se va volando, los mechs se
+            //     retiran, las abejas reina se elevan — el decompile:
+            //     EncourageDespawn por IsItDay en media docena de jefes).
+            //     La noche se presta a TODO NPC mientras el interior
+            //     viva: dentro, NADIE ve el amanecer y todos pelean.
+            //     (La v6.152 la prestaba solo a SkeletronHead — la cabeza
+            //     era el único cliente; ahora el EoC del usuario también.)
+            if (Systems.SubmundoGrimorio.Activo && Main.dayTime)
             {
                 Main.dayTime = false;
                 _prestaNocheInterior = true;
@@ -923,6 +934,19 @@ namespace AethonMod.Content.Globals
                     : global::AethonMod.Content.Projectiles.Jefes.JefeInteriorVoleaProjectile.PatronDe(npc.type);
                 int dano = Math.Max(8, (int)(npc.damage * 0.55f));
                 var fuente = npc.GetSource_FromAI();
+                // v6.178 — LA VIDA CONTADA (la letra: «los proyectiles
+                //     que lanza el Rey Slime en nivel 26 se quedan en el
+                //     mapa permanentemente […] deben desaparecer en
+                //     segundos, analiza que este error no este en mas
+                //     jefes»): el default vanilla de timeLeft es 3600
+                //     ticks = 60 SEGUNDOS (verificado en el decompile —
+                //     y el Spike del Rey Slime NO tiene override) — con
+                //     la furia del nivel alto lloviendo, la arena se
+                //     llenaba de basura eterna. TODA volea de TODOS los
+                //     jefes nace con la vida contada: 180 ticks = 3 s
+                //     (la ley nueva del motor: nadie dispara nada que
+                //     no muera en segundos).
+                int vidaUtil = 180;
                 // LA SEMILLA de la salva (determinista por jefe y por racha)
                 int semilla = npc.whoAmI * 17 + (int)Main.GameUpdateCount;
                 var rng = new System.Random(semilla);
@@ -937,8 +961,10 @@ namespace AethonMod.Content.Globals
                         {
                             float ang = (i - (n - 1) * 0.5f) * 0.16f;
                             Vector2 vel = rumbo.RotatedBy(ang) * 11f;
-                            Projectile.NewProjectile(fuente, npc.Center, vel, tipo, dano, 2f,
+                            int _npx = Projectile.NewProjectile(fuente, npc.Center, vel, tipo, dano, 2f,
                                 Main.myPlayer, 0f, tema, 0f);
+                            if (_npx >= 0 && _npx < Main.maxProjectiles)
+                                Main.projectile[_npx].timeLeft = vidaUtil;
                         }
                         break;
                     }
@@ -950,8 +976,10 @@ namespace AethonMod.Content.Globals
                         {
                             float ang = giro + i * (MathF.PI * 2f / n);
                             Vector2 vel = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 8.5f;
-                            Projectile.NewProjectile(fuente, npc.Center, vel, tipo, dano, 2f,
+                            int _npx = Projectile.NewProjectile(fuente, npc.Center, vel, tipo, dano, 2f,
                                 Main.myPlayer, 1f, tema, 0f);
+                            if (_npx >= 0 && _npx < Main.maxProjectiles)
+                                Main.projectile[_npx].timeLeft = vidaUtil;
                         }
                         break;
                     }
@@ -963,8 +991,10 @@ namespace AethonMod.Content.Globals
                             float dx = (float)(rng.NextDouble() * 2 - 1) * 240f;
                             Vector2 pos = presa.Center + new Vector2(dx, -430f);
                             Vector2 vel = new Vector2((float)(rng.NextDouble() * 2 - 1) * 1.2f, 6.5f);
-                            Projectile.NewProjectile(fuente, pos, vel, tipo, dano, 2f,
+                            int _npx = Projectile.NewProjectile(fuente, pos, vel, tipo, dano, 2f,
                                 Main.myPlayer, 2f, tema, 0f);
+                            if (_npx >= 0 && _npx < Main.maxProjectiles)
+                                Main.projectile[_npx].timeLeft = vidaUtil;
                         }
                         break;
                     }
@@ -977,8 +1007,10 @@ namespace AethonMod.Content.Globals
                             {
                                 float ang = baseAng + b * (MathF.PI * 2f / brazos) + k * 0.22f;
                                 Vector2 vel = new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * (7.5f + k * 1.8f);
-                                Projectile.NewProjectile(fuente, npc.Center, vel, tipo, dano, 2f,
+                                int _npx = Projectile.NewProjectile(fuente, npc.Center, vel, tipo, dano, 2f,
                                     Main.myPlayer, 3f, tema, 0f);
+                            if (_npx >= 0 && _npx < Main.maxProjectiles)
+                                Main.projectile[_npx].timeLeft = vidaUtil;
                             }
                         break;
                     }

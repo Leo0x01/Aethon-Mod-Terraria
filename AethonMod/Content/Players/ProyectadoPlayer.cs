@@ -92,6 +92,10 @@ namespace AethonMod.Content.Players
             return etapa;
         }
 
+        // v6.178 — EL TOTAL DE LOS OPCIONALES (la cura del client.log: la
+        // clave Opcionales pide {1} = el total y nadie lo traía)
+        public const int TotalOpcionales = 6;   // Slime · Abeja · Ciervo · Reina Gelatina · Pez Dragón · Emperatriz
+
         public static int JefesOpcionales()
         {
             int n = 0;

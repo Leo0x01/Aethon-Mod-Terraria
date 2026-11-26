@@ -108,7 +108,14 @@ namespace AethonMod.Content.Items.Investigaciones
                         ProyectadoPlayer.TopeMuertes(etapa) * 100f)));
                 tooltips.Add(new TooltipLine(Mod, "ProyectadoOpcionales",
                     Language.GetTextValue("Mods.AethonMod.Proyectado.Opcionales",
-                        ProyectadoPlayer.JefesOpcionales(), ProyectadoPlayer.BonoOpcionales() * 100f)));
+                        // v6.178 — LA CURA DEL client.log (116 fallos por
+                        // sesión: «System.FormatException: Index (zero
+                        // based) must be greater than or equal to zero…»):
+                        // la clave pide {0}/{1}/{2} y solo viajaban DOS
+                        // argumentos — el {2} (el bono %) nacía muerto y
+                        // la excepción saltaba en cada frame del tooltip.
+                        ProyectadoPlayer.JefesOpcionales(), ProyectadoPlayer.TotalOpcionales,
+                        ProyectadoPlayer.BonoOpcionales() * 100f)));
                 // LA TECLA viva: el nombre de la tecla de habilidad
                 string tecla = Language.GetTextValue("Mods.AethonMod.Proyectado.SinTecla");
                 var kb = global::AethonMod.Content.Systems.ProyectadoSistema.TeclaProyectarse;

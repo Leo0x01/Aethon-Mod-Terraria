@@ -153,6 +153,17 @@ que cree o modifique una librería, shader, textura, efecto visual o de sonido
      puede leerse SOLO por el MOVIMIENTO (temblor suave + hitstop +
      estallido de soles): `ImpactoLib.Golpe/GolpeDeCine` ganan
      `destello:` para apagar flash+luz SIN perder la sacudida.
+   - **`VFXCore.Quad` SIN FLUSH = FANTASMA (v6.178, LA CORONA FANTASMA del faro)** →
+     `Quad`/`QuadSrc`/`Line`/`Ribbon` SOLO ACUMULAN al buffer interno
+     (`_quads`): sin un `FlushAdditive`/`FlushAlpha` DESPUÉS (o sin
+     `RegisterLayer`+`FlushOcclusion`), NADA SE DIBUJA JAMÁS. La corona
+     picada del faro pasó la v6.177 COMPLETA invisible por exactamente
+     eso («le faltan VFX», decía el usuario — faltaba la MITAD). LA
+     REGLA: dentro de un lote YA ABIERTO (`AbrirAdditive` de un
+     PreDraw), dibuja DIRECTO con `Main.spriteBatch.Draw` o los helpers
+     de dibujo directo (`RingQuad`, `LineQuad`, los pinceles de las
+     librerías escuela B); `VFXCore.Quad` es SOLO para la escuela A
+     (buffer + Flush del llamador).
    - **Negro puro en lote aditivo** → suma cero = invisible. Para OSCURECER
      hay que salir del aditivo: `FlushAlpha` / `PaseAlpha` / lote AlphaBlend.
      Toda sombra necesita rim/aliento aditivo o rampa de color para ser
@@ -306,6 +317,7 @@ python3 tools/fx20_validate.py AethonMod/Content/Effects/Shaders/MiShader.fxc
 | Rayo estilo vanilla 1.4.5 (clima, Arc Surge) | **RayoLib** (`RayoLib.cs`) + `RayoSistema.Lanzar` | Sprites de rayo, zigzag con Main.rand |
 | Arcos eléctricos, chispas, coronas de descarga | **StormLib** (`StormLib.cs`) — Bolt/ChainBolt/Arc | Líneas blancas secas |
 | Haz/láser masivo de energía (la pila de capas del RC2) | El patrón de **RayosPruebaProjectile** (pila de capas + strip §5.4) — BeamLib MURIÓ v6.56.9 | Un Quad estirado sin capas |
+| **Rayo concentrado de arma** (el del visor/faro — la técnica de los mods famosos) | **HazProyectadoLib** (§4.3b: seis capas + contorno ondulante + tramos alineados) | RayoStrip pelado para un haz de arma |
 | Rayo de vértices LISO (tiras de triángulos) | **RayoStrip** (`RayoStrip.cs`) — Filamento | Rectángulos encadenados (los "bultos") |
 | Onda de choque / impacto / explosión | **OndaLib** (`OndaLib.cs`) — Shock/Pulse/Kick/Flash | Anillos de grosor constante |
 | Estela que sigue al proyectil | **EstelaLib** (`EstelaLib.cs`) — Track+Ribbon | Copiar posiciones sin sanitizar |
@@ -455,6 +467,46 @@ Lo usan **137 archivos** del mod.
 **Qué dibuja:** rayos y arcos por PILA DE PASADAS del pixel del motor (6 anchos `PilaW {5.2…0.72}` × alfas `PilaF` — la receta del LightningArc 466 de vanilla: el degradado transversal ES la suma de pasadas sólidas). Determinista por (semilla, flick). Escuela B.
 - `FlickTick(time, hz)` (el reloj de regeneración) · `IsLit(seed, flick, aliveChance)` (parpadeo vivo) · `DeathGrow(lifeT)` · `ZigPath(a, b, …)` (el zigzag) · `Boil(pts, seed, tick, amp)` (el hervor) · `ForkTree/BuildTree` (árbol de ramas) · `Ruido1D/Fbm1D` (el ruido CPU compartido) · `Strand(batch, pts, …)` · `ChainBolt(a, b, …)` (cadena entre 2 puntos) · `Bolt(a, b, …)` (EL rayo con doble tira cuerpo+núcleo, ramas y gorros) · `Arc` (corona de descarga)
 **Usuarios (31):** AethonBoss, AtaqueJefe/Fusion, los *Ascendido*, SembradorPulsar, TelarEstrella, LanzaAlba, Apuestas, CodigosVivos, PrimerTrazoFajo…
+
+### 4.3b HazProyectadoLib.cs (v6.178) — EL RAYO CONCENTRADO DE VERDAD
+
+**Qué dibuja:** el rayo concentrado estilo "arma de meme" — la técnica
+que el usuario mandó copiar (la letra: «debes copiar su tecnica ya que
+esta tecnica es basica en muchos mods… muchos mods famosos usan esa
+misma tecnica para crear rayos concentrados»), reimplementada 100% con
+código y texturas de la casa sobre el plano decompilado del .tmod del
+usuario (CiclopeProyectado v1.0.1). LA MISMA LÍNEA EN SEIS CAPAS que se
+funden: (1)+(2) las ENVOLVENTES — `ProyeccionHaz` (16×64, perfil suave
+en Y) estirada de punta a punta + las DOS TAPAS `ProyeccionBorde`
+(64×64) que desvanecen los extremos hacia afuera, a ×3.6 (tinte
+EXTERIOR) y ×1.9 (tinte MEDIO) del ancho; (3) EL CUERPO QUE FLUYE —
+`ProyeccionCuerpo` (256×64, fBm TILEABLE en X, forjada por
+`tools/gen_proyeccion_v6178.py` con costura medida 1/255) dibujada en
+TRAMOS ALINEADOS a los píxeles de la textura (k = texW/repetición: la
+textura se REPITE con su escala nativa, JAMÁS se estira) con el
+CONTORNO ONDULANTE de tres octavas de seno que VIAJAN con el flujo y
+las puntas cerradas en sqrt; (4) EL SEGUNDO FLUJO — `ProyeccionFlujo`
+a ×0.7 de altura y ×1.8 de velocidad, tinte rosado; (5) LOS BORDES QUE
+ARDEN — la rodaja pegada arriba y abajo del contorno (el filo vivo);
+(6) LAS DOS LUCES — el brillo del extremo (doble si Impacto) y la
+estrella de la boca (el destello, 3 draws con el cruzado).
+
+**API:** `HazProyectadoLib.Dibujar(in Parametros p)` con la struct
+`Parametros` (Inicio PANTALLA · Direccion · Largo · Ancho · Tiempo ·
+Intensidad · Destello · Impacto · VelocidadFlujo · Ondulacion ·
+Turbulencia · Colores{Exterior,Medio,Nucleo}) + `TexturasVivas` (la
+puerta del fallback del llamador). TODO determinista (R5: cero azar —
+las olas son senos de (d/ancho − t·vel/ancho)). Escuela B: el llamador
+abre `VFXCore.AbrirAdditive()` y sale con `RestaurarLoteVanilla()` (R21).
+
+**Usuarios (3):** `RayoOpticoProyectado` (el continuo del visor: 18 px
+· flujo 8 · ond 0.45 — los parámetros EXACTOS del plano),
+`RayoProyectado` (LA PROYECCIÓN de la X: 100 · 16 · 1 · 1),
+`FaroDelEclipseHaz` (el barrido del faro: 66 · 14 · 0.7 · 0.6) — los
+tres con fallback a la pila RayoStrip si el asset tarda. Generador:
+`tools/gen_proyeccion_v6178.py` (las 4 texturas, el test de costura
+incorporado). Sim 1:1: `tools/sim_haz_proyectado_v6178.py` (capas ·
+ola que viaja · puntas sqrt · costura — SHIP) + QA VLM 7/10.
 
 ### 4.4 RayoLib.cs (974 líneas, v6.50.18) — LOS RAYOS DE VANILLA 1.4.5
 

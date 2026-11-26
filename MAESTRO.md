@@ -17,7 +17,7 @@
 | **Qué es** | Mod de contenido masivo para **Terraria** vía **tModLoader 2026.09.3.1** |
 | **Lenguaje** | C# (.NET 8, `net8.0`, LangVersion latest) |
 | **Repo** | `https://github.com/Leo0x01/Aethon-Mod-Terraria` (privado durante el desarrollo) |
-| **Versión actual** | **6.177** (vive en `AethonMod/build.txt`, línea `version = 6.177`) |
+| **Versión actual** | **6.178** (vive en `AethonMod/build.txt`, línea `version = 6.178`) |
 | **Última release** | [v6.146](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.146) — md5 `a5fa29117116c8d8c1e0dfad4991819d`, 19.400.025 B, 528 entradas |
 | **Licencia** | Propietaria — © 2026 Leo0x01. VER README §AVISO LEGAL. Nada de terceros. |
 | **Idiomas** | Código y comentarios en **español**; localización del juego en es-MX (primario), es-ES, en-US |
@@ -109,6 +109,8 @@ Detalles de cada paso:
 | R20 | **EL LOOP DE RETROALIMENTACIÓN corre antes de cada release** (`tools/loop_retro_v6175.py`): mide catches vacíos · azar en el dibujo · claves de loc · PNGs y COMPARA con la medición anterior | medir → comparar → arreglar |
 | R21 | **EL PREQUEL DEL PREDRAW** (v6.176, la lección de los dos crashes del client.log — 42.000 frames de «Draw was called, but Begin has not yet been called»): TODO PreDraw/PostDraw que dibuja DIRECTO con `Main.spriteBatch.Draw` abre SU lote con `VFXCore.AbrirAdditive()` (o un `Begin` propio) y sale con `VFXCore.RestaurarLoteVanilla()` — JAMÁS un Draw tras un `End` sin `Begin`. El oráculo NO caza los errores de estado de dibujo: solo el patrón los evita | Los dos crashes nacieron el mismo día que el patrón se escribió: la regla es el único antídoto |
 | R22 | **EL AZAR DEL DIBUJO SE SIEMBRA** (v6.176, la letra: «semilla fija por entidad (whoAmI·edad), como ya hace TentaculoCosmico»): el polvo decorativo que nace DENTRO del dibujo usa `VFXCore.Hash01(whoAmI·edad, a, b)` — NUNCA `Main.rand` en PreDraw/PostDraw. El loop mide SOLO código (los comentarios no cuentan) | R5 medido y blindado |
+| R23 | **LA VIDA CONTADA** (v6.178, la letra: «los proyectiles que lanza el Rey Slime en nivel 26 se quedan en el mapa permanentemente… deben desaparecer en segundos»): el default vanilla de `Projectile.timeLeft` es **3600 ticks = 60 segundos** (verificado contra el decompile) y MUCHOS proyectiles vanilla NO tienen override — TODO proyectil que la casa dispare para un jefe nace con `timeLeft` explícito (180 ticks en las voleas). Nadie dispara nada que no muera en segundos | La arena sembrada de basura eterna |
+| R24 | **LA BRUMA DEL DECORADO ES PEQUEÑA** (v6.178, la letra: «la bruma… hace que los fps bajen hasta solo 5 fps… la bruma es demasiada en el fondo»): el cielo del Mundo Interior es un DECORADO de pantalla completa que corre en GPUs integradas con el mundo entero encima — la niebla de sus tentáculos es UNA bruma PEQUEÑA por tentáculo (radio al ras del ancho de SU punta, calidad ≤0.18, alfa bajo) — JAMÁS radios de cientos de px ni varias masas por tentáculo | Los 5 FPS de la v6.176/.177 |
 
 ### 1.4 Estilo del código
 
@@ -338,6 +340,7 @@ notas de una versión vieja).
 | Dominio | Técnica | Librerías |
 |---|---|---|
 | Rayos | El filamento de primitivas de vértices + el R63-a (rayos reales con investigación) | `RayoLib`, `RayoStrip` |
+| Rayos concentrados | LAS SEIS CAPAS del plano del arma real (envolventes + cuerpo que fluye en tramos alineados + bordes que arden) | `HazProyectadoLib` |
 | Cuerpos | Re-parametrización de cuerpos compuestos | `MoldeLib`, `FormaLib` |
 | Estelas | Perfil de anchura a lo largo del tramo | `EstelaLib` |
 | Ondas de choque | Falloff temporal | `OndaLib` + `OndaSystem` |
@@ -509,6 +512,10 @@ REANIMACIÓN) · `guardian_v6123.py` · `audit_v6123_tmod.py` · `test_fna_png`
 · `test_nvorbis` (tests de formato) · cirugías sueltas.
 
 ## 9 · CRONOLOGÍA (38 versiones — la letra de cada una en CHANGES.md)
+
+**La era v6.178**: EL RAYO DE VERDAD (la técnica del arma real decompilada — HazProyectadoLib y sus cuatro texturas de la Forja) · LA BRUMA PEQUEÑA (la cura de los 5 FPS + R24) · LA NOCHE PRESTADA UNIVERSAL (todos los jefes se quedan en el interior) · LA VIDA CONTADA (R23) · EL BANCO DE PRUEBAS de la persistencia (DiagnosticoPersistenciaSistema — la ranura en blanco exorcizada con NOMBRE COSIDO) · LA CORONA FANTASMA curada (VFXCore.Quad solo acumula: sin Flush, NUNCA se dibuja).
+
+**La era v6.177**: EL PARTIDO DE LOS GIGANTES (AuraLib/AethonBoss/AtaqueJefe partidos sin tocar comportamiento) · LA BARRA QUE LLEGA DE VERDAD (ModifyInfo devuelve true — §4.2.1) · LA ASPIRADORA UNIVERSAL (EL VIGÍA del OnSpawn: la 2ª invocación en TODAS partes) · LA PUERTA SIEMPRE ABIERTA (InteriorInvocaGlobalItem) · LA ESCALERA SIN TECHO (nivel 1+kills sin tope, movimientos por tramo) · LAS VOLEAS TEMÁTICAS VANILLA (ProyectilTematico) · EL VISOR DEL PROYECTADO (el .tmod de Chopilas como plano: mecánica y espíritu, material de la casa) · EL ECLIPSE QUE BARRE (el ataque del Faro rediseñado) · LA PURGA DEL EN-US (paridad 1900=1900).
 
 **La era v6.176**: LA ASPIRADORA QUE ESPERA (la vigilias de 5 s de la letra + el trago simultáneo) · EL GUSANO QUE CALLA (CongeladoPorAspiradora) · EL ARMA DEL CÍCLOPE (ProyecciónDelCiclope) · LAS TIJERAS DEL LIBRO (nada desborda el papel) · LA PURGA DEL EN (194→0) · EL AZAR SEMBRADO (7 llamadas reales) · R21/R22 en el MAESTRO.
 

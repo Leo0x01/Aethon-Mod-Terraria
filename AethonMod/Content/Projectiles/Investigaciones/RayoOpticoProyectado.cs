@@ -178,6 +178,37 @@ namespace AethonMod.Content.Projectiles.Investigaciones
         public override bool PreDraw(ref Color lightColor)
         {
             if (Main.netMode == NetmodeID.Server) return false;
+            // v6.178 — EL RAYO DE VERDAD (la letra: «debes copiar su
+            // tecnica»): las seis capas del plano decompilado del arma
+            // real — envolventes + el cuerpo que FLUYE en tramos alineados
+            // + los bordes que arden — con la casa entera: texturas
+            // propias, determinismo y el lote aditivo (R21).
+            if (HazProyectadoLib.TexturasVivas)
+            {
+                VFXCore.AbrirAdditive();
+                try
+                {
+                    HazProyectadoLib.Parametros p = default;
+                    p.Inicio = Projectile.Center - Main.screenPosition;
+                    p.Direccion = Projectile.velocity.SafeNormalize(Vector2.UnitX);
+                    p.Largo = Largo;
+                    p.Ancho = AnchoBase;
+                    p.Tiempo = Tiempo;
+                    p.Intensidad = Encendido();
+                    p.Destello = 0.6f + 0.4f * Encendido();
+                    p.Impacto = _impacto;
+                    p.VelocidadFlujo = 8f;
+                    p.Ondulacion = 0.45f;
+                    p.Turbulencia = 0f;
+                    p.Colores = new HazProyectadoLib.Paleta
+                    { Exterior = Exterior, Medio = Medio, Nucleo = Nucleo };
+                    HazProyectadoLib.Dibujar(p);
+                }
+                finally { VFXCore.RestaurarLoteVanilla(); }
+                return false;
+            }
+            // EL FALLBACK DE LA CASA (las texturas tardan un frame): la
+            // pila de siempre — el arma JAMÁS se rompe.
             Vector2[] pts = PolylineDelHaz(Projectile.Center - Main.screenPosition,
                 Projectile.velocity, Largo, Tiempo, Projectile.whoAmI, amplitud: 0.45f, largoOnda: 42f);
             DibujarHaz(pts, AnchoBase, Encendido() * 0.6f + 0.4f, Exterior, Medio, Nucleo,
