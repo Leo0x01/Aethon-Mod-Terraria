@@ -447,7 +447,7 @@ namespace AethonMod.Content.Globals
                     var sp = portador.GetModPlayer<Players.ShardPlayer>();
                     if (sp != null) nivel = Math.Max(0, sp.NivelGrimorioPublico);
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FaucesGlobalNPC", exRegistro); }
                 int despertar = 0;
                 try
                 {
@@ -458,7 +458,7 @@ namespace AethonMod.Content.Globals
                         if (alma != null) despertar = Math.Max(0, alma.NivelDespertar);
                     }
                 }
-                catch { }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FaucesGlobalNPC", exRegistro); }
                 int n = 1 + nivel / 30 + despertar / 20;
                 return Math.Max(1, Math.Min(8, n));
             }

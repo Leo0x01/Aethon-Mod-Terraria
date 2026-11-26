@@ -379,7 +379,7 @@ namespace AethonMod.Content.Projectiles.Regla
             catch (System.Exception exRegistro)
             {
                 global::AethonMod.Content.Systems.RegistroSistema.Fallo("SakugaDelCielo", exRegistro);
-                try { VFXCore.CerrarLoteSiAbierto(); } catch { }
+                try { VFXCore.CerrarLoteSiAbierto(); } catch (System.Exception exLote) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SakugaDelCielo", exLote); }
             }
             return false;
         }

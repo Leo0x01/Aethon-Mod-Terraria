@@ -487,7 +487,7 @@ namespace AethonMod.Content.Globals
             catch (System.Exception exRegistro)
             {
                 global::AethonMod.Content.Systems.RegistroSistema.Fallo("JefeInteriorGlobalNPC", exRegistro);
-                try { AuraLib.ReabrirLoteVanilla(); } catch { }
+                try { AuraLib.ReabrirLoteVanilla(); } catch (System.Exception exLote) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LoteDeSombra", exLote); }
             }
         }
 

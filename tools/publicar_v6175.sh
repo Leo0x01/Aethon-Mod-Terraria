@@ -11,7 +11,9 @@ MD5=$(md5sum "$TMOD" | cut -d' ' -f1)
 echo "[1/5] md5: $MD5"
 
 URL=$(git config --get remote.origin.url)
-PAT=${URL#*//}
+# v6.175: el PAT es SOLO el token (la URL es https://user:token@github.com/…)
+PAT=${URL#*://}
+PAT=${PAT#*:}
 PAT=${PAT%@*}
 REPO="Leo0x01/Aethon-Mod-Terraria"
 

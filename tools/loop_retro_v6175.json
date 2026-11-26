@@ -1,9 +1,9 @@
 {
  "cs_archivos": 472,
  "cs_lineas": 193224,
- "catch_vacio": 6,
+ "catch_vacio": 0,
  "catch_total": 1124,
- "catch_registrado": 701,
+ "catch_registrado": 707,
  "rand_en_dibujo": 10,
  "alloc_en_dibujo": 8,
  "rand_top": {
@@ -20,10 +20,10 @@
  "vfx_archivos": 77,
  "vfx_lineas": 48895,
  "loc_es": 1841,
- "loc_en": 2026,
- "loc_faltan_en": 2,
- "loc_faltan_es": 187,
- "loc_en_igual_es": 1279,
+ "loc_en": 2035,
+ "loc_faltan_en": 0,
+ "loc_faltan_es": 194,
+ "loc_en_igual_es": 1280,
  "claves_faltantes_es": [
   "Altar.",
   "Armas.DagaInvocada",
@@ -43,7 +43,7 @@
   "Pergamino."
  ],
  "claves_faltantes_es_n": 16,
- "png_n": 513,
+ "png_n": 512,
  "png_invalidos": [],
  "_fuente": "loop_retro_v6175.py"
 }

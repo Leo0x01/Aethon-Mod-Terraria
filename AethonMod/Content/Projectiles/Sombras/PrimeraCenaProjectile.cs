@@ -681,13 +681,13 @@ namespace AethonMod.Content.Projectiles.Sombras
                         SombrasLib.OndaChoque(posMundo, 40f + 260f * (t - T_CIERRE) / 10f, 0.55f * snap);
                 }
             }
-            catch { }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PrimeraCena", exRegistro); }
             VFXCore.FlushAdditive();
         }
 
         private static void Sonar(Terraria.Audio.SoundStyle estilo, Vector2 pos)
         {
-            try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); } catch { }
+            try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("PrimeraCena", exRegistro); }
         }
 
         /// <summary>El masticar del festín: abre… ¡CIERRA de golpe! …mastica… abre.</summary>
