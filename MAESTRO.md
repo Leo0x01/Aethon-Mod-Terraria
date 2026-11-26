@@ -17,7 +17,7 @@
 | **Qué es** | Mod de contenido masivo para **Terraria** vía **tModLoader 2026.09.3.1** |
 | **Lenguaje** | C# (.NET 8, `net8.0`, LangVersion latest) |
 | **Repo** | `https://github.com/Leo0x01/Aethon-Mod-Terraria` (privado durante el desarrollo) |
-| **Versión actual** | **6.175** (vive en `AethonMod/build.txt`, línea `version = 6.175`) |
+| **Versión actual** | **6.176** (vive en `AethonMod/build.txt`, línea `version = 6.176`) |
 | **Última release** | [v6.146](https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/tag/v6.146) — md5 `a5fa29117116c8d8c1e0dfad4991819d`, 19.400.025 B, 528 entradas |
 | **Licencia** | Propietaria — © 2026 Leo0x01. VER README §AVISO LEGAL. Nada de terceros. |
 | **Idiomas** | Código y comentarios en **español**; localización del juego en es-MX (primario), es-ES, en-US |
@@ -107,6 +107,8 @@ Detalles de cada paso:
 | R18 | **Música/texturas/sonidos = generados por código de la casa** (numpy/PIL) | Cero derechos de terceros |
 | R19 | **NINGÚN «catch { }» vacío vuelve a nacer (v6.175)**: todo catch registra (`RegistroSistema.Fallo`) o devuelve. El silencio costó la v6.173 (botones muertos sin pista). El gate mide: `loop_retro_v6175.py` marca regresión si suben de 0 | El loop de retroalimentación |
 | R20 | **EL LOOP DE RETROALIMENTACIÓN corre antes de cada release** (`tools/loop_retro_v6175.py`): mide catches vacíos · azar en el dibujo · claves de loc · PNGs y COMPARA con la medición anterior | medir → comparar → arreglar |
+| R21 | **EL PREQUEL DEL PREDRAW** (v6.176, la lección de los dos crashes del client.log — 42.000 frames de «Draw was called, but Begin has not yet been called»): TODO PreDraw/PostDraw que dibuja DIRECTO con `Main.spriteBatch.Draw` abre SU lote con `VFXCore.AbrirAdditive()` (o un `Begin` propio) y sale con `VFXCore.RestaurarLoteVanilla()` — JAMÁS un Draw tras un `End` sin `Begin`. El oráculo NO caza los errores de estado de dibujo: solo el patrón los evita | Los dos crashes nacieron el mismo día que el patrón se escribió: la regla es el único antídoto |
+| R22 | **EL AZAR DEL DIBUJO SE SIEMBRA** (v6.176, la letra: «semilla fija por entidad (whoAmI·edad), como ya hace TentaculoCosmico»): el polvo decorativo que nace DENTRO del dibujo usa `VFXCore.Hash01(whoAmI·edad, a, b)` — NUNCA `Main.rand` en PreDraw/PostDraw. El loop mide SOLO código (los comentarios no cuentan) | R5 medido y blindado |
 
 ### 1.4 Estilo del código
 
@@ -497,6 +499,8 @@ REANIMACIÓN) · `guardian_v6123.py` · `audit_v6123_tmod.py` · `test_fna_png`
 · `test_nvorbis` (tests de formato) · cirugías sueltas.
 
 ## 9 · CRONOLOGÍA (38 versiones — la letra de cada una en CHANGES.md)
+
+**La era v6.176**: LA ASPIRADORA QUE ESPERA (la vigilias de 5 s de la letra + el trago simultáneo) · EL GUSANO QUE CALLA (CongeladoPorAspiradora) · EL ARMA DEL CÍCLOPE (ProyecciónDelCiclope) · LAS TIJERAS DEL LIBRO (nada desborda el papel) · LA PURGA DEL EN (194→0) · EL AZAR SEMBRADO (7 llamadas reales) · R21/R22 en el MAESTRO.
 
 **La era actual (v6.12x-135, el Mundo Interior y las alas)**: v6.116 LA
 MÁSCARA DEL PRISMA → v6.117 EL TRAGO DE VERDAD → v6.118 EL CUERPO DEL DIOS

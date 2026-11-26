@@ -93,6 +93,15 @@ namespace AethonMod.Content.Globals
         // === EL ESTADO (por NPC) ===
         /// <summary>0 = normal · 1 = DEVORADO (congelado en 1 HP) · 2 = muerte real ya ejecutada · 3 = LA PRIMERA CENA (el festín del primer jefe).</summary>
         public byte DevorarEstado;
+
+        /// <summary>v6.176 — EL CONGELADO DE LA ASPIRADORA: el cine
+        /// espacial del Devorador congela al gusano SIN pasar por el
+        /// motor del festín (la letra: «en el momento en el que
+        /// empiezan a ser devorados ellos deben dejar de lanzar
+        /// proyectiles»): la aspiradora lo pone al capturar y lo quita
+        /// al terminar — o al morir el cine a medias (jamás un gusano
+        /// zombi: DescongelarAspiradora barre el mundo entero).</summary>
+        public bool CongeladoPorAspiradora;
         /// <summary>3 = sombra de la página (v6.50.72) · 4 = LA PRIMERA CENA de la .110.</summary>
         public byte DevorarEstilo;
         /// <summary>El reloj del festín (el motor lo alimenta en server; el cliente lo cuenta local).</summary>
@@ -483,6 +492,28 @@ namespace AethonMod.Content.Globals
             catch { return false; }
         }
 
+        /// <summary>v6.176 — EL DESCONGELADO: la aspiradora terminó (o
+        /// murió a medias — el cine interrumpido) — NINGÚN gusano queda
+        /// congelado para siempre. Barre el mundo entero: el flag es de
+        /// un solo cine a la vez.</summary>
+        public static void DescongelarAspiradora()
+        {
+            try
+            {
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    NPC n = Main.npc[i];
+                    if (n == null || !n.active) continue;
+                    if (n.TryGetGlobalNPC<FaucesGlobalNPC>(out var g) && g.CongeladoPorAspiradora)
+                    {
+                        g.CongeladoPorAspiradora = false;
+                        n.netUpdate = true;
+                    }
+                }
+            }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FaucesGlobalNPC", exRegistro); }
+        }
+
         public static void ArrancarPrimeraCena(NPC jefe, Player portador)
         {
             if (jefe == null || !jefe.active || portador == null) return;
@@ -781,6 +812,24 @@ namespace AethonMod.Content.Globals
             if (_cenaActiva >= 0 &&
                 (_cenaActiva >= Main.maxNPCs || Main.npc[_cenaActiva] is not { active: true }))
                 _cenaActiva = -1;
+
+            // === v6.176 — EL CONGELADO DE LA ASPIRADORA (la letra:
+            //     «mientras los jefes estan siendo devorados por el
+            //     grimorio del eterno siguen lanzando proyectiles de
+            //     jefes, en el momento en el que empiezan a ser
+            //     devorado ellos deben dejar de lanzar proyectiles»):
+            //     la pieza en el cine espacial NI PIENSA — ni IA, ni
+            //     animación, ni UN solo proyectil: solo la posición que
+            //     el motor del cine dicta. Va PRIMERO: nada de
+            //     guardianes, cenas ni gatillos para un preso del
+            //     cine. ===
+            if (CongeladoPorAspiradora && npc.active)
+            {
+                npc.velocity *= 0f;
+                npc.damage = 0;
+                if (npc.lifeRegen < 0) npc.lifeRegen = 0;
+                return false;
+            }
 
             // === v6.50.115 — EL GUARDIÁN DE LA MAZMORRA NO CRUZA (el
             //     easter egg de la letra: «en su fase de guardián… el

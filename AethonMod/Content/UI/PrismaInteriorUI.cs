@@ -260,7 +260,7 @@ namespace AethonMod.Content.UI
                             ModContent.ProjectileType
                                 <global::AethonMod.Content.Projectiles.Sombras.AspiradoraDevoradorProjectile>(),
                             0, 0f, Main.myPlayer, idx, yo.whoAmI);
-                        if (p >= 0) Main.projectile[p].timeLeft = 420;
+                        if (p >= 0) Main.projectile[p].timeLeft = 700;   // v6.176: el cine nuevo dura más (vigilia de 5 s + flotación + trago)
                     }
                 }
             }

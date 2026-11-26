@@ -126,7 +126,10 @@ def medir():
                     if prof == 0:
                         break
                 j += 1
-            cuerpo = t[k:j]
+            # v6.176 — LA MEDIDA HONESTA: el cuerpo se LIMPIA DE
+            # COMENTARIOS antes de contar (3 de las 10 «llamadas» de la
+            # auditoría eran documentación: «jamás Main.rand en render»).
+            cuerpo = limpiar_comentarios(t[k:j])
             nr = cuerpo.count('Main.rand')
             na = len(re.findall(r'new\s+[A-Za-z_.]+\[', cuerpo))
             if nr:

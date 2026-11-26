@@ -98,6 +98,35 @@ namespace AethonMod.Content.Players
             }
             catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TestingPlayer", exRegistro); }
 
+            // ==============================================================
+            //  v6.176 — EL ARMA DEL CÍCLOPE PROYECTADO, DIRECTO A LA MANO
+            //  (la letra: «si creaste algo de esto Cíclope Proyectado,
+            //  debes darselo al jugador directamente, ademas lo que se
+            //  tenia que crear era un arma»): la Proyección del Cíclope
+            //  nace en el inventario del portador al entrar al mundo —
+            //  SIEMPRE que no la lleve (una por jugador).
+            // ==============================================================
+            try
+            {
+                int tipoCiclope = ModContent.ItemType
+                    <global::AethonMod.Content.Weapons.Investigaciones.ProyeccionDelCiclope>();
+                bool llevaCiclope = false;
+                for (int k = 0; k < 58; k++)
+                {
+                    Item it = Player.inventory[k];
+                    if (it != null && !it.IsAir && it.type == tipoCiclope) { llevaCiclope = true; break; }
+                }
+                if (!llevaCiclope)
+                {
+                    Player.QuickSpawnItem(Player.GetSource_FromThis(), tipoCiclope, 1);
+                    if (Player.whoAmI == Main.myPlayer && !Main.dedServ)
+                        Main.NewText(Terraria.Localization.Language.GetTextValue(
+                                "Mods.AethonMod.Ira.CiclopeEntregado"),
+                            new Microsoft.Xna.Framework.Color(255, 140, 220));
+                }
+            }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TestingPlayer", exRegistro); }
+
             // v6.50.10 — ARMADURA: PlayerLoader.OnEnterWorld NO envuelve el
             // hook en try/catch (IL-verificado contra el tML 2026.07.3.0 —
             // a diferencia de SaveData/LoadData) y este cuerpo muta el

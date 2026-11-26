@@ -457,14 +457,21 @@ namespace AethonMod.Content.NPCs
                         NPC.whoAmI * 17 + 57, -deriva * 0.6f);
                     // LAS MOTAS DE TINTA (las 2 de siempre, ahora nacen
                     // DENTRO de la bruma — la firma del escriba)
+                    // v6.176 — EL AZAR SEMBRADO (R5 — la letra de la
+                    // sesión: «semilla fija por entidad (whoAmI·edad),
+                    // como ya hace TentaculoCosmico»): la mota nace con SU
+                    // valor FIJO — semilla = entidad · cubo de nacimiento
+                    // (GameUpdateCount/14): la misma mota en todas las
+                    // máquinas, sin re-tirar nada por frame.
                     if ((Main.GameUpdateCount + NPC.whoAmI) % 14f == 0f)
                     {
+                        int semMota = NPC.whoAmI * 31 + (int)(Main.GameUpdateCount / 14f) * 17 + 5;
                         Vector2 cuna = NPC.BottomLeft + new Vector2(
-                            Main.rand.NextFloat(NPC.width), 0f);
+                            VFXCore.Hash01(semMota, 1, 977) * NPC.width, 0f);
                         Dust d = Dust.NewDustPerfect(cuna,
                             ModContent.DustType<global::AethonMod.Content.Dusts.PolvoVacioInvertido>(),
-                            new Vector2(Main.rand.NextFloat(-0.2f, 0.2f), -0.5f),
-                            0, new Color(140, 90, 200), Main.rand.NextFloat(0.22f, 0.34f));
+                            new Vector2((VFXCore.Hash01(semMota, 2, 979) - 0.5f) * 0.4f, -0.5f),
+                            0, new Color(140, 90, 200), 0.22f + 0.12f * VFXCore.Hash01(semMota, 3, 983));
                         d.noGravity = true;
                     }
                 }

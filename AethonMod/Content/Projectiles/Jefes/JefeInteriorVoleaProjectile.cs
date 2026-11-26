@@ -151,7 +151,13 @@ namespace AethonMod.Content.Projectiles.Jefes
             int tema = Math.Clamp((int)Projectile.ai[1], 0, Temas.Length - 1);
             var (nucleo, halo, rayo) = Temas[tema];
 
-            VFXCore.CerrarLoteSiAbierto();
+            // v6.176 — EL LOTE DE LA CASA (la cura del crash del
+            // client.log: «Draw was called, but Begin has not yet been
+            // called» ×42.000 frames — la volea cerraba el lote de
+            // vanilla y dibujaba SIN abrir el suyo). Ahora abre SU lote
+            // aditivo (R6) y sale con RestaurarLoteVanilla — LA SALIDA
+            // correcta de todo PreDraw que dibuja directo.
+            VFXCore.AbrirAdditive();
             try
             {
                 // LA ESTELA (tres fantasmas del camino recorrido)
@@ -187,7 +193,7 @@ namespace AethonMod.Content.Projectiles.Jefes
             {
                 global::AethonMod.Content.Systems.RegistroSistema.Fallo("JefeInteriorVolea", exRegistro);
             }
-            VFXCore.ReabrirLoteVanilla();
+            VFXCore.RestaurarLoteVanilla();   // cierra NUESTRO aditivo y reabre el de vanilla
             return false;
         }
     }

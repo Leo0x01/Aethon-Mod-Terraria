@@ -746,9 +746,34 @@ namespace AethonMod.Content.UI
                 // (la MISMA matriz del pase — el decompile lo prueba: el
                 // bucle de layers corre bajo _uiScaleMatrix) + recorte
                 // con RasterizerState.ScissorTest para las columnas.
+                // v6.176 — EL PASE CON TIJERAS: el cuerpo del libro corre
+                // recortado a las DOS PÁGINAS — lo que no cabe en el
+                // papel NO SE DIBUJA (la letra: «los textos… se
+                // desbordan, especialmente en los botones»). El recorte
+                // se mide en píxeles de pantalla (la matriz de UI
+                // aplicada a las esquinas de las páginas).
                 sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend,
                     SamplerState.LinearClamp, DepthStencilState.None,
-                    RasterizerState.CullNone, null, Main.UIScaleMatrix);
+                    LibroMarco.Tijeras, null, Main.UIScaleMatrix);
+                try
+                {
+                    Vector2 cTL = Vector2.Transform(new Vector2(
+                        Math.Min(pagIzq.X, pagDer.X), Math.Min(pagIzq.Y, pagDer.Y)), Main.UIScaleMatrix);
+                    Vector2 cBR = Vector2.Transform(new Vector2(
+                        Math.Max(pagIzq.Right, pagDer.Right), Math.Max(pagIzq.Bottom, pagDer.Bottom)), Main.UIScaleMatrix);
+                    var recortePag = new Rectangle((int)cTL.X, (int)cTL.Y,
+                        (int)(cBR.X - cTL.X) + 2, (int)(cBR.Y - cTL.Y) + 2);
+                    var vpPag = sb.GraphicsDevice.Viewport.Bounds;
+                    if (recortePag.X < vpPag.X) { recortePag.Width -= vpPag.X - recortePag.X; recortePag.X = vpPag.X; }
+                    if (recortePag.Y < vpPag.Y) { recortePag.Height -= vpPag.Y - recortePag.Y; recortePag.Y = vpPag.Y; }
+                    if (recortePag.Right > vpPag.Right) recortePag.Width = vpPag.Right - recortePag.X;
+                    if (recortePag.Bottom > vpPag.Bottom) recortePag.Height = vpPag.Bottom - recortePag.Y;
+                    if (recortePag.Width < 0) recortePag.Width = 0;
+                    if (recortePag.Height < 0) recortePag.Height = 0;
+                    if (recortePag.Width > 0 && recortePag.Height > 0)
+                        sb.GraphicsDevice.ScissorRectangle = recortePag;
+                }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LibroDelEternoUI", exRegistro); }
 
                 // ============================================================
                 //  v6.163 — EL CUERPO SEGÚN LA PESTAÑA: 0 = EL ÍNDICE DE
@@ -826,6 +851,12 @@ namespace AethonMod.Content.UI
                 //  la TAPA (el sitio universal del cierre): DIBUJO y
                 //  HITBOX son EL MISMO rectángulo de 30×30.
                 // ============================================================
+                // v6.176 — LAS TIJERAS SE GUARDAN: la X de la tapa y el
+                // selector flotante viven FUERA de las páginas (la tapa
+                // y el aire) — el recorte vuelve a la pantalla entera.
+                try { sb.GraphicsDevice.ScissorRectangle = sb.GraphicsDevice.Viewport.Bounds; }
+                catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LibroDelEternoUI", exRegistro); }
+
                 var rectX = new Rectangle(x + w - 38, y + 6, 30, 30);
                 bool hoverX = rectX.Contains(Main.mouseX, Main.mouseY);
                 // v6.152 — LA X DIBUJADA ES SU HITBOX (la letra: «el
@@ -1204,7 +1235,7 @@ namespace AethonMod.Content.UI
         private static readonly Color Tinta = new(28, 20, 16);
         private static readonly Color TintaVioleta = new(148, 72, 178);
         private static readonly Color TintaOro = new(168, 108, 44);
-        private static readonly Color TintaApagado = new(118, 96, 70);
+        private static readonly Color TintaApagado = new(82, 60, 40);   // v6.176: oscurecido (leía claro sobre el papel)
         private static readonly Color TintaRojo = new(140, 40, 40);
         private static readonly Color PapelSombra = new(190, 172, 134);
 
@@ -1254,6 +1285,9 @@ namespace AethonMod.Content.UI
             sb.Draw(TextureAssets.MagicPixel.Value, b,
                 (hov ? cBase : new Color(cBase.R * 2 / 3, cBase.G * 2 / 3, cBase.B * 2 / 3)) * (hov ? 0.30f : 0.15f));
             LibroMarco.Marco(sb, b, apagado ? TintaApagado * 0.5f : (hov ? cBase : cBase * 0.55f));
+            // v6.176 — EL BOTÓN JAMÁS REBOSA (re-medida al momento del
+            // trazo — la ventana de la fuente dinámica se cierra aquí)
+            esc = LibroLineas.EscalaQueCabe(t ?? "", esc, 206f);
             LibroLineas.Texto(sb, t ?? "", new Vector2(b.Center.X, b.Center.Y),
                 apagado ? TintaApagado : Tinta, esc, 0.5f, 0.5f);
             if (hov && clicNuevo) alClic?.Invoke();
@@ -1449,9 +1483,14 @@ namespace AethonMod.Content.UI
             bool hovM = marca.Contains(Main.mouseX, Main.mouseY);
             Rectangle txtMarca = new Rectangle(marca.Right + 8, marca.Y - 3, 282, 28);
             bool hovTxt = txtMarca.Contains(Main.mouseX, Main.mouseY);
-            sb.Draw(TextureAssets.MagicPixel.Value, marca, marcada ? TintaVioleta * 0.30f : PapelSombra * 0.9f);
+            // v6.176 — EL CHECKLIST UNIFORME (la letra: «el marcador del
+            // checklis que dice que se usan las 3 armas esta mal,
+            // deberia ser igual a los otros checklis donde el cuadrito
+            // se pinta de morado»): la palomita MUERE — la casilla vive
+            // EXACTAMENTE como las del albedrío: el cuadradito se
+            // RELLENA de morado, sin símbolo encima.
+            sb.Draw(TextureAssets.MagicPixel.Value, marca, marcada ? TintaVioleta * 0.85f : PapelSombra * 0.9f);
             LibroMarco.Marco(sb, marca, marcada || hovM ? TintaVioleta : TintaApagado * 0.6f);
-            if (marcada) LibroMarco.Palomita(sb, marca, TintaVioleta);
             LibroLineas.Texto(sb, At("TrioMarcaTexto"), new Vector2(marca.Right + 8, marca.Center.Y),
                 marcada ? TintaVioleta : hovTxt ? Tinta : TintaApagado, 0.82f, 0f, 0.5f);
             if ((hovM || hovTxt) && (clicNuevo || clicDerNuevo) && !selectorVivo)
@@ -1610,8 +1649,15 @@ namespace AethonMod.Content.UI
             if (string.IsNullOrEmpty(texto)) return Vector2.Zero;
             Vector2 origen = fuente.MeasureString(texto) * new Vector2(ax, ay);
             Vector2 p = pos - origen;
-            Color halo = new Color(255, 250, 236);
-            const float o = 1.1f;
+            // v6.176 — EL HALO MANSO (la letra: «el color de los textos
+            // es demasiado claro en la ventana del pilar y el altar»):
+            // el contorno blanco era GRUESO constante — a las escalas
+            // menudas de los controles (0.45-0.88) el borde COMÍA el
+            // glifo y la tinta leía clara. Ahora el grosor ESCALA con
+            // el texto y el blanco pierde un punto de alfa: separa, no
+            // lava.
+            Color halo = new Color(255, 250, 236) * 0.82f;
+            float o = Math.Clamp(esc * 1.15f, 0.55f, 1.1f);
             sb.DrawString(fuente, texto, p + new Vector2(o, 0f), halo, 0f, Vector2.Zero, esc, SpriteEffects.None, 0f);
             sb.DrawString(fuente, texto, p + new Vector2(-o, 0f), halo, 0f, Vector2.Zero, esc, SpriteEffects.None, 0f);
             sb.DrawString(fuente, texto, p + new Vector2(0f, o), halo, 0f, Vector2.Zero, esc, SpriteEffects.None, 0f);
@@ -1634,6 +1680,15 @@ namespace AethonMod.Content.UI
     /// las páginas vivas de las pestañas nuevas) y la palomita de la casa.</summary>
     internal static class LibroMarco
     {
+        /// <summary>v6.176 — LAS TIJERAS del libro: el rasterizador con
+        /// recorte para el pase del cuerpo — el papel manda (nada
+        /// desborda la página; la letra: «los textos en la ventana del
+        /// pilar y el altar se desbordan, especialmente en los
+        /// botones»).</summary>
+        internal static readonly Microsoft.Xna.Framework.Graphics.RasterizerState Tijeras =
+            new Microsoft.Xna.Framework.Graphics.RasterizerState
+            { CullMode = Microsoft.Xna.Framework.Graphics.CullMode.None, ScissorTestEnable = true };
+
         public static void Marco(SpriteBatch sb, Rectangle r, Color c)
         {
             var px = TextureAssets.MagicPixel.Value;
@@ -1689,7 +1744,7 @@ namespace AethonMod.Content.UI
         private static readonly Color Tinta = new(28, 20, 16);
         private static readonly Color TintaVioleta = new(148, 72, 178);
         private static readonly Color TintaOro = new(168, 108, 44);
-        private static readonly Color TintaApagado = new(118, 96, 70);
+        private static readonly Color TintaApagado = new(82, 60, 40);   // v6.176: oscurecido (leía claro sobre el papel)
         private static readonly Color TintaRojo = new(140, 40, 40);
         private static readonly Color PapelSombra = new(216, 200, 166);
 
@@ -1742,6 +1797,11 @@ namespace AethonMod.Content.UI
             sb.Draw(TextureAssets.MagicPixel.Value, b,
                 (hov ? cBase : new Color(cBase.R * 2 / 3, cBase.G * 2 / 3, cBase.B * 2 / 3)) * (hov ? 0.30f : 0.15f));
             LibroMarco.Marco(sb, b, apagado ? TintaApagado * 0.5f : (hov ? cBase : cBase * 0.55f));
+            // v6.176 — EL BOTÓN JAMÁS REBOSA: re-medida AL MOMENTO DEL
+            // TRAZO (la fuente MouseText de vanilla es dinámica — puede
+            // crecer entre la medida y el dibujo; medir pegado al trazo
+            // cierra la ventana y las tijeras del pase lo blindan).
+            esc = LibroLineas.EscalaQueCabe(txt, esc, 206f);
             LibroLineas.Texto(sb, txt, new Vector2(b.Center.X, b.Center.Y),
                 apagado ? TintaApagado : Tinta, esc, 0.5f, 0.5f);
             if (hov && clicNuevo) alClic?.Invoke();

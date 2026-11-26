@@ -700,15 +700,23 @@ namespace AethonMod.Content.Weapons.Definitivas
 
                     // LA ESTELA DE LA CAZA: migas de luz dorada→roja que el
                     // sol deja mientras persigue (la historia del vuelo)
-                    if (!Main.dedServ && Main.rand.NextBool(2))
+                    // v6.176 — EL AZAR SEMBRADO (R5): la miga nace (o no)
+                    // con Hash01, y SU ángulo/radio/empuje nacen de la
+                    // MISMA semilla — semilla = entidad (whoAmI) · edad
+                    // (_t): cada máquina ve la MISMA estela.
+                    if (!Main.dedServ)
                     {
-                        float ang = Main.rand.NextFloat(MathHelper.TwoPi);
-                        Dust d = Dust.NewDustPerfect(_centroCaza + ang.ToRotationVector2() *
-                            (r * (0.7f + 0.5f * Main.rand.NextFloat())),
-                            DustID.GoldFlame,
-                            -ang.ToRotationVector2() * Main.rand.NextFloat(0.8f, 2.2f), 0,
-                            Color.Lerp(new Color(255, 226, 150), new Color(255, 90, 40), rg), 1.1f);
-                        d.noGravity = true;
+                        int semMiga = Projectile.whoAmI * 29 + (int)_t;
+                        if (VFXCore.Hash01(semMiga, 4, 701) < 0.5f)
+                        {
+                            float ang = VFXCore.Hash01(semMiga, 1, 703) * MathHelper.TwoPi;
+                            Dust d = Dust.NewDustPerfect(_centroCaza + ang.ToRotationVector2() *
+                                (r * (0.7f + 0.5f * VFXCore.Hash01(semMiga, 2, 707))),
+                                DustID.GoldFlame,
+                                -ang.ToRotationVector2() * (0.8f + 1.4f * VFXCore.Hash01(semMiga, 3, 709)), 0,
+                                Color.Lerp(new Color(255, 226, 150), new Color(255, 90, 40), rg), 1.1f);
+                            d.noGravity = true;
+                        }
                     }
 
                     // EL ARO QUE CAE (la firma de la carga vieja, ahora

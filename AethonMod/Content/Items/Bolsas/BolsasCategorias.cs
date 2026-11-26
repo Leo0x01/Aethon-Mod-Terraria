@@ -963,6 +963,9 @@ namespace AethonMod.Content.Items.Bolsas
             // v6.175 — EL ECO PROYECTADO (la llamada del Cíclope Proyectado
             // — la recreación del vídeo «Me Proyecte» de Chopilas).
             l.Add((ModContent.ItemType<Items.NPCs.EcoProyectado>(), 3));
+            // v6.176 — EL ARMA DEL CÍCLOPE (la letra: «lo que se tenia
+            // que crear era un arma» — la proyección del ojo).
+            l.Add((ModContent.ItemType<Weapons.Investigaciones.ProyeccionDelCiclope>(), 1));
             // v6.86 — R5 — EL ALTAR DE OFRENDAS (el altar que consagra
             // la ofrenda por el Eterno).
             l.Add((ModContent.ItemType<Items.Altar.AltarOfrendasItem>(), 1));

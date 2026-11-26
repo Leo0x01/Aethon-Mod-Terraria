@@ -13,6 +13,13 @@ Items: {
 		Tooltip: Hold the use button — half a second of charge, then the beam follows the cursor up to 900 px
 	}
 
+	// v6.176 — THE CYCLOPS' WEAPON (the letter: what had to be built
+	// was a weapon — the eye projection of the video).
+	ProyeccionDelCiclope: {
+		DisplayName: Cyclops Projection
+		Tooltip: The Cyclops' eye projects over you: twelve beats of screaming, then the magenta ray fires — infinite pierce
+	}
+
 	// v6.170 — THE THRESHOLD CLICKER DIED (la letra: «esta
 	// horrible, lo puedes borrar»): claves extirpadas.
 	// v6.168 — THE NEW WEAPON (the vertical lines)
@@ -2757,6 +2764,7 @@ Ira: {
 	AvisoOjos: The Wrath needs the full squad: {0} awakened eyes (you have {1}).
 	SombrasConcentradas: The grimoire concentrates {0} page shadows on the prey — the bite tightens ×{1}.
 	FaroEntregado: The Lighthouse of the Eclipse shines in your inventory — the Eternal hands it over for you to test it.
+	CiclopeEntregado: The Cyclops Projection opens its eye in your inventory — the video's weapon, delivered for you to test.
 }
 
 Llamado: {
@@ -3890,9 +3898,6 @@ Pergamino: {
 	TituloPaginaInfo: Information
 	TituloPaginaLore: Lore
 	// v6.163 — THE BOOK'S TABS (the grimoire is the center)
-	PestanaIndice: INDEX
-	PestanaAltar: ALTAR
-	PestanaPilar: PILLAR
 	// v6.160 — THE ETERNAL CODEX (the canonical document, translated;
 	// the prologue, the eleven chapters and the epilogue — each opens
 	// with the Awakening (canon is EARNED).
@@ -4258,12 +4263,12 @@ Projectiles: {
 	AuraJuicio2Ancla.DisplayName: Aura Juicio2 Ancla
 	CoronaDePlumasProjectile.DisplayName: Corona De Plumas Projectile
 	DerrameDeTintaProjectile.DisplayName: Derrame De Tinta Projectile
-	// ClickerGolpeProjectile.DisplayName: Clicker Golpe Projectile
 	AethonMenorOscuroPet.DisplayName: Aethon Menor Oscuro Pet
 	AethonMenorPet.DisplayName: Aethon Menor Pet
 	AlasAuroraHalo.DisplayName: Alas Aurora Halo
 	AnilloRunicoDorsalHalo.DisplayName: Anillo Runico Dorsal Halo
 	AnillosSolaresHalo.DisplayName: Anillos Solares Halo
+	AnillosSolRunicoHalo.DisplayName: Anillos Sol Runico Halo
 	AuraPortadorHalo.DisplayName: Aura Portador Halo
 	BrilloSolarHalo.DisplayName: Brillo Solar Halo
 	EscupidizoProjectile.DisplayName: Escupidizo Projectile
@@ -4384,8 +4389,14 @@ Projectiles: {
 	LaUltimaPalabraProjectile.DisplayName: La Ultima Palabra Projectile
 	RayoConcentradoDosProjectile.DisplayName: Rayo Concentrado Dos Projectile
 	RayosPruebaProjectile.DisplayName: Rayos Prueba Projectile
+	PalabraCortadaProjectile.DisplayName: Palabra Cortada Projectile
+	PortalTrioProjectile.DisplayName: Portal Trio Projectile
+	TrioRescoldoProjectile.DisplayName: Trio Rescoldo Projectile
+	FaroDelEclipseHaz.DisplayName: Faro Del Eclipse Haz
+	ProyeccionCiclopeRayo.DisplayName: Proyeccion Ciclope Rayo
 	AtaqueFusionProjectile.DisplayName: Ataque Fusion Projectile
 	AtaqueJefeProjectile.DisplayName: Ataque Jefe Projectile
+	JefeInteriorVoleaProjectile.DisplayName: Jefe Interior Volea Projectile
 	JefeMiradaCieloProj.DisplayName: Jefe Mirada Cielo Proj
 	JefeMiradaProj.DisplayName: Jefe Mirada Proj
 	JefePruebaCProj.DisplayName: Jefe Prueba C Proj
@@ -4395,20 +4406,19 @@ Projectiles: {
 	LlegadaBrumaProjectile.DisplayName: Llegada Bruma Projectile
 	GrimorioNerviosoFlotante.DisplayName: Grimorio Nervioso Flotante
 	SombraPaginaCaza.DisplayName: Sombra Pagina Caza
+	SombraPaginaEterno.DisplayName: Sombra Pagina Eterno
 	OjoEternoMinion.DisplayName: Ojo Eterno Minion
 	AtaqueOleadaProjectile.DisplayName: Ataque Oleada Projectile
 	PrimerTrazoFajo.DisplayName: Primer Trazo Fajo
 	PrimerTrazoHeld.DisplayName: Primer Trazo Held
+	SakugaDelCielo.DisplayName: Sakuga Del Cielo
+	AspiradoraDevoradorProjectile.DisplayName: Aspiradora Devorador Projectile
 	BocadoDelSueloProjectile.DisplayName: Bocado Del Suelo Projectile
 	CaidaDevoradaProjectile.DisplayName: Caida Devorada Projectile
 	FauceDevoradorProjectile.DisplayName: Fauce Devorador Projectile
 	GrietaDeTintaProjectile.DisplayName: Grieta De Tinta Projectile
 	ManchaDeTinta.DisplayName: Mancha De Tinta
 	PrimeraCenaProjectile.DisplayName: Primera Cena Projectile
-	SombraPagina2Projectile.DisplayName: Sombra Pagina2 Projectile
-	SombraPagina3Projectile.DisplayName: Sombra Pagina3 Projectile
-	SombraPagina4Projectile.DisplayName: Sombra Pagina4 Projectile
-	SombraPagina5Projectile.DisplayName: Sombra Pagina5 Projectile
 	SombraPaginaProjectile.DisplayName: Sombra Pagina Projectile
 	TresCasasProjectile.DisplayName: Tres Casas Projectile
 	PhoenixNovaProjectile.DisplayName: Phoenix Nova Projectile
@@ -4424,17 +4434,6 @@ Projectiles: {
 	LaMiradaProyectil.DisplayName: La Mirada Proyectil
 	LaMiradaRayo.DisplayName: La Mirada Rayo
 	ArcaneBolt.DisplayName: Arcane Bolt
-	SombraPaginaIIProjectile.DisplayName: Sombra Pagina I I Projectile
-	PilarOjoMinion.DisplayName: Pilar Ojo Minion
-	AnillosSolRunicoHalo.DisplayName: Anillos Sol Runico Halo
-	SombraPaginaEterno.DisplayName: Sombra Pagina Eterno
-	PalabraCortadaProjectile.DisplayName: Palabra Cortada Projectile
-	PortalTrioProjectile.DisplayName: Portal Trio Projectile
-	TrioRescoldoProjectile.DisplayName: Trio Rescoldo Projectile
-	FaroDelEclipseHaz.DisplayName: Faro Del Eclipse Haz
-	JefeInteriorVoleaProjectile.DisplayName: Jefe Interior Volea Projectile
-	SakugaDelCielo.DisplayName: Sakuga Del Cielo
-	AspiradoraDevoradorProjectile.DisplayName: Aspiradora Devorador Projectile
 }
 
 Ciclope.Grito: AAAAH I PROJECT MYSELF!
