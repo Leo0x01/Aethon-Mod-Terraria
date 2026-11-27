@@ -33,7 +33,8 @@ REPO="Leo0x01/Aethon-Mod-Terraria"
 
 echo "[1/6] LOS GATES — el publicador ya no publica a ciegas"
 echo "    · EL CUERPO DEL .TMOD (la lección del build fantasma):"
-python3 tools/parse_tmod.py "$TMOD" | head -2
+python3 tools/parse_tmod.py "$TMOD" > /tmp/gate_cuerpo.log 2>&1 || true
+head -2 /tmp/gate_cuerpo.log
 python3 - "$TMOD" <<'PYC'
 import sys, os
 sys.path.insert(0, 'tools')
