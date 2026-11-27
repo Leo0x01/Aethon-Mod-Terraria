@@ -2254,6 +2254,8 @@ Items: {
 	}
 
 	TrioVacio: The stand is empty — insert magic weapons at the altar.
+	TrioMarcadasTip: Fires {0}/3 slots — mark them with left-click on the altar slot
+	TrioSinMarca: ✦ No slot marked — left-click a FULL slot in the altar to light its weapon
 	TrioNoArma: That is not a magic weapon — the stand only holds MAGIC weapons.
 	TrioLleno: The stand already holds three weapons — extract one at the altar.
 	TrioInsertada: Weapon seated in slot {0}.
@@ -2266,11 +2268,7 @@ Items: {
 	TrioLibre: (free)
 	TrioRanura: Slot {0}: {1}
 	TrioModoUna: The trio will fire ONLY weapon {0}.
-	TrioModoTres: The trio will fire ALL THREE weapons at once.
 	TrioModoUnaTip: Fires: only weapon {0} (chosen at the book's altar)
-	TrioModoTresTip: Fires: ALL THREE at once (the altar's mark)
-	TrioModoTurnos: Fires: one at a time (in turns — the altar's mark is off).
-	TrioModoTurnosTip: Fires: one at a time (in turns)
 	TrioSinProyectil: “{0}” fires no projectiles: from the stand it leaves as an ink ember with its damage.
 	TrioNoDispara: ✦ “{0}” could not fire from the stand — the trio threw its ember.
 	TrioAlbedrio0: Original
@@ -3760,7 +3758,7 @@ Submundo: {
 	FalloPuerta: THE BOOK COULD NOT OPEN — the attempt was lost in the mist. Try again: the door still lives.
 	RedCaida: THE VOID RETURNS YOU TO THE PLAZA — no one falls inside the book.
 	Devorado: THE GRIMOIRE DEVOURS YOU — the mist floods everything…
-	PuertaAbiertaAnuncio: THE ALTAR HAS PAID THE THOUSAND ESSENCES — the book opens its interior from the altar: its window can now devour you.
+	PuertaAbiertaAnuncio: THE ALTAR HAS PAID THE THOUSAND ESSENCES — the INNER WORLD is now fixed among your BUFFS: right-click its icon and the book devours you.
 }
 
 FormaEterna: {
@@ -4012,7 +4010,6 @@ Altar: {
 	SelectorTrioTitulo: THE ARSENAL — CHOOSE A WEAPON
 	DevueltaAlSuelo: Your inventory is full: the weapon dropped at your feet.
 	TrioSinTrio: You are not carrying the Eternal Trio — bring it to the altar to fuse its three weapons.
-	TrioPista: Click an empty slot to OPEN THE ARSENAL and choose · right-click a filled one to return it to your inventory.
 	TrioMarca: The "3" box: fire ALL THREE at once ({0}) — chosen HERE, at the altar.
 	EtiquetaArma: LA OFRENDA — un arma, un material o esencias (no herramienta)
 	FiltroArma: Not consecrated, no tools/accessories. ESSENCES YES: the Eternal devours them
@@ -4081,11 +4078,11 @@ Altar: {
 	MundoProgreso: Essences consecrated at the altar: {0}/{1}
 	MundoPista: (when the tally reaches ONE THOUSAND, the altar itself will open the door into the book's interior)
 	MundoAbierta: The thousand essences are paid: the altar can NOW devour the bearer and take them inside.
-	MundoPuerta: ENTER THE INNER WORLD
 	LeyendaSello: El grimorio SOLO devora la ofrenda CONSAGRADA
 	LeyendaSello2: (las esencias y el DINERO no necesitan sello: el dinero simplemente se deja caer)
-	TrioMarcaTexto: Allows using all of them at once
 	TrioDesequiparTodo: Unequip all
+	TrioMarcaPuesta: ✦ Slot {0}: MARKED — its weapons fire.
+	TrioMarcaQuitada: ✦ Slot {0}: off — it does not fire.
 	SelectorRueda: Mouse wheel: more items
 	TrioAlbedrioTitulo: THE WILL — the intelligence of each projectile
 	TrioAlbedrioPista: Choose per slot: Original (exactly as its weapon fires) · Prey (chases the enemy) · Cursor (flies to your pointer and orbits). The check mark shows the live one.
@@ -4200,6 +4197,10 @@ Buffs: {
 		Description: Mods.AethonMod.Buffs.LivingPulsarBuff.Description
 	}
 
+	MundoInteriorBuff: {
+		DisplayName: Mundo Interior
+	}
+
 	NebulaJellyfishBuff: {
 		DisplayName: Nebula Jellyfish Buff
 		Description: Mods.AethonMod.Buffs.NebulaJellyfishBuff.Description
@@ -4237,7 +4238,7 @@ Buffs: {
 
 	VacioExterior: {
 		DisplayName: Vacio Exterior
-		Description: Mods.AethonMod.Buffs.VacioExterior.Description
+		Description: The Void Fire recognizes its master and grants a small improvement
 	}
 
 	VastagoDelEternoBuff: {
@@ -4435,7 +4436,7 @@ Registro: {
 	Resumen: "{0} logged failures ({1} distinct) — check tModLoader-Logs."
 }
 
-Devorador.Pedacito: '''"Bleh. This is disgusting. I won't devour this hideous thing whole... I'd rather eat King Slime than this filth. A little piece is enough."'''
+Devorador.Pedacito: '''"This is disgusting, a little piece is enough. I will never devour this hideous thing again... I'd rather eat King Slime than this filth."'''
 
 PilarInterior: {
 	YaDespierto: The seal is already awake — the grimoire waits.

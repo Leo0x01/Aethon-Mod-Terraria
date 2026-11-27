@@ -1167,6 +1167,25 @@ namespace AethonMod.Content.Systems
 
         public override void PostUpdateWorld()
         {
+            // ==============================================================
+            //  v6.182 — EL BUFF DE LA PUERTA VIVA (la letra: «sera como un
+            //  buff que se activa con las 1000 esencias del eterno en el
+            //  altar y quedara permanentemente fijado en los buff»): con
+            //  las mil pagadas (PuertaAbierta — el cerrojo PuertaViva de
+            //  la v6.179 JAMÁS se apaga), el portador lleva «Mundo
+            //  Interior» FIJADO entre sus buffs — el icono del paisaje
+            //  plano y brumoso. Refrescado cada tick (nunca parpadea,
+            //  nunca caduca); el CLIC DERECHO en el icono VIAJA (el
+            //  camino del botón que murió — MundoInteriorBuff).
+            // ==============================================================
+            if (!Main.dedServ && !Main.gameMenu && PuertaAbierta)
+            {
+                Player conPuerta = Main.LocalPlayer;
+                if (conPuerta != null && conPuerta.active && !conPuerta.dead)
+                    conPuerta.AddBuff(ModContent.BuffType
+                        <global::AethonMod.Content.Buffs.MundoInteriorBuff>(), 2, true);
+            }
+
             if (!Activo || Main.gameMenu || Main.dedServ) return;
 
             // v6.115 — LA REVELACIÓN CAMINA: la niebla de la llegada se

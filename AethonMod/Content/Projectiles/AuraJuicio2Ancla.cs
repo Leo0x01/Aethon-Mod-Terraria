@@ -454,15 +454,28 @@ namespace AethonMod.Content.Projectiles
         /// enemigo del jugador»): el 2% del maná TOTAL se suma AL
         /// MÁXIMO — al daño que cobra PEGADO al portador. Con 400 de
         /// maná: 10 + 20 (el 10% de los 200 extra) + 8 (el 2% del
-        /// total) = 38 pegado al cuerpo; el borde exterior SIEMPRE 1.</summary>
+        /// total) = 38 pegado al cuerpo; el borde exterior SIEMPRE 1.
+        /// v6.182 — EL 1% DEL MANÁ MÁXIMO (la letra: «asegurate de que el
+        /// calculo de daño de Aura de Vacio tome en cuenta el 1% del
+        /// mana maximo del jugador para aumentar el daño maximo que es
+        /// cuanto mas cerca esta del jugador»): el 1% del maná MÁXIMO
+        /// del portador se suma TAMBIÉN al tope — el daño pegado al
+        /// cuerpo del portador crece con SU maná máximo por tres vías
+        /// (el 10% del exceso sobre 200 + el 2% del total + el 1% del
+        /// máximo). Con 400 de maná: 10 + 20 + 8 + 4 = 42 pegado al
+        /// cuerpo; el borde exterior SIEMPRE 1.</summary>
         public static int DanoAuraMax(Player p)
         {
             try
             {
                 int bonusTotal = 0;
+                int unoPorciento = 0;
                 if (p != null && p.active)
+                {
                     bonusTotal = (int)(p.statManaMax2 * 0.02f);   // EL 2% DEL MANÁ TOTAL
-                return 10 + BonusMana(p) + bonusTotal;
+                    unoPorciento = (int)(p.statManaMax2 * 0.01f); // EL 1% DEL MANÁ MÁXIMO (v6.182)
+                }
+                return 10 + BonusMana(p) + bonusTotal + unoPorciento;
             }
             catch { return 10; }
         }

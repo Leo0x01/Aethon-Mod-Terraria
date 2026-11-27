@@ -1230,9 +1230,8 @@ namespace AethonMod.Content.UI
         private static readonly Color PapelSombra = new(190, 172, 134);
 
         // LA GEOMETRÍA VIVA
-        internal static Rectangle GeoSlot, GeoConsagrar, GeoPuerta;
+        internal static Rectangle GeoSlot, GeoConsagrar;
         internal static readonly Rectangle[] GeoTrio = new Rectangle[3];
-        internal static Rectangle GeoMarcaTres;
         internal static Rectangle GeoDesequiparTodo;
         internal static readonly Rectangle[,] GeoAlbedrio = new Rectangle[3, 3];
 
@@ -1316,7 +1315,7 @@ namespace AethonMod.Content.UI
             float maxAncho = pag.Width - 36f;
             float Linea(string t, float y, float esc, Color c)
                 => LibroLineas.Linea(sb, t ?? "", pag.X + 18f, y, maxAncho, esc, c, rec, pag);
-            GeoSlot = Rectangle.Empty; GeoConsagrar = Rectangle.Empty; GeoPuerta = Rectangle.Empty;
+            GeoSlot = Rectangle.Empty; GeoConsagrar = Rectangle.Empty;
             if (!AltarOfrendasUI.Abierta) return 0f;
 
             Item arma = AltarOfrendasUI.Ofrenda;
@@ -1406,23 +1405,26 @@ namespace AethonMod.Content.UI
                 // no el botón de abajo — la ventana nace justo bajo el hueco
                 ancla = new Rectangle(GeoSlot.X, GeoSlot.Bottom + 2, GeoSlot.Width, 1);
 
-            // ── EL MUNDO INTERIOR (v6.180 — SUBE DE PUESTO: la letra:
-            //     «no veo el boton de ir al mundo interior y el altar
-            //     dice que ya esta activo» — la sección vivía AL FINAL
-            //     de la página y los textos grandes de la v6.179 la
-            //     EMPUJARON fuera del papel: el botón ni se dibujaba.
-            //     Ahora vive JUSTO DESPUÉS del botón Consagrar, donde
-            //     SIEMPRE cabe — y el botón, una vez viva la puerta,
-            //     jamás vuelve a desaparecer) ──
-            cy += 6f;
-            Titulo(sb, At("MundoTitulo"), pag, cy, out cy);
-            if (global::AethonMod.Content.Systems.SubmundoGrimorio.PuertaAbierta)
-                cy = Boton(sb, pag, rec, cy, At("MundoPuerta"), TintaOro, out GeoPuerta, clicNuevo,
-                    () => AltarOfrendasUI.ClicEnPuerta());
-            else
+            // ── EL MUNDO INTERIOR (v6.182 — EL BOTÓN MUERE, LA PUERTA ES
+            //     UN BUFF: la letra: «siento que el boton de ir al mundo
+            //     interior esta ocupando espacio innecesario en la zona
+            //     de consagracion de la ventana del altar, creo que lo
+            //     mejor seria crear un icono tipo buff que represente al
+            //     mundo interior»): con la puerta VIVA, el altar YA NO
+            //     dibuja NADA — el icono MUNDO INTERIOR vive entre los
+            //     buffs del portador (fijado para siempre, clic derecho
+            //     y te traga). Mientras las mil NO están pagadas solo
+            //     queda la CUENTA (la línea del progreso); pagadas, la
+            //     sección entera desaparece — el papel queda para lo
+            //     demás) ──
+            if (!global::AethonMod.Content.Systems.SubmundoGrimorio.PuertaAbierta)
+            {
+                cy += 6f;
+                Titulo(sb, At("MundoTitulo"), pag, cy, out cy);
                 cy = Linea(Language.GetTextValue(A + "MundoProgreso",
                     global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas,
                     global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta), cy, 0.92f, Tinta);
+            }
 
             // ── GANA + CÓMO CONSEGUIR ESENCIAS (el tutorial del final:
             //     si el papel se acaba, estas secciones son las que
@@ -1460,7 +1462,7 @@ namespace AethonMod.Content.UI
             float Linea(string t, float y, float esc, Color c)
                 => LibroLineas.Linea(sb, t ?? "", pag.X + 18f, y, maxAncho, esc, c, rec, pag);
             for (int i = 0; i < 3; i++) { GeoTrio[i] = Rectangle.Empty; for (int j = 0; j < 3; j++) GeoAlbedrio[i, j] = Rectangle.Empty; }
-            GeoMarcaTres = Rectangle.Empty; GeoDesequiparTodo = Rectangle.Empty;
+            GeoDesequiparTodo = Rectangle.Empty;
             if (!AltarOfrendasUI.Abierta) return 0f;
 
             Titulo(sb, At("TrioTitulo"), pag, cy, out cy);
@@ -1471,10 +1473,23 @@ namespace AethonMod.Content.UI
                 return 0f;
             }
             bool selectorVivo = SelectorFlotante.Abierta;    // el libro ya no nos da clics: cinturón y tirantes
-            cy = Linea(At("TrioPista"), cy, 1.1f, Tinta);
+            // v6.182 — LA PISTA MUERE (la letra: «creo que no es
+            //     necesario decir elegir una ranura y luego explicarla»):
+            //     la línea «Clic en una ranura vacía para ABRIR EL
+            //     ARSENAL…» desaparece — las ranuras se explican solas.
             cy += 12f;
 
             // ── LAS TRES RANURAS COSIDAS AL PAPEL ──
+            // v6.182 — LA RANURA QUE DISPARA SE MARCA CON CLIC IZQUIERDO
+            //     (la letra: «al parecer ahora no puedo seleccionar cual
+            //     de las 3 armas en el slot del trio del eterno quiero que
+            //     ataque […] solo hay que marcar el arma con click
+            //     izquierdo para que el slot se active y se dispare con
+            //     esa arma, si se selecciona 2 slot disparan esas 2»):
+            //     clic izq. en ranura LLENA (cursor vacío) = SELECCIÓN
+            //     (toggle — el slot ACTIVO se enciende); clic izq. en
+            //     ranura VACÍA = la vitrina; clic izq. con arma al
+            //     cursor = dejarla; clic der. = devolverla.
             int abrirPara = int.MinValue;
             for (int i = 0; i < 3; i++)
             {
@@ -1483,33 +1498,21 @@ namespace AethonMod.Content.UI
                 bool hov = s.Contains(Main.mouseX, Main.mouseY);
                 Item ra = trio.Ranuras != null && i < trio.Ranuras.Length ? trio.Ranuras[i] : null;
                 bool llena = ra != null && !ra.IsAir;
-                sb.Draw(TextureAssets.MagicPixel.Value, s, llena ? PapelSombra * 1.25f : PapelSombra * 0.9f);
-                LibroMarco.Marco(sb, s, hov ? TintaVioleta : llena ? TintaOro : TintaOro * 0.4f);
+                bool activa = llena && trio.Seleccionada(i);   // LA MARCA DEL DISPARO
+                // EL COLOR DEL SLOT: ACTIVA = la tinta violeta de la casa
+                // (el mismo relleno vivo del albedrío) · llena suelta = oro
+                sb.Draw(TextureAssets.MagicPixel.Value, s,
+                    activa ? TintaVioleta * 0.30f : llena ? PapelSombra * 1.25f : PapelSombra * 0.9f);
+                LibroMarco.Marco(sb, s,
+                    activa ? TintaVioleta : hov ? TintaVioleta : llena ? TintaOro : TintaOro * 0.4f);
                 if (llena)
                 {
-                    // v6.179 — EL SLOT MUDO (la letra: «en el cuadro del
-                    //     slot que no deberia tener ningun texto»): el
-                    //     nombre cosido de la v6.178 MUERE (nacía de una
-                    //     escala que se encogía a lo invisible para caber
-                    //     en 60 px) y el número de la ranura vacía
-                    //     muere con él — el cuadro del slot NO lleva
-                    //     NINGÚN texto: solo el ARMA se lee (el icono,
-                    //     más grande y centrado).
                     try
                     {
-                        // v6.180 — EL ICONO CARGADO DE VERDAD (la autopsia
-                        // del fantasma eterno: «el slot del trio siempre
-                        // esta en blanco, tienen las armas pero no salen
-                        // sus iconos ESE SIEMPRE HA SIDO EL PROBLEMA»):
-                        // los ítems de las ranuras SOLO viven aquí — su
-                        // textura VANILLA jamás fue pedida al motor y
-                        // TextureAssets.Item[...] daba el PLACEHOLDER
-                        // transparente. Main.GetItemDrawFrame (el camino
-                        // del inventario) CARGA la textura y respeta su
-                        // frame animado — el icono NACE de verdad.
                         Main.GetItemDrawFrame(ra.type, out Texture2D tex, out Rectangle frame);
                         float esc = Math.Min(48f / frame.Width, 48f / frame.Height);
-                        sb.Draw(tex, s.Center.ToVector2(), frame, Color.White, 0f,
+                        sb.Draw(tex, s.Center.ToVector2(), frame,
+                            activa ? Color.White : Color.White * 0.62f, 0f,
                             frame.Size() * 0.5f, esc, SpriteEffects.None, 0f);
                     }
                     catch (System.Exception exIcono)
@@ -1517,41 +1520,29 @@ namespace AethonMod.Content.UI
                 }
                 // la ranura VACÍA queda MUDA: ni número ni nombre
 
-                // EL GESTO: izquierdo con el cursor vacío = ELEGIR · con un arma al cursor = DEJARLA · derecho = DEVOLVER
+                // EL GESTO: izquierdo en la LLENA = SELECCIÓN · en la
+                // VACÍA o con arma al cursor = elegir/dejar · derecho = devolver
                 if (hov && !selectorVivo)
                 {
                     if (clicDerNuevo) AltarOfrendasUI.DesequiparRanura(i);
                     else if (clicNuevo)
                     {
-                        if (Main.mouseItem.IsAir) abrirPara = i;
+                        if (Main.mouseItem.IsAir)
+                        {
+                            if (llena) AltarOfrendasUI.ClicEnSeleccionRanura(i);
+                            else abrirPara = i;
+                        }
                         else AltarOfrendasUI.ClicEnRanura(i);
                     }
                 }
             }
             cy += 72f;
 
-            // ── LA CASILLA «LAS TRES A LA VEZ» ──
-            Rectangle marca = new Rectangle(pag.X + pag.Width / 2 - 150, (int)cy, 22, 22);
-            GeoMarcaTres = marca;
-            bool marcada = trio.ModoDisparo >= 3;
-            bool hovM = marca.Contains(Main.mouseX, Main.mouseY);
-            Rectangle txtMarca = new Rectangle(marca.Right + 8, marca.Y - 3, 282, 28);
-            bool hovTxt = txtMarca.Contains(Main.mouseX, Main.mouseY);
-            // v6.176 — EL CHECKLIST UNIFORME (la letra: «el marcador del
-            // checklis que dice que se usan las 3 armas esta mal,
-            // deberia ser igual a los otros checklis donde el cuadrito
-            // se pinta de morado»): la palomita MUERE — la casilla vive
-            // EXACTAMENTE como las del albedrío: el cuadradito se
-            // RELLENA de morado, sin símbolo encima.
-            sb.Draw(TextureAssets.MagicPixel.Value, marca, marcada ? TintaVioleta * 0.85f : PapelSombra * 0.9f);
-            LibroMarco.Marco(sb, marca, marcada || hovM ? TintaVioleta : TintaApagado * 0.6f);
-            LibroLineas.Texto(sb, At("TrioMarcaTexto"), new Vector2(marca.Right + 8, marca.Center.Y),
-                marcada ? TintaVioleta : hovTxt ? Tinta : TintaApagado, 1.1f, 0f, 0.5f);
-            if ((hovM || hovTxt) && (clicNuevo || clicDerNuevo) && !selectorVivo)
-                AltarOfrendasUI.ClicEnMarcaTres();
-            cy += 34f;
-
-            // ── EL BOTÓN «DESEQUIPAR TODO» ──
+            // ── EL BOTÓN «DESEQUIPAR TODO» ── (v6.182 — LA CASILLA
+            //     «LAS TRES A LA VEZ» MURIÓ: la letra: «de hecho estaba
+            //     pensado que la casilla para que las 3 ataquen al mismo
+            //     tiempo es innecesario» — la SELECCIÓN POR RANURA la
+            //     reemplaza: marca 1, 2 o las 3 y esas disparan) ──
             Rectangle btnTodo = new Rectangle(pag.X + pag.Width / 2 - 78, (int)cy, 156, 28);
             GeoDesequiparTodo = btnTodo;
             bool hovTodo = btnTodo.Contains(Main.mouseX, Main.mouseY);
@@ -1582,20 +1573,20 @@ namespace AethonMod.Content.UI
                 bool llena = ra != null && !ra.IsAir;
                 float x0 = pag.X + 18f;
                 string et = Language.GetTextValue(A + "TrioRanuraEtiqueta", i + 1);
-                LibroLineas.Texto(sb, et, new Vector2(x0, cy + 13f), llena ? Tinta : TintaApagado, 1.05f, 0f, 0.5f);
+                // v6.182 — EL HUECO ENTRE LA ETIQUETA Y SU CASILLA (la
+                //     letra: «las letras de ranura 1, 2, 3 estan muy
+                //     pegadas a sus casillas de checklist, deberian
+                //     estar separadas por un espacio pequeño»): la
+                //     etiqueta nace ALINEADA A LA DERECHA contra SU
+                //     casilla — el hueco ya no depende del ancho del
+                //     texto: SIEMPRE hay 14 px de aire (el mismo en las
+                //     tres filas).
+                float xCasilla = x0 + anchoEtiqueta + 14f;
+                LibroLineas.Texto(sb, et, new Vector2(xCasilla - 14f, cy + 13f),
+                    llena ? Tinta : TintaApagado, 1.05f, 1f, 0.5f);
                 for (int j = 0; j < 3; j++)
                 {
-                    // ========================================================
-                    //  v6.175 — EL CHECKLIST SIMPLE (la letra: «el checklist
-                    //  de las armas del trio eterno es demasiado grando, o
-                    //  sea es una linea morada, hazlo simple, que el
-                    //  cuadradito solo cambie de color y se rellene de
-                    //  morado»): los CHIPS anchos MUEREN (la caja grande
-                    //  con marco leía como «una línea morada») — queda SOLO
-                    //  el cuadradito cosido: apagado vacío · viva = RELLENO
-                    //  DE MORADO + su marco violeta. El texto al lado.
-                    // ========================================================
-                    Rectangle casilla = new Rectangle((int)(x0 + anchoEtiqueta + j * 118f), (int)cy + 4, 18, 18);
+                    Rectangle casilla = new Rectangle((int)(xCasilla + j * 118f), (int)cy + 4, 18, 18);
                     GeoAlbedrio[i, j] = casilla;
                     bool viva = llena && trio.Inteligencia != null && i < trio.Inteligencia.Length &&
                         trio.Inteligencia[i] == j;
@@ -1701,7 +1692,20 @@ namespace AethonMod.Content.UI
         {
             var fuente = FontAssets.MouseText.Value;
             if (string.IsNullOrEmpty(texto)) return Vector2.Zero;
-            Vector2 origen = fuente.MeasureString(texto) * new Vector2(ax, ay);
+            // v6.182 — EL ANCLA ESCLAVO DE LA ESCALA (la letra: «los textos
+            //     de los botones en la ventana del pilar no estan
+            //     centrados y se desbordan»): el origen nacía SIN la
+            //     escala — el texto dibujado mide texto·esc, pero el
+            //     desplazamiento restaba texto·ancla: a esc < 1 el texto
+            //     quedaba corrido a la IZQUIERDA por texto·(1−esc)/2 — y
+            //     con el texto largo de un botón (202 px a esc 0,62) la
+            //     punta IZQUIERDA salía 50 px FUERA del botón: descentrado
+            //     Y desbordado (en el altar los textos son cortos y casi
+            //     no se notaba; en el pilar — BotonSellado, Lanzar la
+            //     oleada — son largos y esc < 1 SIEMPRE). El origen ahora
+            //     escala CON el texto: el anclaje es exacto a cualquier
+            //     escala — el pilar se centra y NADA se desborda.
+            Vector2 origen = fuente.MeasureString(texto) * esc * new Vector2(ax, ay);
             Vector2 p = pos - origen;
             // v6.176 — EL HALO MANSO (la letra: «el color de los textos
             // es demasiado claro en la ventana del pilar y el altar»):

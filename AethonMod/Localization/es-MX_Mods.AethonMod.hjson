@@ -2237,6 +2237,8 @@ Items: {
 	}
 
 	TrioVacio: El atril está vacío — insértale armas mágicas desde el altar.
+	TrioMarcadasTip: Disparan {0}/3 ranuras — se marcan con clic izquierdo en la ranura del altar
+	TrioSinMarca: ✦ Ninguna ranura marcada — clic izquierdo en una ranura LLENA del altar para encender su arma
 	TrioNoArma: Eso no es un arma mágica — el atril solo sostiene armas MÁGICAS.
 	TrioLleno: El atril ya sostiene tres armas — extrae una en el altar.
 	TrioInsertada: Arma asentada en la ranura {0}.
@@ -2249,11 +2251,7 @@ Items: {
 	TrioLibre: (libre)
 	TrioRanura: Ranura {0}: {1}
 	TrioModoUna: El trío disparará SOLO el arma {0}.
-	TrioModoTres: El trío disparará LAS TRES ARMAS a la vez.
 	TrioModoUnaTip: Dispara: solo el arma {0} (se elige en el altar del libro)
-	TrioModoTresTip: Dispara: LAS TRES a la vez (la marca del altar)
-	TrioModoTurnos: Dispara: de una en una (por turnos — la marca del altar está suelta).
-	TrioModoTurnosTip: Dispara: de una en una (por turnos)
 	TrioSinProyectil: «{0}» no dispara proyectiles: desde el atril sale como brasa de tinta con su daño.
 	TrioNoDispara: ✦ «{0}» no logró disparar desde el atril — el trío lanzó su brasa.
 	TrioAlbedrio0: Original
@@ -3748,7 +3746,7 @@ Submundo: {
 	FalloPuerta: EL LIBRO NO PUDO ABRIRSE — el intento se perdió en la bruma. Vuelve a intentarlo: la puerta sigue viva.
 	RedCaida: EL VACÍO TE DEVUELVE A LA PLAZA — nadie cae dentro del libro.
 	Devorado: EL GRIMORIO TE DEVORA — la bruma lo inunda todo…
-	PuertaAbiertaAnuncio: EL ALTAR HA PAGADO LAS MIL ESENCIAS — el libro abre su interior desde el altar: su ventana ya puede devorarte.
+	PuertaAbiertaAnuncio: EL ALTAR HA PAGADO LAS MIL ESENCIAS — el MUNDO INTERIOR queda fijado entre tus BUFFS: clic derecho en su icono y el libro te devora.
 }
 
 FormaEterna: {
@@ -4000,7 +3998,6 @@ Altar: {
 	SelectorTrioTitulo: ELIGE UN ARMA
 	DevueltaAlSuelo: Tu inventario está lleno: el arma cayó a tus pies.
 	TrioSinTrio: No llevas el Trío del Eterno — tráelo al altar para fusionar sus tres armas.
-	TrioPista: Clic en una ranura vacía para ABRIR EL ARSENAL y elegir · clic derecho en una llena para devolverla al inventario.
 	TrioMarca: Casilla «3»: disparar LAS TRES a la vez ({0}) — se elige AQUÍ, en el altar.
 	EtiquetaArma: LA OFRENDA — un arma, un material o esencias (no herramienta)
 	FiltroArma: No consagradas, no herramientas. Las ESENCIAS SÍ: el Eterno las devora
@@ -4069,11 +4066,11 @@ Altar: {
 	MundoProgreso: Esencias consagradas en el altar: {0}/{1}
 	MundoPista: (con las MIL esencias pagadas, el altar abre la puerta al interior)
 	MundoAbierta: Las mil pagadas: el altar YA puede devorarte y llevarte al interior.
-	MundoPuerta: IR AL MUNDO INTERIOR
 	LeyendaSello: El grimorio SOLO devora la ofrenda CONSAGRADA
 	LeyendaSello2: (esencias y dinero no necesitan sello)
-	TrioMarcaTexto: Permite usar todas al mismo tiempo
 	TrioDesequiparTodo: Desequipar todo
+	TrioMarcaPuesta: ✦ Ranura {0}: MARCADA — sus armas disparan.
+	TrioMarcaQuitada: ✦ Ranura {0}: apagada — no dispara.
 	SelectorRueda: Rueda del ratón: más items
 	TrioAlbedrioTitulo: EL ALBEDRÍO — la inteligencia de cada proyectil
 	TrioAlbedrioPista: Elige por ranura: Original (tal como dispara su arma) · Presa (persigue al enemigo) · Cursor (vuela a tu puntero y orbita). La palomita marca el que está vivo.
@@ -4189,6 +4186,10 @@ Buffs: {
 		Description: Una estrella de neutrones gira a tu lado, sus haces rañando a tus enemigos
 	}
 
+	MundoInteriorBuff: {
+		DisplayName: Mundo Interior
+	}
+
 	NebulaJellyfishBuff: {
 		DisplayName: Medusa Nebular
 		Description: Una medusa de nebulosa deriva a tu lado a pulsos de gravedad
@@ -4226,7 +4227,7 @@ Buffs: {
 
 	VacioExterior: {
 		DisplayName: Vacío exterior
-		Description: El fuego del vacío reconoce a su dueño: +10% ataque, +10 defensa, −15% coste de maná mientras un enemigo arda
+		Description: El Fuego de Vacío reconoce a su dueño y da una pequeña mejora
 	}
 
 	VastagoDelEternoBuff: {
@@ -4425,7 +4426,7 @@ Registro: {
 	Resumen: "{0} fallos registrados ({1} distintos) — mira tModLoader-Logs."
 }
 
-Devorador.Pedacito: «Guá. Esto es asqueroso. No pienso devorar a esta cosa tan desagradable entera... prefiero comerme al Rey Slime que a esta porquería. Un pedacito es suficiente.»
+Devorador.Pedacito: «Esto es asqueroso, un pedacito es suficiente. No volveré a devorar esta cosa tan desagradable... prefiero comerme al Rey Slime que a esta porquería.»
 PilarInterior.YaDespierto: El sello ya está despierto — el grimorio espera.
 PilarInterior.IraSellado1: ✦ CINCO SOMBRAS — LA IRA DE UN SER EXTERIOR abre su ojo y lo persigue. Corre, portador: la lentitud también mata.
 PilarInterior.IraSellado2: ✦ DIEZ SOMBRAS — EL SEGUNDO OJO despierta. Ya no corres de él: corres entre dos.

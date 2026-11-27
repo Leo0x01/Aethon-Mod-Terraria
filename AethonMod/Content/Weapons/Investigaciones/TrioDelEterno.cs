@@ -68,28 +68,45 @@ namespace AethonMod.Content.Weapons.Investigaciones
     //  ──────────────────────────────────────────────────────────────
     public class TrioDelEterno : ModItem
     {
-        /// <summary>Dispara POR TURNOS: una ranura armada en cada uso.</summary>
-        public const int Turnos = 0;
-        /// <summary>Dispara LAS TRES ranuras armadas en cada uso.</summary>
-        public const int Todas = 3;
+        /// <summary>Dispara POR SELECCIÓN: SOLO las ranuras marcadas (la
+        /// letra v6.182 — la casilla «las tres a la vez» murió).</summary>
+        public const int Turnos = 0;   // MUERTO (v6.182): queda para los guardados viejos
 
         /// <summary>LAS TRES RANURAS — las armas insertadas (air = ranura
         /// libre). Viajan con el ítem.</summary>
         public Item[] Ranuras = new Item[3];
+
+        /// <summary>v6.182 — LA SELECCIÓN DEL DISPARO (la letra: «al parecer
+        /// ahora no puedo seleccionar cual de las 3 armas en el slot del
+        /// trio del eterno quiero que ataque, todas atacan al mismo
+        /// tiempo, yo debo poder seleccionar cual arma ataca […] solo hay
+        /// que marcar el arma con click izquierdo para que el slot se
+        /// active y se dispare con esa arma, si se selecciona 2 slot
+        /// disparan esas 2, si se seleccionan los 3 slots entonces las 3
+        /// armas atacan»): el CLIC IZQUIERDO en la ranura LLENA del altar
+        /// enciende/apaga cada ranura — disparan SOLO las marcadas (la
+        /// casilla «las tres a la vez» murió: la selección por ranura la
+        /// reemplaza).</summary>
+        public bool[] Selecciones = new bool[3] { true, true, true };
+
+        /// <summary>¿ESTA ranura está marcada para disparar?</summary>
+        public bool Seleccionada(int i)
+            => i >= 0 && i < 3 && Selecciones != null && i < Selecciones.Length
+               ? Selecciones[i] : false;
+
+        /// <summary>Marca/apaga la ranura (con defensa de tabla).</summary>
+        public void PonerSeleccion(int i, bool v)
+        {
+            if (i < 0 || i > 2) return;
+            if (Selecciones == null || Selecciones.Length < 3) Selecciones = new bool[3];
+            Selecciones[i] = v;
+        }
 
         /// <summary>EL ALBEDRÍO de cada ranura: 0 = Original (el proyectil
         /// tal cual lo hizo su arma) · 1 = Presa (persigue al enemigo) ·
         /// 2 = Cursor (vuela al puntero del dueño y orbita). Se elige en
         /// el altar del libro.</summary>
         public int[] Inteligencia = new int[3];
-
-        /// <summary>El modo de fuego: `Todas` o `Turnos` (la casilla «3»
-        /// del altar).</summary>
-        public int ModoDisparo = Todas;
-
-        /// <summary>La última ranura que disparó en el modo por turnos
-        /// (−1 al nacer: el primer uso arranca en la primera armada).</summary>
-        public int Turno = -1;
 
         /// <summary>El conteo del aviso «el atril está vacío» (no spamea).</summary>
         private int _usosSinArmas;
@@ -130,10 +147,9 @@ namespace AethonMod.Content.Weapons.Investigaciones
             Item.autoReuse = true;
             Ranuras = new Item[3];
             Inteligencia = new int[3];
+            Selecciones = new bool[3] { true, true, true };   // v6.182 — nacen ENCENDIDAS
             for (int i = 0; i < 3; i++)
                 Ranuras[i] = new Item();
-            ModoDisparo = Todas;
-            Turno = -1;
         }
 
         // ================================================================
@@ -149,15 +165,16 @@ namespace AethonMod.Content.Weapons.Investigaciones
             var copia = (TrioDelEterno)base.Clone(newEntity);
             copia.Ranuras = new Item[3];
             copia.Inteligencia = new int[3];
+            copia.Selecciones = new bool[3];
             for (int i = 0; i < 3; i++)
             {
                 copia.Ranuras[i] = (Ranuras != null && i < Ranuras.Length && Ranuras[i] != null &&
                     !Ranuras[i].IsAir) ? (Item)Ranuras[i].Clone() : new Item();
                 copia.Inteligencia[i] = (Inteligencia != null && i < Inteligencia.Length)
                     ? Math.Clamp(Inteligencia[i], 0, 2) : 0;
+                copia.Selecciones[i] = Selecciones != null && i < Selecciones.Length
+                    ? Selecciones[i] : true;
             }
-            copia.ModoDisparo = ModoDisparo == Todas ? Todas : Turnos;
-            copia.Turno = Turno;
             copia._usosSinArmas = 0;
             return copia;
         }
@@ -251,18 +268,6 @@ namespace AethonMod.Content.Weapons.Investigaciones
             => i >= 0 && i < 3 && Ranuras != null && Ranuras[i] != null && !Ranuras[i].IsAir &&
                Ranuras[i].damage > 0;
 
-        /// <summary>La siguiente ranura armada después de `Turno` (el modo
-        /// por turnos es un carrusel) o −1 si no hay ninguna.</summary>
-        private int SiguienteConArma()
-        {
-            for (int paso = 0; paso < 3; paso++)
-            {
-                Turno = (Turno + 1) % 3;
-                if (RanuraArmada(Turno)) return Turno;
-            }
-            return -1;
-        }
-
         // ================================================================
         //  EL ATAQUE
         // ================================================================
@@ -289,12 +294,25 @@ namespace AethonMod.Content.Weapons.Investigaciones
             }
             _usosSinArmas = 0;
 
-            // EL MODO: las tres a la vez, o la del turno
-            int laDelTurno = ModoDisparo == Todas ? -1 : SiguienteConArma();
+            // ══ v6.182 — LA SELECCIÓN DEL DISPARO (la letra: «yo debo
+            //     poder seleccionar cual arma ataca […] si se selecciona
+            //     2 slot disparan esas 2, si se seleccionan los 3 slots
+            //     entonces las 3 armas atacan»): disparan SOLO las
+            //     ranuras MARCADAS (el clic izquierdo del altar las
+            //     enciende). Sin NINGUNA marcada no dispara nada — y la
+            //     voz del libro lo dice (nada de clics mudos).
+            bool algunaMarcada = (RanuraArmada(0) && Seleccionada(0)) ||
+                                 (RanuraArmada(1) && Seleccionada(1)) ||
+                                 (RanuraArmada(2) && Seleccionada(2));
+            if (!algunaMarcada)
+            {
+                if (Main.myPlayer == player.whoAmI && ++_usosSinArmas % 4 == 1)
+                    Main.NewText(Language.GetTextValue("Mods.AethonMod.Items.TrioSinMarca"), ChatOro);
+                return false;
+            }
             for (int idx = 0; idx < 3; idx++)
             {
-                if (laDelTurno >= 0 && idx != laDelTurno) continue;
-                if (!RanuraArmada(idx)) continue;
+                if (!RanuraArmada(idx) || !Seleccionada(idx)) continue;
                 try { DispararLaRanura(player, idx); }
                 catch
                 {
@@ -457,20 +475,23 @@ namespace AethonMod.Content.Weapons.Investigaciones
                 { OverrideColor = viva ? new Color(196, 110, 228) : new Color(168, 140, 104) });
             }
             tooltips.Add(new TooltipLine(Mod, "TrioModo",
-                Language.GetTextValue(ModoDisparo == Todas
-                    ? "Mods.AethonMod.Items.TrioModoTresTip"
-                    : "Mods.AethonMod.Items.TrioModoTurnosTip"))
+                Language.GetTextValue("Mods.AethonMod.Items.TrioMarcadasTip",
+                    (RanuraArmada(0) && Seleccionada(0) ? 1 : 0) +
+                    (RanuraArmada(1) && Seleccionada(1) ? 1 : 0) +
+                    (RanuraArmada(2) && Seleccionada(2) ? 1 : 0)))
             { OverrideColor = new Color(200, 160, 255) });
         }
 
-        // === LA PERSISTENCIA: las tres armas, el modo y el albedrío viajan con el ítem ===
+        // === LA PERSISTENCIA: las tres armas, la selección y el albedrío viajan con el ítem ===
 
         public override void SaveData(TagCompound tag)
         {
             for (int i = 0; i < 3; i++)
                 if (Ranuras[i] != null && !Ranuras[i].IsAir)
                     tag["trio" + i] = ItemIO.Save(Ranuras[i]);
-            tag["trioModo"] = ModoDisparo == Todas ? Todas : Turnos;
+            // v6.182 — LA SELECCIÓN viaja (el «modo» murió con su casilla)
+            for (int i = 0; i < 3; i++)
+                tag["trioSel" + i] = Seleccionada(i);
             for (int i = 0; i < 3; i++)
                 if (Inteligencia != null && i < Inteligencia.Length && Inteligencia[i] != 0)
                     tag["trioAlb" + i] = Inteligencia[i];
@@ -487,11 +508,12 @@ namespace AethonMod.Content.Weapons.Investigaciones
                 Inteligencia[i] = tag.ContainsKey("trioAlb" + i)
                     ? Math.Clamp(tag.GetInt("trioAlb" + i), 0, 2) : 0;
             }
-            // los ítems de la v6.162 guardaban 0..2 como «una sola ranura»:
-            // ahora todo lo que no sea LAS TRES significa POR TURNOS
-            ModoDisparo = !tag.ContainsKey("trioModo") || tag.GetInt("trioModo") == Todas
-                ? Todas : Turnos;
-            Turno = -1;
+            // v6.182 — LA SELECCIÓN: los tríos de la era del «modo» (v6.161+)
+            // disparaban TODAS — nacen ENCENDIDAS (el comportamiento de
+            // siempre); los de la era de la selección guardan la SUYA
+            for (int i = 0; i < 3; i++)
+                PonerSeleccion(i, tag.ContainsKey("trioSel" + i)
+                    ? tag.GetBool("trioSel" + i) : true);
         }
 
         public override void NetSend(System.IO.BinaryWriter writer)
@@ -502,7 +524,8 @@ namespace AethonMod.Content.Weapons.Investigaciones
                 if (Ranuras[i] != null && !Ranuras[i].IsAir)
                     ItemIO.Send(Ranuras[i], writer, true);
             }
-            writer.Write(ModoDisparo == Todas);          // el modo viaja por la red
+            for (int i = 0; i < 3; i++)
+                writer.Write(Seleccionada(i));          // la selección viaja por la red
             for (int i = 0; i < 3; i++)
                 writer.Write((byte)((Inteligencia != null && i < Inteligencia.Length)
                     ? Math.Clamp(Inteligencia[i], 0, 2) : 0));
@@ -516,10 +539,10 @@ namespace AethonMod.Content.Weapons.Investigaciones
                 Ranuras[i] = viva ? ItemIO.Receive(reader, true, false) : new Item();
                 if (Ranuras[i] == null) Ranuras[i] = new Item();
             }
-            ModoDisparo = reader.ReadBoolean() ? Todas : Turnos;
+            for (int i = 0; i < 3; i++)
+                PonerSeleccion(i, reader.ReadBoolean());
             for (int i = 0; i < 3; i++)
                 Inteligencia[i] = Math.Clamp((int)reader.ReadByte(), 0, 2);
-            Turno = -1;
         }
 
         public override void AddRecipes()

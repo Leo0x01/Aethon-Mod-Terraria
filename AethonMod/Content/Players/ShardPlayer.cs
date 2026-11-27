@@ -1376,8 +1376,46 @@ namespace AethonMod.Content.Players
         //  Página en Blanco la devuelve a la mesa. El contador de la
         //  2ª invocación y su llamada pendiente MURIERON con la
         //  aspiradora (la animación que nunca ocurría).
+        //  v6.182 — LA MARCA DE LA LLAMADA (la autopsia del festín que
+        //  no iniciaba): la v6.180 armaba el pedacito con CUALQUIER
+        //  cabeza de Devorador nacida cerca — y LOS GUARDIANES DE LAS
+        //  OLEADAS también son Devoradores (LosSeis): el primer
+        //  guardián de oleada se comía la marca sin que el portador
+        //  viera NADA. AHORA el pedacito solo se sirve con la cabeza
+        //  nacida de UNA INVOCACIÓN REAL del portador: el pilar y la
+        //  comida de gusano (dentro y fuera del interior) la MARCAN
+        //  aquí, y OnSpawn la consume al nacer la cabeza.
         // ================================================================
         public bool DevoramundosPedacito;
+
+        /// <summary>v6.182 — LA LLAMADA PENDIENTE: el portador acaba de
+        /// INVOCAR al Devoramundos (pilar · comida de gusano). Vive
+        /// segundos (caduca sola) — la consume la cabeza que nace.</summary>
+        private bool _llamadaDevoramundos;
+        private ulong _llamadaDevoramundosTick;
+
+        /// <summary>v6.182 — EL PORTADOR LLAMA: marca la invocación real
+        /// (10 s de vida — si vanilla rechaza el uso, la marca caduca
+        /// sola sin quemar nada).</summary>
+        public void MarcarLlamadaDevoramundos()
+        {
+            _llamadaDevoramundos = true;
+            _llamadaDevoramundosTick = Main.GameUpdateCount;
+        }
+
+        /// <summary>v6.182 — ¿NACE UNA CABEZA DE LA LLAMADA? La consume
+        /// (una invocación, una cabeza).</summary>
+        public bool ConsumirLlamadaDevoramundos()
+        {
+            if (!_llamadaDevoramundos) return false;
+            if (Main.GameUpdateCount - _llamadaDevoramundosTick > 600ul)
+            {
+                _llamadaDevoramundos = false;   // caducó: la llamada se enfrió
+                return false;
+            }
+            _llamadaDevoramundos = false;       // consumida por ESTA cabeza
+            return true;
+        }
 
         /// <summary>v6.180 — LA PRIMERA VEZ CON EL CRONISTA (la letra:
         /// «hay que dejar claro que el lore lo escribió el mismo
@@ -1798,6 +1836,11 @@ namespace AethonMod.Content.Players
                 // v6.175 — LAS INVOCACIONES DEL PILAR (la segunda llamada
                 // del Devorador desata la ASPIRADORA del grimorio)
                 tag["devoramundosPedacito"] = DevoramundosPedacito;
+                // v6.182 — LA MIGRACIÓN DEL FÓSIL DEL FESTÍN: los
+                // guardados de la era v6.180-v6.181 pudieron quemar la
+                // marca con un GUARDIÁN DE OLEADA (la autopsia del festín
+                // que no iniciaba) — la mecánica cambió: se revive UNA vez
+                tag["pedacitoV2"] = true;
                 tag["primeraVezCronista"] = PrimeraVezCronista;
                 // v6.50.115 — EL FESTÍN DEL GUARDIÁN (el easter egg de la
                 // Mazmorra: una vez por portador)
@@ -1872,6 +1915,11 @@ namespace AethonMod.Content.Players
                 // v6.175 — LAS INVOCACIONES DEL PILAR (ausente = lista
                 // vacía: los guardados viejos estrenan su Devorador)
                 DevoramundosPedacito = tag.GetBool("devoramundosPedacito");
+                // v6.182 — LA MIGRACIÓN DEL FÓSIL: los guardados de la era
+                // v6.180-v6.181 traen la marca quemada por el agujero de
+                // las oleadas — la mecánica NUEVA la revive una única vez
+                if (!tag.ContainsKey("pedacitoV2"))
+                    DevoramundosPedacito = false;
                 PrimeraVezCronista = tag.GetBool("primeraVezCronista");
                 // v6.50.115 — EL FESTÍN DEL GUARDIÁN (ausente = false: aún
                 // no ocurrió — el guardado viejo estrena el easter egg)

@@ -204,7 +204,7 @@ namespace AethonMod.Content.UI
             try
             {
                 Player yo = Main.LocalPlayer;
-                if (yo == null || !yo.active || !_abierta) return;
+                if (yo == null || !yo.active) return;
                 if (Submundo.PuedeEntrar(yo, out string razonPuerta))
                 {
                     ForzarCierre();
@@ -222,6 +222,36 @@ namespace AethonMod.Content.UI
                         Main.NewText(razonPuerta, ChatVioleta);
                     Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                 }
+            }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltarOfrendasUI", exRegistro); }
+        }
+
+        /// <summary>v6.182 — EL VIAJE SIN EL ALTAR ABIERTO (la letra: el
+        /// botón de la ventana muere y LA PUERTA PASA A SER EL BUFF
+        /// «Mundo Interior» — clic derecho en su icono entre los buffs): el
+        /// camino de siempre, disponible desde cualquier parte del mundo.
+        /// Lo llama el buff (MundoInteriorBuff).</summary>
+        public static void ViajarAlInterior()
+        {
+            try
+            {
+                Player yo = Main.LocalPlayer;
+                if (yo == null || !yo.active) return;
+                if (!Submundo.PuedeEntrar(yo, out string razonPuerta))
+                {
+                    if (razonPuerta != null)
+                        Main.NewText(razonPuerta, ChatVioleta);
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+                    return;
+                }
+                if (Abierta) ForzarCierre();
+                if (LibroDelEternoUI.Abierto) LibroDelEternoUI.Cerrar();
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item74);
+                Projectile.NewProjectile(yo.GetSource_Misc("BuffMundoInterior"),
+                    yo.Center, Vector2.Zero,
+                    ModContent.ProjectileType
+                        <global::AethonMod.Content.Projectiles.Definitivas.DevoracionEterna>(),
+                    0, 0f, yo.whoAmI);
             }
             catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltarOfrendasUI", exRegistro); }
         }
@@ -668,6 +698,7 @@ namespace AethonMod.Content.UI
             if (trio.Inteligencia == null || trio.Inteligencia.Length < 3) trio.Inteligencia = new int[3];
             trio.Ranuras[ranura] = paraRanura;
             trio.Inteligencia[ranura] = 0;            // el albedrío es del arma: la nueva nace Original
+            trio.PonerSeleccion(ranura, true);        // v6.182 — nace ENCIENDA: dispara desde el primer clic
 
             // …y el original muere después: UNA sola arma en total
             arma.stack--;
@@ -721,6 +752,7 @@ namespace AethonMod.Content.UI
             if (!alInventario && !Main.mouseItem.IsAir) return false;
             trio.Ranuras[i] = new Item();
             if (trio.Inteligencia != null && i < trio.Inteligencia.Length) trio.Inteligencia[i] = 0;
+            trio.PonerSeleccion(i, false);   // v6.182 — sin arma no hay marca
             if (!alInventario) Main.mouseItem = arma;
             return true;
         }
@@ -776,21 +808,26 @@ namespace AethonMod.Content.UI
             catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltarOfrendasUI", exRegistro); }
         }
 
-        /// <summary>LA MARCA DEL ALTAR (v6.167): las tres a la vez ↔ por
-        /// turnos.</summary>
-        public static void ClicEnMarcaTres()
+        /// <summary>v6.182 — LA SELECCIÓN DEL DISPARO (la letra: «solo hay
+        /// que marcar el arma con click izquierdo para que el slot se
+        /// active y se dispare con esa arma, si se selecciona 2 slot
+        /// disparan esas 2»): el clic izquierdo en una ranura LLENA la
+        /// ENCIENDE o la apaga — disparan SOLO las marcadas.</summary>
+        public static void ClicEnSeleccionRanura(int slotT)
         {
             try
             {
                 Player yo = Main.LocalPlayer;
                 if (yo == null || !yo.active || !_abierta) return;
                 TrioArma trio = TrioArma.Del(yo);
-                if (trio == null) return;
-                trio.ModoDisparo = trio.ModoDisparo == TrioArma.Todas
-                    ? TrioArma.Turnos : TrioArma.Todas;
-                bool tres = trio.ModoDisparo == TrioArma.Todas;
-                DecirItem(tres ? "TrioModoTres" : "TrioModoTurnos", ChatVioleta);
+                if (trio == null || trio.Ranuras == null || slotT < 0 || slotT > 2) return;
+                Item arma = slotT < trio.Ranuras.Length ? trio.Ranuras[slotT] : null;
+                if (arma == null || arma.IsAir) return;   // la vacía no se marca
+                bool ahora = !trio.Seleccionada(slotT);
+                trio.PonerSeleccion(slotT, ahora);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
+                DecirItem(ahora ? "TrioMarcaPuesta" : "TrioMarcaQuitada",
+                    ahora ? ChatVioleta : ChatApagado, slotT + 1);
             }
             catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltarOfrendasUI", exRegistro); }
         }

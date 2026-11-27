@@ -913,6 +913,35 @@ namespace AethonMod.Content.Globals
                 _cenaActiva = -1;
 
             // ============================================================
+            //  v6.182 — EL GUARDIÁN DEL HOGAR (LA CURA DEL client.log: la
+            //  «Excepción silenciosa:
+            //  System.IndexOutOfRangeException en
+            //  NPC.AI_007_FindGoodRestingSpot» — esta vez 5 minutos
+            //  DESPUÉS de entrar al interior). LA CAUSA RAÍZ (verificada
+            //  en el decompile de NPC.cs:56255): FindGoodRestingSpot
+            //  dibuja su rejilla de búsqueda con EL HOGAR DEL NPC
+            //  (homeTileX/Y), no con su posición — un solo vecino con el
+            //  homeTile del MUNDO GRANDE (p. ej. 3.400 en un interior de
+            //  800×600) revienta Main.tile en la NOCHE ETERNA del
+            //  interior. La Ciudad Vacía (v6.179) apagó a los que
+            //  ENTRARON vivos; éste es el CERROJO PERMANENTE: dentro del
+            //  interior, TODO NPC de pueblo cuyo hogar esté fuera del
+            //  cuerpo del dios lo coge prestado AQUÍ (su propio tile,
+            //  clamped) — el crash es matemáticamente imposible venga
+            //  de donde venga (mudanza natural, Cronista, transformación).
+            // ============================================================
+            if (global::AethonMod.Content.Systems.SubmundoGrimorio.Activo &&
+                npc.townNPC && npc.homeTileX >= 0 &&
+                (npc.homeTileX < 5 || npc.homeTileX >= Main.maxTilesX - 5 ||
+                 npc.homeTileY < 5 || npc.homeTileY >= Main.maxTilesY - 5))
+            {
+                npc.homeTileX = Math.Clamp((int)(npc.Center.X / 16f), 5, Main.maxTilesX - 6);
+                npc.homeTileY = Math.Clamp((int)(npc.Center.Y / 16f), 5, Main.maxTilesY - 6);
+                npc.homeless = true;   // sin cama que buscar: pasea el cuerpo del dios
+                npc.netUpdate = true;
+            }
+
+            // ============================================================
             //  v6.180 — EL PEDACITO DEL DEVORAMUNDOS (la cabeza espera y
             //  sirve; la cola se deja comer). La cabeza NO se congela:
             //  el gusano PELEA mientras la bruma se lleva su cola — el
@@ -1186,6 +1215,32 @@ namespace AethonMod.Content.Globals
                 if (npc.type == NPCID.EaterofWorldsHead)
                 {
                     if (Main.netMode == NetmodeID.MultiplayerClient) return;
+                    // ========================================================
+                    //  v6.182 — LA AUTOPSIA DEL FESTÍN QUE NO INICIABA (la
+                    //  letra: «la animacion de festin de devorar del
+                    //  grimorio no inicio con el Devoramundos»): LA
+                    //  v6.180 armaba el pedacito con LA PRIMERA cabeza de
+                    //  Devorador que naciera CERCA del portador — y LAS
+                    //  OLEADAS DE HAMBRE también paren cabezas de
+                    //  Devorador (GrimorioFuriaSistema.LosSeis: el
+                    //  Devorador es UNO de los seis guardianes, y nacen
+                    //  FUERA DE PANTALLA): el primer guardián de oleada
+                    //  SE COMÍA la marca (el pedacito servido en la
+                    //  bruma, lejos de la vista — y el diálogo
+                    //  «asqueroso» sonando en plena oleada) y cuando el
+                    //  portador invocaba al Devoramundos DE VERDAD, su
+                    //  marca ya estaba gastada: NADA.
+                    //
+                    //  LA CURA — LA MARCA DE LA LLAMADA (el patrón R26 de
+                    //  la v6.179, hecho derecha): el pedacito SOLO se
+                    //  arma con la cabeza nacida de UNA INVOCACIÓN
+                    //  REAL del portador (el pilar · la comida de gusano
+                    //  dentro del interior · la comida de gusano del
+                    //  mundo real — InteriorInvocaGlobalItem marca la
+                    //  llamada ANTES de parir la cabeza; PrismaInteriorUI
+                    //  también). Las oleadas, los orbes rotos y cualquier
+                    //  otro nacimiento JAMÁS queman la marca.
+                    // ========================================================
                     Player portador = null;
                     float mejorD = 3000f * 3000f;
                     for (int i = 0; i < Main.maxPlayers; i++)
@@ -1198,11 +1253,12 @@ namespace AethonMod.Content.Globals
                     if (portador != null && npc.TryGetGlobalNPC<FaucesGlobalNPC>(out var gPedacito))
                     {
                         var spPedacito = portador.GetModPlayer<Players.ShardPlayer>();
-                        if (spPedacito != null && !spPedacito.DevoramundosPedacito)
+                        if (spPedacito != null && !spPedacito.DevoramundosPedacito &&
+                            spPedacito.ConsumirLlamadaDevoramundos())
                         {
-                            // el festín se SIRVE una sola vez: la marca
-                            // viaja con el portador (la Página en Blanco
-                            // la borra con el olvido)
+                            // el festín se SIRVE una sola vez por
+                            // portador (la Página en Blanco la borra con
+                            // el olvido)
                             spPedacito.DevoramundosPedacito = true;
                             gPedacito.PedacitoEspera = 150;   // ~2,5 s: que la cadena nazca
                             gPedacito.PedacitoPortador = portador.whoAmI;

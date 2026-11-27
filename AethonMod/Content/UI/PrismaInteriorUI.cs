@@ -212,6 +212,18 @@ namespace AethonMod.Content.UI
 
                 var sp = yo.GetModPlayer<Players.ShardPlayer>();
                 int kills = sp != null ? sp.KillsInteriorDe(tipoJefe) : 0;
+
+                // v6.182 — LA MARCA DE LA LLAMADA (la autopsia del festín
+                //     que no iniciaba con el Devoramundos): la v6.180
+                //     armaba el pedacito con CUALQUIER cabeza nacida
+                //     cerca — y los guardianes de las OLEADAS también son
+                //     Devoradores: el primero quemaba la marca sin que
+                //     el portador viera nada. AHORA la invocación del
+                //     PILAR marca la llamada aquí y OnSpawn la consume
+                //     al nacer ESTA cabeza.
+                if (tipoJefe == NPCID.EaterofWorldsHead && sp != null && !sp.DevoramundosPedacito)
+                    sp.MarcarLlamadaDevoramundos();
+
                 // v6.177 — EL NIVEL SIN TOPE (la letra: «ademas en el mundo
                 // interior los jefes no necesitan estar limitados a nivel
                 // 10, que este nivel sea infitino y cuanto mas nivels mas

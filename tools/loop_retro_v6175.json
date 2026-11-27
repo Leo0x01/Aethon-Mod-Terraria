@@ -1,9 +1,9 @@
 {
- "cs_archivos": 476,
- "cs_lineas": 194358,
+ "cs_archivos": 477,
+ "cs_lineas": 194760,
  "catch_vacio": 0,
- "catch_total": 1141,
- "catch_registrado": 726,
+ "catch_total": 1144,
+ "catch_registrado": 729,
  "rand_en_dibujo": 0,
  "alloc_en_dibujo": 8,
  "rand_top": {},
@@ -14,11 +14,11 @@
  "Immediate": 60,
  "vfx_archivos": 80,
  "vfx_lineas": 49279,
- "loc_es": 1862,
- "loc_en": 2042,
+ "loc_es": 1860,
+ "loc_en": 2040,
  "loc_faltan_en": 0,
  "loc_faltan_es": 180,
- "loc_en_igual_es": 1277,
+ "loc_en_igual_es": 1278,
  "claves_faltantes_es": [
   "Altar.",
   "Armas.DagaInvocada",
@@ -38,7 +38,7 @@
   "PilarInterior.IraSellado"
  ],
  "claves_faltantes_es_n": 16,
- "png_n": 511,
+ "png_n": 512,
  "png_invalidos": [],
  "_fuente": "loop_retro_v6175.py"
 }

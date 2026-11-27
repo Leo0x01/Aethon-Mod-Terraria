@@ -67,10 +67,22 @@ namespace AethonMod.Content.NPCs
 
         // ═══ LA CORONA ═══
         private const int OJOS = 11;        // los once ojos (la letra)
-        // v6.180 — NIVEL MÁXIMO (la letra: «que esten a nivel maximo»):
-        // la corona del dios es la del ESCUADRÓN COMPLETO — ojos de
-        // nivel 4 (los del tope del Eterno), hinchados y vivos.
-        private const float NIVEL_OJOS = 4f;
+        // v6.182 — EXACTAMENTE LOS MINIONS A NIVEL MÁXIMO (la letra:
+        // «solo debes usar exactamente los minions a nivel maximo que
+        // tiene el jugador con sus anillos runicos de soles y agujeros
+        // negros»): la hinchazón «nivel 4» de la v6.180 MUERE — cada ojo
+        // de la corona es UN MINION DEL ESCUADRÓN tal como lo ve el
+        // portador: la MISMA ESCALA del Ojo Eterno (0,375 → 21×20 px) con
+        // SU SELLO COMPLETO de las 4 mejoras — el círculo mágico de los
+        // agujeros negros + los 2 anillos rúnicos de agujero negro
+        // (dorado + violeta) + los 2 anillos rúnicos de sol (oro + azul
+        // estelar) — el atuendo EXACTO de OjoEternoMinion.DrawElSello
+        // con MejorasMax (la fuente de la verdad).
+        private const float ESCALA_MINION = 0.375f;   // == OjoEternoMinion.ESCALA
+
+        // ── LA PALETA DEL SELLO (medida del Umbral — la misma del minion) ──
+        private static readonly Color SelloOro = new(240, 124, 65);
+        private static readonly Color SelloPunta = new(255, 205, 140);
 
         // ═══ LA ESCALA DEL CUERPO (el tamaño del grimorio NORMAL) ═══
         private const float ESCALA = 1.30f;   // 36×49 → ~47×64 px
@@ -536,138 +548,223 @@ namespace AethonMod.Content.NPCs
         }
 
         // ════════════════════════════════════════════════════════════
-        //  EL DIBUJO DEL DIOS (el grimorio normal + su ojo + la corona)
+        //  EL DIBUJO DEL DIOS — v6.182: LA PROPORCIÓN DEL ARMA Y LOS
+        //  ANILLOS RÚNICOS. (1) EL IRIS a LA ESCALA DEL ARMA
+        //  (GrimorioHambriento.IRIS_ESC — el disco nacía a escala
+        //  completa: 42 px sobre un libro de 47×64; el arma dibuja el
+        //  SUYO a 0,2773 — AHORA el dios también). (2) EL HALO PLANO
+        //  MUERE (la regla de la casa: nada de círculos planos — era un
+        //  SoftGlow redondo estirado a 2,4×ESCALA): su lugar lo ocupa
+        //  EL ANILLO RÚNICO SOLAR del propio dios (la letra: «y darle
+        //  tambien un anillo runico solar al grimorio jefe»).
+        //  (3) LA CORONA son EXACTAMENTE los minions a nivel máximo.
         // ════════════════════════════════════════════════════════════
         public override bool PreDraw(SpriteBatch sb, Vector2 screenPos, Color drawColor)
         {
             if (Main.netMode == NetmodeID.Server) return false;
+            VFXCore.CerrarLoteSiAbierto();
             try
             {
                 float t = Main.GlobalTimeWrappedHourly;
-                Vector2 pos = NPC.Center - screenPos;
                 Player presa = Main.player[NPC.target];
 
-                // ══ EL HALO DEL SELLO ══
-                var glow = VFXCore.SoftGlow;
-                if (glow != null)
-                    sb.Draw(glow, pos, null,
-                        new Color(118, 74, 190) * (0.28f * NPC.Opacity), 0f,
-                        glow.Size() * 0.5f, 2.4f * ESCALA, SpriteEffects.None, 0f);
-
-                // ══ EL CUERPO: EL GRIMORIO NORMAL (el sprite del arma) ══
-                // el vaivén del flotante (la firma del grimorio) + el
-                // cabeceo hacia donde va
-                float bob = MathF.Sin(t * 1.35f + NPC.whoAmI * 0.4f) * 5.5f;
-                float tilt = NPC.rotation * 0.6f + 0.05f * MathF.Sin(t * 0.9f);
-                Texture2D cuerpo = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Weapons/GrimorioHambriento",
-                    ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
-                Vector2 destino = pos + new Vector2(0f, bob);
-
-                // LA RESPIRACIÓN (el libro vivo — la esencia del Menor)
-                float escVivo = ESCALA * (1f + 0.035f * MathF.Sin(t * 2.1f));
-                sb.Draw(cuerpo, destino, null,
-                    Color.White * NPC.Opacity, tilt,
-                    cuerpo.Size() * 0.5f, escVivo, SpriteEffects.None, 0f);
-
-                // ══ SU OJO (el del arma: el iris que MIRA + el párpado
-                //    que parpadea + el iris rojo de la furia) ══
-                // LA CASA DEL OJO en el sprite (OJO = 19.09, 22.45 de 36×49)
-                Vector2 casaOjo = destino + new Vector2((19.09f - 18f), (22.45f - 24.5f)) * escVivo;
-                // LA MIRADA: el iris se desplaza hacia la presa
-                Vector2 mira = Vector2.Zero;
-                if (presa != null && presa.active)
+                // ══ EL ANILLO RÚNICO SOLAR DEL DIOS (la letra: «y darle
+                //    también un anillo rúnico solar al grimorio jefe»):
+                //    la elipse inclinada de los soles (SigiloLib — el
+                //    MISMO emisor del anillo de sol de la mejora 3 del
+                //    escuadrón), al tamaño del dios, girando alrededor
+                //    del libro — EL REEMPLAZO DEL HALO PLANO ══
+                VFXCore.Begin();
+                try
                 {
-                    mira = presa.Center - screenPos - casaOjo;
-                    if (mira.LengthSquared() > 1f) mira = Vector2.Normalize(mira) * 3.4f * escVivo;
+                    SigiloLib.AnilloRunico(NPC.Center, 58f, 58f * 0.36f, -0.55f,
+                        t * 0.24f, 8, 1.55f, t, 0,
+                        SigiloLib.CuerpoOro, SigiloLib.PuntaOro, 0.92f * NPC.Opacity);
+                    VFXCore.FlushAdditive();
                 }
-                // EL PARPADEO (el compás del Menor: late cada ~2 s)
-                float alpha = 1f;
-                _ojoParpadeo = (_ojoParpadeo + 1) % 130;
-                if (_ojoParpadeo > 118) alpha = Math.Abs(_ojoParpadeo - 124) / 6f;
+                catch (System.Exception exAnillo)
+                { VFXCore.CerrarLoteSiAbierto(); global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonSellado.Anillo", exAnillo); }
 
-                Texture2D iris = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Weapons/GrimorioHambriento_Iris",
-                    ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
-                sb.Draw(iris, casaOjo + mira, null,
-                    Color.White * (0.92f * alpha * NPC.Opacity), 0f,
-                    iris.Size() * 0.5f, escVivo, SpriteEffects.None, 0f);
-                // EL IRIS ROJO (la furia lo enciende — la marca del dios)
-                if (Furia > 0.35f)
-                    sb.Draw(ModContent.Request<Texture2D>(
-                        "AethonMod/Content/Weapons/GrimorioHambriento_IrisRojo",
-                        ReLogic.Content.AssetRequestMode.ImmediateLoad).Value,
-                        casaOjo + mira, null,
-                        Color.White * (MathHelper.Clamp((Furia - 0.35f) * 1.4f, 0f, 0.85f) * alpha * NPC.Opacity),
-                        0f, iris.Size() * 0.5f, escVivo, SpriteEffects.None, 0f);
-                // EL PÁRPADO (medio/cerrado en el parpadeo — la casa)
-                if (alpha < 0.99f)
-                {
-                    Texture2D tapa = ModContent.Request<Texture2D>(
-                        alpha < 0.45f ? "AethonMod/Content/Weapons/GrimorioHambriento_Cerrado"
-                                      : "AethonMod/Content/Weapons/GrimorioHambriento_Medio",
-                        ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
-                    sb.Draw(tapa, destino, null,
-                        Color.White * NPC.Opacity, tilt,
-                        tapa.Size() * 0.5f, escVivo, SpriteEffects.None, 0f);
-                }
-
-                // ══ LA CORONA DE LOS ONCE OJOS (la letra: «rodeandolos
-                //    bien animados con su parpadeo iris y demas») ══
-                // cada ojo con SU fase de parpadeo, SU iris clavado en
-                // la presa y el vaivén de la órbita — a NIVEL MÁXIMO.
-                Texture2D ojoA = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Projectiles/OjoEterno_Abierto",
-                    ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
-                Texture2D ojoM = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Projectiles/OjoEterno_Medio",
-                    ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
-                Texture2D ojoC = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Projectiles/OjoEterno_Cerrado",
-                    ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
-                for (int i = 0; i < OJOS; i++)
-                {
-                    Vector2 po = PosicionDelOjo(i, t) - screenPos;
-                    // EL OJO HABLANTE SE HINCHA (el telegraph del coro)
-                    bool habla = Estado == EST_PELEA && i == _ojoHablante && _acto == 1;
-                    float escOjo = (habla ? 1.35f : 1f) * (0.55f + NIVEL_OJOS * 0.05f)
-                        * (1f + 0.06f * MathF.Sin(t * 3.1f + i * 2.2f));
-
-                    // SU PARPADEO (cada ojo a su compás — la corona respira)
-                    int fase = ((int)(t * 60f) + i * 37) % 170;
-                    Texture2D texOjo = ojoA;
-                    if (fase > 156) texOjo = ojoC;
-                    else if (fase > 146) texOjo = ojoM;
-
-                    // EL RESPLANDOR del ojo (más vivo si habla)
-                    if (glow != null)
-                        sb.Draw(glow, po, null,
-                            (habla ? new Color(255, 120, 100) : new Color(150, 84, 235))
-                                * ((habla ? 0.42f : 0.26f) * NPC.Opacity), 0f,
-                            glow.Size() * 0.5f, escOjo * 1.5f, SpriteEffects.None, 0f);
-                    sb.Draw(texOjo, po, null,
-                        Color.White * NPC.Opacity, 0f,
-                        texOjo.Size() * 0.5f, escOjo, SpriteEffects.None, 0f);
-
-                    // EL IRIS DE LA CORONA: clavado en la presa
-                    if (texOjo == ojoA && presa != null && presa.active)
-                    {
-                        Vector2 hacia = presa.Center - screenPos - po;
-                        if (hacia.LengthSquared() > 1f)
-                        {
-                            hacia = Vector2.Normalize(hacia) * 4.5f * escOjo;
-                            if (glow != null)
-                                sb.Draw(glow, po + hacia, null,
-                                    (habla ? new Color(255, 150, 120) : new Color(255, 200, 90))
-                                        * (0.80f * NPC.Opacity), 0f,
-                                    glow.Size() * 0.5f, escOjo * 0.42f, SpriteEffects.None, 0f);
-                        }
-                    }
-                }
+                DibujarLaCorona(sb, t, presa, screenPos);
+                DibujarElCuerpo(sb, t, presa, screenPos);
             }
             catch (System.Exception exRegistro)
             { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonSellado", exRegistro); }
+            VFXCore.ReabrirLoteVanilla();
             return false;   // el dibujo es TODO nuestro
+        }
+
+        // ── LA CORONA DE LOS ONCE OJOS: los minions a nivel máximo ──
+        private void DibujarLaCorona(SpriteBatch sb, float t, Player presa, Vector2 screenPos)
+        {
+            // ── LOS ANILLOS DE AGUJERO NEGRO (el lote aditivo del sello
+            //    del minion — SU MISMO dibujado): el círculo mágico
+            //    erosionado + el dorado de 8 girando + el violeta de 6
+            //    contrarrotando ──
+            Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
+                SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                null, Main.GameViewMatrix.TransformationMatrix);
+            try
+            {
+                for (int i = 0; i < OJOS; i++)
+                {
+                    bool habla = Estado == EST_PELEA && i == _ojoHablante && _acto == 1;
+                    Vector2 po = PosicionDelOjo(i, t) - screenPos;
+                    float arde = habla ? 1f + 0.25f * MathF.Sin(t * 9f) : 0f;   // el hablante ARDE
+                    float escOjo = EscalaDelOjo(i, t) * (habla ? 1.35f : 1f);
+                    int seed = NPC.whoAmI * 13 + i * 7 + 3;
+                    float r = ESCALA_MINION * 16f * (habla ? 1.25f : 1f);
+                    float glyph = Math.Max(r / 52f, 0.25f) * 1.75f;
+                    OrbitaLib.SigiloErosionado(po, r, t, seed,
+                        2.55f, 8, 0.06f, glyph, SelloOro, SelloPunta,
+                        offset: 0, hashOff: 0, spikeAngle: -0.55f, spikeWindow: 0.45f);
+                    float g1 = Math.Max(15f / 52f, 0.25f) * 1.15f;
+                    OrbitaLib.CirculoRunico(po, 15f * (1f + arde * 0.2f), t, 1f, 8, 0.10f,
+                        OrbitaLib.RunaDorada, OrbitaLib.RunaDoradaTip, g1,
+                        null, 0, 1, 0.95f, 0.30f);
+                    float g2 = Math.Max(20f / 52f, 0.25f) * 1.15f;
+                    OrbitaLib.CirculoRunico(po, 20f * (1f + arde * 0.2f), t, 1f, 6, -0.075f,
+                        OrbitaLib.RunaVioleta, OrbitaLib.RunaVioletaTip, g2,
+                        null, 3, 1, 0.95f, 0.26f);
+                }
+            }
+            finally { Main.spriteBatch.End(); }
+
+            // ── LOS ANILLOS RÚNICOS DE SOL (el lote VFX de coords de
+            //    mundo — las elipses inclinadas de la mejora 3 y 4) ──
+            VFXCore.Begin();
+            try
+            {
+                for (int i = 0; i < OJOS; i++)
+                {
+                    bool habla = Estado == EST_PELEA && i == _ojoHablante && _acto == 1;
+                    Vector2 c = PosicionDelOjo(i, t);
+                    float mult = habla ? 1.2f : 1f;
+                    SigiloLib.AnilloRunico(c, 25f * mult, 25f * 0.34f * mult, -0.55f,
+                        t * 0.26f, 8, Math.Max(25f / 52f, 0.25f) * 1.45f,
+                        t, 0, SigiloLib.CuerpoOro, SigiloLib.PuntaOro, 0.95f);
+                    SigiloLib.AnilloRunico(c, 30f * mult, 30f * 0.41f * mult, 0.35f,
+                        -t * 0.31f, 6, Math.Max(30f / 52f, 0.25f) * 1.45f,
+                        t, 2, SigiloLib.CuerpoAzul, SigiloLib.PuntaAzul, 0.95f);
+                }
+                VFXCore.FlushAdditive();
+            }
+            catch (System.Exception exAnilloSol)
+            { VFXCore.CerrarLoteSiAbierto(); global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonSellado.AnilloSol", exAnilloSol); }
+
+            // ── LOS OJOS (el lote vanilla — reabierto): el sprite a la
+            //    ESCALA DEL MINION, su parpadeo propio y SU IRIS clavado
+            //    en la presa (la firma del escuadrón) ──
+            VFXCore.ReabrirLoteVanilla();
+            Texture2D ojoA = ModContent.Request<Texture2D>(
+                "AethonMod/Content/Projectiles/OjoEterno_Abierto").Value;
+            Texture2D ojoM = ModContent.Request<Texture2D>(
+                "AethonMod/Content/Projectiles/OjoEterno_Medio").Value;
+            Texture2D ojoC = ModContent.Request<Texture2D>(
+                "AethonMod/Content/Projectiles/OjoEterno_Cerrado").Value;
+            Texture2D iris = ModContent.Request<Texture2D>(
+                "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;
+            for (int i = 0; i < OJOS; i++)
+            {
+                Vector2 po = PosicionDelOjo(i, t) - screenPos;
+                bool habla = Estado == EST_PELEA && i == _ojoHablante && _acto == 1;
+                float escOjo = EscalaDelOjo(i, t) * (habla ? 1.35f : 1f);
+
+                // SU PARPADEO (cada ojo a su compás — la corona respira)
+                int fase = ((int)(t * 60f) + i * 37) % 170;
+                Texture2D texOjo = ojoA;
+                if (fase > 156) texOjo = ojoC;
+                else if (fase > 146) texOjo = ojoM;
+
+                sb.Draw(texOjo, po, null,
+                    Color.White * NPC.Opacity, 0f,
+                    texOjo.Size() * 0.5f, escOjo, SpriteEffects.None, 0f);
+
+                // EL IRIS DEL ESCUADRÓN: clavado en la presa — el viaje
+                // por la almendra (±7,5 · ±2,5) a la ESCALA del minion
+                if (texOjo == ojoA && presa != null && presa.active)
+                {
+                    float ang = (presa.Center - screenPos - po).ToRotation();
+                    Vector2 mirada = new(MathF.Cos(ang) * 7.5f, MathF.Sin(ang) * 2.5f);
+                    Vector2 posIris = po + (new Vector2(0.7f, 2.3f) + mirada) * escOjo;
+                    sb.Draw(iris, posIris, null,
+                        Color.White * NPC.Opacity, 0f,
+                        iris.Size() * 0.5f, 0.41f * escOjo, SpriteEffects.None, 0f);
+                }
+            }
+        }
+
+        /// <summary>La escala viva del ojo `i`: la del MINION (0,375)
+        /// con su micro-respiración — la hinchazón de la v6.180 murió.</summary>
+        private float EscalaDelOjo(int i, float t)
+            => ESCALA_MINION * (1f + 0.06f * MathF.Sin(t * 3.1f + i * 2.2f));
+
+        // ── EL CUERPO: el grimorio normal + su ojo a la ESCALA DEL ARMA ──
+        private void DibujarElCuerpo(SpriteBatch sb, float t, Player presa, Vector2 screenPos)
+        {
+            Vector2 pos = NPC.Center - screenPos;
+
+            // el vaivén del flotante (la firma del grimorio) + el
+            // cabeceo hacia donde va
+            float bob = MathF.Sin(t * 1.35f + NPC.whoAmI * 0.4f) * 5.5f;
+            float tilt = NPC.rotation * 0.6f + 0.05f * MathF.Sin(t * 0.9f);
+            Texture2D cuerpo = ModContent.Request<Texture2D>(
+                "AethonMod/Content/Weapons/GrimorioHambriento").Value;
+            Vector2 destino = pos + new Vector2(0f, bob);
+
+            // LA RESPIRACIÓN (el libro vivo — la esencia del Menor)
+            float escVivo = ESCALA * (1f + 0.035f * MathF.Sin(t * 2.1f));
+            sb.Draw(cuerpo, destino, null,
+                Color.White * NPC.Opacity, tilt,
+                cuerpo.Size() * 0.5f, escVivo, SpriteEffects.None, 0f);
+
+            // ══ SU OJO (el del arma: el iris que MIRA + el párpado
+            //    que parpadea + el iris rojo de la furia) ══
+            // LA CASA DEL OJO en el sprite (OJO = 19.09, 22.45 de 36×49)
+            Vector2 casaOjo = destino + new Vector2((19.09f - 18f), (22.45f - 24.5f)) * escVivo;
+            // v6.182 — LA PROPORCIÓN DEL ARMA (la letra: «el iris es
+            // demasiado grande»): el disco de 32 px nacía a ESCALA
+            // COMPLETA (42 px de disco sobre un libro de 47×64); el ARMA
+            // dibuja su iris a IRIS_ESC = 0,2773 (la caja de 174 px →
+            // 8,87 px de juego en el sprite 36×49). AHORA el dios usa
+            // LA MISMA proporción: 32 × 0,2773 × 1,30 ≈ 11,6 px — el
+            // ojo del arma en el cuerpo del dios.
+            // LA MIRADA: el iris se desliza hacia la presa (el
+            // desplazamiento del arma — LA CAJA DEL SOCKET, sin inflar)
+            Vector2 mira = Vector2.Zero;
+            if (presa != null && presa.active)
+            {
+                mira = presa.Center - screenPos - casaOjo;
+                if (mira.LengthSquared() > 1f) mira = Vector2.Normalize(mira) * 2.6f * escVivo;
+            }
+            // EL PARPADEO (el compás del Menor: late cada ~2 s)
+            float alpha = 1f;
+            _ojoParpadeo = (_ojoParpadeo + 1) % 130;
+            if (_ojoParpadeo > 118) alpha = Math.Abs(_ojoParpadeo - 124) / 6f;
+
+            Texture2D iris = ModContent.Request<Texture2D>(
+                "AethonMod/Content/Weapons/GrimorioHambriento_Iris").Value;
+            float escIris = escVivo * Weapons.GrimorioHambriento.IRIS_ESC;
+            sb.Draw(iris, casaOjo + mira, null,
+                Color.White * (0.92f * alpha * NPC.Opacity), 0f,
+                iris.Size() * 0.5f, escIris, SpriteEffects.None, 0f);
+            // EL IRIS ROJO (la furia lo enciende — la marca del dios)
+            if (Furia > 0.35f)
+                sb.Draw(ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Weapons/GrimorioHambriento_IrisRojo").Value,
+                    casaOjo + mira, null,
+                    Color.White * (MathHelper.Clamp((Furia - 0.35f) * 1.4f, 0f, 0.85f) * alpha * NPC.Opacity),
+                    0f, iris.Size() * 0.5f, escIris, SpriteEffects.None, 0f);
+            // EL PÁRPADO (medio/cerrado en el parpadeo — la casa)
+            if (alpha < 0.99f)
+            {
+                Texture2D tapa = ModContent.Request<Texture2D>(
+                    alpha < 0.45f ? "AethonMod/Content/Weapons/GrimorioHambriento_Cerrado"
+                                  : "AethonMod/Content/Weapons/GrimorioHambriento_Medio").Value;
+                sb.Draw(tapa, destino, null,
+                    Color.White * NPC.Opacity, tilt,
+                    tapa.Size() * 0.5f, escVivo, SpriteEffects.None, 0f);
+            }
         }
     }
 
@@ -806,6 +903,7 @@ namespace AethonMod.Content.NPCs
         public override bool PreDraw(ref Color lightColor)
         {
             if (Main.netMode == NetmodeID.Server) return false;
+            VFXCore.CerrarLoteSiAbierto();
             try
             {
                 float t = Edad;
@@ -816,14 +914,30 @@ namespace AethonMod.Content.NPCs
                     : 1f;
 
                 Texture2D ojoA = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Projectiles/OjoEterno_Abierto",
-                    ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
+                    "AethonMod/Content/Projectiles/OjoEterno_Abierto").Value;
                 Texture2D ojoM = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Projectiles/OjoEterno_Medio",
-                    ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
+                    "AethonMod/Content/Projectiles/OjoEterno_Medio").Value;
                 var glow = VFXCore.SoftGlow;
 
+                // ══ v6.182 — LA CORONA DE CONJURO DEL SER (el halo plano
+                //    MURIÓ — la regla de la casa: nada de círculos planos;
+                //    era un SoftGlow redondo estirado a 3,6×): la TRIPLE
+                //    CORONA de los agujeros negros de la casa (OrbitaLib.
+                //    CoronaConjuro — el círculo dorado de 8 + el violeta
+                //    de 6 + el blanco íntimo de 6, las runas DE PIE con
+                //    sus perlas) girando alrededor del ojo colosal ══
+                Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive,
+                    SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
+                    null, Main.GameViewMatrix.TransformationMatrix);
+                try
+                {
+                    OrbitaLib.CoronaConjuro(pos, RADIO * 1.5f * hinchazon, t,
+                        0.95f * nacer * Projectile.Opacity, 1.30f);
+                }
+                finally { Main.spriteBatch.End(); }
+
                 // ══ EL HAZ (después de la ceremonia) ══
+                VFXCore.ReabrirLoteVanilla();
                 if (t >= T_CEREMONIA)
                 {
                     float vivo = Math.Min(1f, (t - T_CEREMONIA) / 30f);
@@ -863,11 +977,6 @@ namespace AethonMod.Content.NPCs
 
                 // ══ EL OJO COLOSAL ══
                 float escOjo = (RADIO * 2f * hinchazon) / ojoA.Width;
-                // EL HALO (la presencia del ser exterior)
-                if (glow != null)
-                    Main.spriteBatch.Draw(glow, pos, null,
-                        new Color(150, 60, 210) * (0.34f * nacer * Projectile.Opacity), 0f,
-                        glow.Size() * 0.5f, hinchazon * 3.6f, SpriteEffects.None, 0f);
                 // EL PARPADEO LENTO DEL SER (casi humano — más aterrador)
                 int fase = (int)t % 240;
                 Texture2D texOjo = fase > 228 ? ojoM : ojoA;
@@ -893,6 +1002,7 @@ namespace AethonMod.Content.NPCs
             }
             catch (System.Exception exRegistro)
             { global::AethonMod.Content.Systems.RegistroSistema.Fallo("IraSellado", exRegistro); }
+            VFXCore.ReabrirLoteVanilla();
             return false;
         }
     }

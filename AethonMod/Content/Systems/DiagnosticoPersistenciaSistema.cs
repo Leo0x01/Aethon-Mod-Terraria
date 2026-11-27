@@ -88,7 +88,9 @@ namespace AethonMod.Content.Systems
             tríoMod.Ranuras[1] = (Item)arco.Clone();
             tríoMod.Ranuras[2] = (Item)aguja.Clone();
             tríoMod.Inteligencia[1] = 2;      // albedrío: al cursor
-            tríoMod.ModoDisparo = global::AethonMod.Content.Weapons.Investigaciones.TrioDelEterno.Todas;
+            tríoMod.PonerSeleccion(0, true);    // v6.182 — la selección del disparo
+            tríoMod.PonerSeleccion(1, true);
+            tríoMod.PonerSeleccion(2, false);   // una apagada: el disco debe guardarla así
 
             // ── 2. EL CICLO DE REINICIO: SaveData → DISCO → LoadData ──
             var tagTrio = new TagCompound();
@@ -115,7 +117,8 @@ namespace AethonMod.Content.Systems
                 bool viva = r != null && !r.IsAir;
                 Decir($"TRIO-RANURA-{i}: {(viva ? $"VIVA type={r.type} ({r.Name})" : "VACIA — EL BUG DEL USUARIO")}");
             }
-            Decir("TRIO-MODO: " + (renacidoMod.ModoDisparo == global::AethonMod.Content.Weapons.Investigaciones.TrioDelEterno.Todas ? "TODAS (correcto)" : "TURNOS (perdido)"));
+            Decir("TRIO-MODO: " + (renacidoMod.Seleccionada(0) && renacidoMod.Seleccionada(1) &&
+                !renacidoMod.Seleccionada(2) ? "SELECCIÓN VIVA (correcto)" : "SELECCIÓN PERDIDA — el bug del usuario"));
             Decir("TRIO-ALBEDRIO-1: " + (renacidoMod.Inteligencia != null && renacidoMod.Inteligencia.Length > 1 ? renacidoMod.Inteligencia[1].ToString() : "?"));
 
             // EL SELLO de la ranura 0 (exigido por PuedeEntrar)
