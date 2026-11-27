@@ -1,20 +1,17 @@
-# SNAPSHOT ESTABLE — v6.183 — EL FESTÍN DE LA APARICIÓN, LOS ANILLOS SOLARES Y EL AJUAR DEL PORTADOR
+# SNAPSHOT ESTABLE — v6.184 — LA PURGA QUE SE COMÍA SU PROPIA MESA, EL DIOS SEPARADO Y LA LUZ CANÓNICA
 
-> **PUBLICADA — release de GitHub 461019829 · md5 fe30a30c559ab20f4997417a1e783753 · AethonMod_v6.183.tmod · tML 2026.09.3.1**
+> **PUBLICADA — md5 15c9176fbbe834921cd045bd3dd13e20 · AethonMod_v6.184.tmod · tML 2026.09.3.1**
 
-## LOS DIEZ PUNTOS DE LA SESIÓN 35
+## LOS SIETE PUNTOS DE LA SESIÓN 36
 
-1. **EL FESTÍN DE LA APARICIÓN**: la marca de la llamada MURIÓ entera — la PRIMERA vez que el Devoramundo APARECE (≤2600 px de un portador con el libro) el grimorio devora UNA SECCIÓN (la cola, con la bruma de siempre y el diálogo «Esto es asqueroso…»). Los guardianes de OLEADA vetan la mesa el mismo tick que nacen (jamás son el festín) y LA MIGRACIÓN devuelve el cerrojo quemado de la era v6.180/.181 (una vez por portador — la Página en Blanco sigue reponiendo el suyo).
-2. **EL TEXTO EN CRUDO MUERTI**: 5 crudos cazados (Items.TrioMarcaPuesta en el chat de las ranuras · ChatSellado0 del Cronista · Bestario→Bestiario del jefe · Pergamino.Subtitulo que nace · la paridad en-US documentada) + **EL GUARDIÁN DE LAS LLAVES** (gate nuevo, R34): toda clave que el código ARMA vive en los 3 hjson.
-3. **EL VACÍO EXTERIOR PAGA A LA CAMADA**: +10 % daño mágico Y +10 % daño de invocación (+10 def · −15 % maná).
-4. **LOS ANILLOS SOLARES DEL SELLO**: un anillo rúnico solar POR FASE (1/2/3, radios 58/74/90). FASE 1: EL ARRANQUE (el anillo gira acelerándose) + LA RUEDA DE RAYOS (10 rayos de energía). FASE 2: LA ENERGÍA CONCENTRADA (un haz dorado por anillo, anclado al punto vivo). FASE 3: la concentrada ×3 + EL DIOS PERSIGUE ~4 s.
-5. **LA TERCERA CURA DEL client.log**: la rejilla de reposo de vanilla lee `Main.tile[home±7]` SIN clamp — EL GUARDIÁN DEL HOGAR v2 usa margen 12 universal (5−7=−2 era el crash que quedó vivo).
-6. **LA VÍSPERA DEL LIBRO SE ESPERA**: el Libro Consagrado (la llave del despertar 20) se entrega al 19… y AHORA también a cualquier nivel posterior mientras falte — la llave ya no se pierde.
-7. **EL ICONO ÉPICO DEL MUNDO INTERIOR**: EL ECLIPSE con su corona dorada + bruma + tentáculos con filo + EL MARCO dorado con esquinas rúnicas (VLM 3/10 → 8/10).
-8. **LA MASCOTA LIMPIA**: el Vástago del Eterno v2 — pixel art 100 % código, alas cosidas simétricas, ojos consistentes (parpadeo solo en el frame 3), cero antialiasing (VLM 6/10 → 8,5/10).
-9. **EL AJUAR DEL PORTADOR**: los 13 regalos (Formas 2/3/4/8 · Pequeño Recuerdo · Halo · Brillo · Coro · Pluma · Regla del Cielo · Corona · Derrame · La Última Palabra) ya no caen sueltos: viven en la bolsa 29 del Cofre del Arsenal (sprite propio: el saco de oro con la pluma blanca).
-10. **LOS INFORMES**: `download/CALCULOS-DANO-GRIMORIO-v6183.md` (TODOS los cálculos de daño del grimorio y la forma del eterno, con archivo y línea) + `download/LISTA-ITEMS-INICIALES-v6183.md` (todo lo que el jugador recibe al entrar).
+1. **EL FESTÍN DEL DEVORAMUNDO, POR FIN (LA CUARTA AUTOPSIA — con el crimen presenciado)**: LA PURGA DE LA MESA mataba a su propia animación — `ServirElPedacito` purgaba DESPUÉS de parir al `FauceDevoradorProjectile` (que nace encima del preso con `friendly=false`): muerto al instante desde la v6.180, con TRES gatillos distintos cayendo sobre el mismo cadáver. LA CURA: la purga SALTA al Fauce SIEMPRE (R35) + el orden canónico PURGA PRIMERO, BOCA DESPUÉS. **VERIFICADO EN EL BANCO HEADLESS NUEVO: `A-FESTIN COMPLETO ✔` (mesa servida · fauce nació · la sección murió de verdad) + `EL LEJOS NO CENA ✔`**.
+2. **EL BANCO DEL FESTÍN** (`DiagnosticoFestinSistema` + EL SOCKET FALSO): el servidor vacío JAMÁS tickea el mundo (decompile Main.cs:6038 — solo `Main.Update` con `Netplay.HasClients`); el banco planta un `ISocket` eterno en `Netplay.Clients[0]` desde `Main.OnTickForThirdPartySoftwareOnly` (el único latido idle) → el mundo VIVE y los bancos de gameplay corren el camino EXACTO del juego (R36).
+3. **EL DIOS SELLADO, SEPARADO DE VERDAD**: la pareja era el proyectil VANILLA 931 CON EL JUGADOR DE DUEÑO (sus propios ataques lo golpeaban a él) → **`ParejaSelladoProjectile`** (hostil, de la casa); el coro le prestaba el ARSENAL del jefe Recuerdo → ahora el ojo ES EL MINION: **`OjoSelladoMinion`** (NPC propio con parpadeo completo, iris clavado, órbita + picado, 12 s de caza, máx. 4 vivos).
+4. **LA EXPLOSIÓN DE LUZ CANÓNICA**: **`EstallidoLuzLib`** — la receta EXACTA del estallido del Pequeño Recuerdo de Aethon (recogida de 6 agujas · 14 rayos · cruz anamórfica · núcleo que inunda · estrella · onda · bokeh) con `escala` libre. El ataque de luz del dios (**`EstallidoSelladoProjectile`**, ×2,2, a la tercera andanada del coro, esquivable) y el estallido de textura extraña MUERE del Sellado con todo el arsenal prestado.
+5. **EL NACIMIENTO DEL RAYO DE PRUEBA C**: al aparecer el haz, SU BASE estalla con la explosión de la mascota (el `MiniEstallidoPet` real, escala abierta en `ai[2]`).
+6. **EL SOLAPAMIENTO DE LOS BUFFS MUERTO**: el `PreDraw` del buff de la Ira devolvía `true` (mandaba a vanilla a REDIBUJAR el icono encima: el doble sobre su celda y el marco derramado en el vecino — el Ahogamiento del usuario) → **`return false`** (R37, verificada contra el decompile). Los buffs del mod son ModBuff puros; la única costura con vanilla (flags `lightPet`/`vanityPet` de las mascotas) es el contrato del tML.
+7. **EL VÁSTAGO v3 — ADORABLE DE VERDAD**: librito regordete con volumen (luz arriba, sombra al pie), ojotes con doble reflejo SIEMPRE en su sitio, rubor, sonrisita, alitas cosidas a la axila y cinta dorada colgando — 4 rondas de QA VLM: 8,5 → 9 → 8,5 → **9/10 SHIP** (el atlas 40×384 es drop-in del .cs de siempre).
 
-## GATES
+## GATES (10 PASADAS + 4 RONDAS DE SPRITE + 5 BUILDS DE BANCO)
 
-oráculo 0/0 · build REAL 0/0 + Packaging (536 entradas) · GUARDIÁN de texturas TODO VIVE · **GUARDIÁN DE LAS LLAVES TODO VIVE (1862×3)** · AUDIT v6.183 TODO VERIFICADO · headless 0 excepciones · loop sin regresiones · sims SHIP (anillos · icono 8/10 · mascota 8,5/10)
+oráculo 0/0 (481 .cs) · build REAL 0/0 + Packaging (536 entradas, 19.549.282 B, md5 15c9176fbbe834921cd045bd3dd13e20) · GUARDIÁN de texturas TODO VIVE (el minion sin cara cazado ANTES de publicar — R38) · GUARDIÁN DE ARRANQUE: EL CLIENTE VIVE · GUARDIÁN DE LAS LLAVES TODO VIVE (1864×3) · AUDIT v6.184 TODO VERIFICADO · headless 0 excepciones · **BANCO DEL FESTÍN COMPLETO ✔** · loop SIN REGRESIONES (catches 0 · azar 0 · PNG 0 inválidos) · QA VLM del Vástago 9/10 SHIP

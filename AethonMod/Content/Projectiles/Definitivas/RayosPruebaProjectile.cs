@@ -411,6 +411,33 @@ namespace AethonMod.Content.Projectiles.Definitivas
             }
         }
 
+        // ================================================================
+        //  v6.184 — LA EXPLOSIÓN DE LUZ DEL NACIMIENTO (la letra: «has
+        //  que el rayo de prueba C, al momento de aparecer en la base,
+        //  en su base de nacimiento use una explosion de luz de la
+        //  mascota de luz Pequeño Recuerdo de Aethon»): al NACER el haz,
+        //  SU BASE estalla con la explosión canónica de la casa — la
+        //  MISMA de la mascota (MiniEstallidoPet), a escala del arma,
+        //  estática en el punto de nacimiento (ai[1] = -1: no cabalga
+        //  ninguna fuente). La ira (EsIra) no la lleva: la luz de
+        //  nacimiento es del RAYO DE PRUEBA C.
+        // ================================================================
+        public override void OnSpawn(Terraria.DataStructures.IEntitySource source)
+        {
+            try
+            {
+                if (EsIra) return;   // solo el rayo de prueba C
+                if (Main.netMode == Terraria.ID.NetmodeID.MultiplayerClient) return;
+                Projectile.NewProjectile(source, Projectile.Center, Microsoft.Xna.Framework.Vector2.Zero,
+                    ModContent.ProjectileType
+                        <global::AethonMod.Content.Projectiles.Cosmetic.MiniEstallidoPet>(),
+                    0, 0f, Projectile.owner,
+                    Projectile.whoAmI * 31f, -1f, 1.30f);
+            }
+            catch (System.Exception exRegistro)
+            { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayosPrueba.Nacimiento", exRegistro); }
+        }
+
         public override void SendExtraAI(BinaryWriter writer)
         {
             writer.Write(Projectile.direction == 1);

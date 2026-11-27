@@ -115,6 +115,10 @@ Detalles de cada paso:
 | R26 | **LA MARCA DE LA LLAMADA** (v6.179, la letra: «no se activa el festin… se invoca mas de 2 veces despues de borrar la lista del festin»): un contador con disparo «== 2» EXACTO JAMÁS puede contar eventos que el jugador no controla (las oleadas parían cabezas de Devorador entre invocación e invocación y el «== 2» ya nunca caía en una llamada de verdad). La regla: el contador cuenta SOLO lo que marca la LLAMADA del portador (ShardPlayer.InvocacionDevoradorPendiente — la marcan el ítem en la mano y el pilar; la gasta el OnSpawn de la cabeza) | El vigía universal de la v6.177 contaba TODO — y TODO contaminaba |
 | R27 | **EL ALTAR LEE EL TRÍO MÁS ARMADO** (v6.179, la letra: «los slot… todavia se muestran vacios cuando entro, el item solo vuelve a aparecer si lo desequipo y lo vuelvo a equipar»): el item es CRAFTABLE (5 maderas) — el portador puede llevar DOS; si `Del()` devolvía «el primero que encontraba», el altar leía el VACÍO. La persistencia estaba VIVA (el banco v6.178 lo probó) — el fantasma era el trío equivocado. La regla: cuando buscas UN ítem por tipo para leer SU estado, busca el de MÁS estado | El bug que sobrevivió a un banco de pruebas por mirar el ítem que no era |
 | R34 | **EL GUARDIÁN DE LAS LLAVES** (v6.183, la letra: «hay mucho texto en crudo… por que hay tanto texto en crudo»): el mod arma MUCHAS claves de localización CONCATENANDO («Categoría.» + clave) — y una clave USADA que no vive en los hjson se pinta CRUDA en el juego. EL GATE (`tools/audit_claves_codigo_v6183.py`, corre en cada release): TODO literal del código + TODA llamada de los helpers de concatenación (ternarios incluidos) + las bases dinámicas + las variantes de EcoLib (base+N) + paridad es-MX=es-ES exacta y en-US sin faltantes (los autogenerados del build son INFO). Un helper NUEVO que arme claves SE DECLARA en su tabla o el gate no lo ve | Cinco crudos vistos por el usuario que cuatro gates no vieron |
+| R35 | **LA BOCA DEL FESTÍN ES INTOCABLE** (v6.184, LA CUARTA AUTOPSIA del festín del Devoramundo: TRES versiones de gatillo murieron igual y NINGÚN gate lo vio): `PurgarProyectilesDelJefe` mataba al `FauceDevoradorProjectile` recién nacido — el pedacito (v6.180) purgaba DESPUÉS de parir la bruma, y el Fauce nace ENCIMA del preso con `friendly=false`: muerto al instante. DOS reglas: (a) una PURGA de zona JAMÁS mata al proyectil-animación de SU propio evento (la purga lleva su lista de inmunidad: el Fauce SIEMPRE se salta); (b) el orden canónico es PURGA PRIMERO, BOCA DESPUÉS (como el camino clásico de `Iniciar`). Y la regla del gate: una mecánica que gira sobre un PROYECTIL visible se prueba CON EL PROYECTIL VIVO — compilar no es correr | El festín que no iniciaba porque su propia purga se lo comía |
+| R36 | **EL SERVIDOR VACÍO NO TICKEA** (v6.184, el descubrimiento del banco — decompile `Main.cs:6038`: `while (!Netplay.Disconnect) { if (Netplay.HasClients) ((Game)this).Update(...) }`): el servidor dedicado SIN clientes JAMÁS llama `Main.Update` — el mundo está CONGELADO (ningún `ModSystem.PreUpdateWorld` corre: solo `OnWorldLoad` y `Main.OnTickForThirdPartySoftwareOnly`). EL BANCO (`DiagnosticoFestinSistema`, solo con `AETHON_FESTIN_PROBE=1`): planta un SOCKET FALSO (`ISocket` conectado para siempre) en `Netplay.Clients[0]` desde el latido idle → `HasClients` → `Main.Update` → EL MUNDO TICKEA y los bancos de gameplay corren el camino EXACTO del juego (SpawnBoss/OnSpawn/PreAI de verdad). CUATRO versiones de headless-gate solo probaron CARGA, nunca VIDA | Los gates que decían «0 excepciones» sobre un mundo congelado |
+| R37 | **EL `PreDraw` DEL BUFF DEVUELVE LO QUE DICE** (v6.184, la letra: «el buff ira de un ser exterior se solapa con ahogamiento»): en tML `ModBuff.PreDraw` que devuelve `true` manda a vanilla a REDIBUJAR el icono ENCIMA del nuestro (decompile `Main.DrawBuffIcon:56397`: `num4 = !BuffLoader.PreDraw(...); if (!num4) Draw(...)`). Si el buff se dibuja ENTERO (base + recortes + marco), el return es `false` — si no, el icono sale DOBLE sobre su celda y su marco de luz derrama sobre el vecino | El icono que se solapaba con el Ahogamiento |
+| R38 | **TODO NPC NUEVO LLEVA SU TEXTURA O SU OVERRIDE** (v6.184, el guardián volvió a cazar): un `ModNPC` sin `.png` propio y sin override de `Texture` es el crash de arranque de la v6.180 — el GUARDIÁN DE TEXTURAS lo grita ANTES del release. El override a un asset que YA VIVE en el .tmod (el ojo del escuadrón) es la cura canónica | El minion que casi se publica sin cara |
 | R33 | **EL BUILD CON CAMINO ABSOLUTO** (v6.182, el build fantasma): `start-tModLoader.sh -build AethonMod` (SOLO el nombre) «compila 0 errores» y empaqueta UNA CÁSCARA VACÍA (9 KB, 3 entradas, versión 1.0 — sin build.txt, sin fuentes: compilar NADA da 0 errores). El camino REAL es el ABSOLUTO: `start-tModLoader.sh -build "$PWD/AethonMod"` (el pipeline siempre lo documentó así — y la desviación casi publica una cáscara). VERIFICAR SIEMPRE: el .tmod pesa ~19 MB, versión y nº de entradas con `tools/parse_tmod.py` | El 0-errores más mentiroso de la casa: compiló la nada |
 | R32 | **EL GUARDIÁN DEL HOGAR** (v6.182, la segunda «Excepción silenciosa: IndexOutOfRangeException en NPC.AI_007_FindGoodRestingSpot» — 5 minutos DESPUÉS de entrar al interior): LA CAUSA RAÍZ (decompile NPC.cs:56255) — FindGoodRestingSpot dibuja su rejilla con EL HOGAR del NPC (homeTileX/Y), NO con su posición; R25 mató a los que ENTRARON, pero cualquier vecino que nazca/adentre DESPUÉS con el homeTile del mundo grande revienta igual. EL CERROJO PERMANENTE: dentro del interior, TODO townNPC con hogar fuera de rango lo coge prestado AQUÍ (su tile, clamped) — el crash es imposible venga de donde venga | La ciudad vacía despejó la entrada; el guardián vigila la puerta abierta |
 | R31 | **EL ANCLA DE TEXTO ESCALA CON EL TEXTO** (v6.182, la letra: «los textos de los botones en la ventana del pilar no estan centrados y se desbordan»): un helper de texto anclado (`pos − medido·ancla`) que DIBUJA escalado (`esc`) miente: el desplazamiento debe ser `pos − medido·esc·ancla` — sin la escala, el texto queda corrido a la izquierda por `medido·(1−esc)/2` (a esc 0,62 con texto de 202 px: 62 px de desvío, 50 px fuera del botón). Y LA MARCA DE LA LLAMADA REDUX (la misma cepa de R26): una marca «una vez por portador» JAMÁS se arma con «lo primero que nazca cerca» — LOS GUARDIANES DE LAS OLEADAS también son Devoradores (LosSeis) y nacen fuera de pantalla: la marca la pone SOLO la invocación REAL (el ítem y el pilar) y la consume `OnSpawn` de ESA cabeza; las oleadas JAMÁS la queman | El festín que no iniciaba porque una oleada se lo comió primero |
@@ -267,6 +271,10 @@ Y la regla de la casa: **primero sincronizar el repo** (§1.2 paso 1). Si el
 
 ```bash
 bash /tmp/tml/start-tModLoader.sh -build /home/z/my-project/mod/AethonMod
+# v6.184 — EL CONSTRUCTOR CON PACIENCIA (tools/build_v6184.sh): el -build
+# de tML COMPLETA y EMPAQUETA pero el proceso NO SALE (stdout tamponado);
+# el wrapper lanza DESPEGADO, vigila el .tmod y lo mata cuando ya está fresco:
+#   bash tools/build_v6184.sh
 # → "Compilation finished with 0 errors and 0 warnings" + Packaging
 # el .tmod cae en ~/.local/share/Terraria/tModLoader/Mods/AethonMod.tmod
 ```
@@ -274,8 +282,17 @@ bash /tmp/tml/start-tModLoader.sh -build /home/z/my-project/mod/AethonMod
 ### 3.4 El servidor headless (prueba de carga real)
 
 ```bash
-cd /tmp/tml && timeout 150 bash start-tModLoaderServer.sh -config serverconfig.txt
-# gate: 0 "Exception" en el log + la línea "Sandboxing: Aethon, the Eternal Grimoire v6.138"
+cd /tmp/tml && timeout 150 bash start-tModLoaderServer.sh -nosteam \
+  -world ~/.local/share/Terraria/tModLoader/Worlds/World.wld -maxplayers 1
+# gate: 0 "Exception" en el log + la línea "Sandboxing: Aethon, the Eternal Grimoire"
+# (v6.184: el servidor tarda 1-3 min en cargar el mundo ("Settling liquids")
+# y NO imprime por tubería — escribir a ARCHIVO y esperar con paciencia)
+#
+# v6.184 — EL BANCO DEL FESTÍN (R36 — el mundo tickea de verdad):
+#   AETHON_FESTIN_PROBE=1 bash start-tModLoaderServer.sh -nosteam \
+#     -world ~/.local/share/Terraria/tModLoader/Worlds/World.wld -maxplayers 1
+# gate: leer [DiagnosticoFestin] en tModLoader-Logs/server.log:
+#   "A-FESTIN COMPLETO ✔" + "B: EL LEJOS NO CENA ✔" + "FIN DEL BANCO"
 ```
 
 ---

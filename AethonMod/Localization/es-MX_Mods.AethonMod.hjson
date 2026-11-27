@@ -2496,7 +2496,14 @@ NPCs: {
 		Bestiario: El grimorio mismo, sellado en su propio interior: el libro que fue dios mira a través de sus tres ojos dormidos. Diecisiete ojos orbitan su forma y cada ojo destruido renace más fuerte: los funerales no cierran en un mundo donde el duelo ya fue comido.
 	}
 
-	AethonSelladoOjo.DisplayName: Ojo Sellado
+		AethonSelladoOjo.DisplayName: Ojo Sellado
+	OjoSelladoMinion: {
+		// v6.184 — EL MINION DEL OJO (la letra: «este ojo debe ser un minion
+		// con su animacion completa de parpadeo y el iris»)
+		DisplayName: Ojo del Sello
+		Bestiario: Un ojo de la corona del dios sellado, desprendido para cazar: parpadea a su propio compás y su iris nunca deja de mirarte. Se disuelve en tinta cuando su turno termina.
+	}
+
 	ElCronista.DisplayName: El Cronista
 }
 

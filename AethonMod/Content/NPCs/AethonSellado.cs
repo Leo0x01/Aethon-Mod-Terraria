@@ -87,16 +87,17 @@ namespace AethonMod.Content.NPCs
         // ═══ LA ESCALA DEL CUERPO (el tamaño del grimorio NORMAL) ═══
         private const float ESCALA = 1.30f;   // 36×49 → ~47×64 px
 
-        // ═══ EL ARSENAL DEL CORO (el repertorio del Recuerdo) ═══
-        private static readonly int[] ARSENAL = new int[]
-        {
-            Projectiles.Jefes.AtaqueJefeProjectile.EstiloPuaSagrario,
-            Projectiles.Jefes.AtaqueJefeProjectile.EstiloCoroCristal,
-            Projectiles.Jefes.AtaqueJefeProjectile.EstiloViroteVacio,
-            Projectiles.Jefes.AtaqueJefeProjectile.EstiloFlechaEstelar,
-            Projectiles.Jefes.AtaqueJefeProjectile.EstiloTajoPortador,
-            Projectiles.Jefes.AtaqueJefeProjectile.EstiloEstallidoRadiante,
-        };
+        // ═══ v6.184 — EL ARSENAL PRESTADO MUERE (la letra: «Aethon
+        //     sellado tienes que programarlo y separar toda su logica
+        //     del grimorio eterno… son logicas separadas, si no separas
+        //     sus logicas entonces sus ataques lo golpean a el mismo»):
+        //     el coro YA NO dispara el arsenal del jefe Recuerdo
+        //     (AtaqueJefeProjectile — la lógica de OTRO jefe, con su
+        //     estallido de textura extraña): el ataque del ojo es EL
+        //     OJO MINION (OjoSelladoMinion — un minion NPC propio con
+        //     su parpadeo completo y su iris) y la explosión de luz es
+        //     LA CANÓNICA de la mascota (EstallidoSelladoProjectile —
+        //     EstallidoLuzLib). TODO lo que el dios dispara es SUYO ═══
 
         // ═══ EL ESTADO (ai) ═══
         private byte Estado => (byte)(NPC.ai[0] % 3);
@@ -123,6 +124,7 @@ namespace AethonMod.Content.NPCs
         private bool _iraUno;                  // ¿ya lanzó la primera Ira?
         private bool _iraDos;                 // ¿y la segunda?
         private int _ojoParpadeo;             // el compás del propio ojo
+        private int _estallidoCuenta;          // v6.184 — el compás de la explosión canónica
 
         // ═══ v6.183 — LOS ANILLOS SOLARES DE LA FASE (la letra: «que
         //     por cada fase obtenga un anillo runico solar y que ataque
@@ -336,7 +338,8 @@ namespace AethonMod.Content.NPCs
                 }
 
                 // ══ ACTO 2 — EL CORO DE LOS ONCE OJOS (el libro FRENA,
-                //     un ojo se HINCHA y dispara el arsenal del Recuerdo) ══
+                //     un ojo se HINCHA y nace MINION — y a la tercera
+                //     andanada el ojo hablante DETONA LA LUZ CANÓNICA) ══
                 case 1:
                 {
                     NPC.velocity *= 0.90f;
@@ -347,6 +350,17 @@ namespace AethonMod.Content.NPCs
                         int voces = Fase >= 3 ? 3 : Fase >= 2 ? 2 : 1;
                         for (int v = 0; v < voces; v++)
                             DispararUnOjo(presa);
+                        // v6.184 — LA EXPLOSIÓN CANÓNICA (la letra: «la
+                        // explosion de luz real es la de la mascota de
+                        // luz Pequeño Recuerdo de Aethon… solo escala su
+                        // tamaño»): a la TERCERA andanada, el ojo DETONA
+                        // la luz de la mascota sobre la presa (la
+                        // recogida de 6 agujas es el AVISO — esquivable)
+                        if (++_estallidoCuenta >= 3)
+                        {
+                            _estallidoCuenta = 0;
+                            LanzarElEstallido(presa);
+                        }
                     }
                     break;
                 }
@@ -376,20 +390,27 @@ namespace AethonMod.Content.NPCs
             NPC.netUpdate = _actoTick % 30 == 0;
         }
 
-        // ── LA PAREJA DORADA/VIOLETA ×3 (el básico del grimorio) ──
+        // ── LA PAREJA DORADA/VIOLETA ×3 — PROPIA DEL DIOS (la letra:
+        //    «son logicas separadas, si no separas sus logicas entonces
+        //    sus ataques lo golpean a el mismo»: la pareja vieja era el
+        //    proyectil VANILLA 931 con EL JUGADOR de dueño — un ataque
+        //    "amigo" nacido del jefe se volvía contra el dios mismo.
+        //    AHORA: ParejaSelladoProjectile — HOSTIL, de la casa) ──
         private void DispararLaPareja(Player presa)
         {
             try
             {
                 Vector2 rumbo = (presa.Center - NPC.Center).SafeNormalize(Vector2.UnitX);
                 int dano = (int)(NPC.damage * 0.40f);
+                int tipo = ModContent.ProjectileType
+                    <Projectiles.Jefes.ParejaSelladoProjectile>();
                 for (int k = -1; k <= 1; k++)
                 {
                     Vector2 vel = rumbo.RotatedBy(0.26f * k) * 12.5f;
                     Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center,
-                        vel.RotatedBy(-0.26f), 931, dano, 2f, NPC.target, -1f, 0.64f, 9201f);
+                        vel.RotatedBy(-0.26f), tipo, dano, 2f, NPC.target, 0f);
                     Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center,
-                        vel.RotatedBy(0.26f), 931, dano, 2f, NPC.target, -1f, 0.28f, 9202f);
+                        vel.RotatedBy(0.26f), tipo, dano, 2f, NPC.target, 1f);
                 }
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122.WithPitchOffset(0.12f), NPC.Center);
             }
@@ -397,22 +418,63 @@ namespace AethonMod.Content.NPCs
             { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonSellado", exRegistro); }
         }
 
-        // ── EL CORO: un ojo de la corona dispara el arsenal ──
+        // ── EL CORO: un ojo de la corona NACE MINION DE VERDAD (la
+        //    letra: «cuando haga un ataque en donde use un ojo, este ojo
+        //    debe ser un minion con su animacion completa de parpadeo
+        //    y el iris») — el ojo saltarín de la corona se desprende y
+        //    CAZA por su cuenta (máximo CUATRO vivos) ──
         private void DispararUnOjo(Player presa)
         {
             try
             {
                 _ojoHablante = (_ojoHablante + 1) % OJOS;
+
+                // EL TECHO DEL REBAÑO: máximo CUATRO ojos-minion vivos
+                int tipoMinion = ModContent.NPCType<OjoSelladoMinion>();
+                int vivos = 0;
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    NPC n = Main.npc[i];
+                    if (n != null && n.active && n.type == tipoMinion) vivos++;
+                }
+                if (vivos >= 4) return;
+
                 Vector2 cuna = PosicionDelOjo(_ojoHablante, Main.GlobalTimeWrappedHourly);
-                Vector2 rumbo = (presa.Center - cuna).SafeNormalize(Vector2.UnitX);
-                int estilo = ARSENAL[Main.rand.Next(ARSENAL.Length)];
-                float vel = estilo == Projectiles.Jefes.AtaqueJefeProjectile.EstiloEstallidoRadiante
-                    ? 0f : 9.5f;
-                Projectile.NewProjectile(NPC.GetSource_FromAI(), cuna, rumbo * vel,
-                    ModContent.ProjectileType<Projectiles.Jefes.AtaqueJefeProjectile>(),
-                    (int)(NPC.damage * 0.50f), 2f, NPC.target, estilo,
-                    NPC.whoAmI * 1.7f, NPC.whoAmI);
-                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122.WithPitchOffset(0.30f), cuna);
+                int idx = NPC.NewNPC(NPC.GetSource_FromAI(),
+                    (int)cuna.X, (int)cuna.Y, tipoMinion,
+                    0, NPC.whoAmI, 0f, 0f, NPC.target);
+                if (idx >= 0 && idx < Main.maxNPCs)
+                {
+                    // LA HERENCIA DEL DIOS: la presa actual es SU presa
+                    Main.npc[idx].target = NPC.target;
+                    Main.npc[idx].netUpdate = true;
+                }
+                Terraria.Audio.SoundEngine.PlaySound(
+                    SoundID.Item122.WithPitchOffset(0.30f), cuna);
+            }
+            catch (System.Exception exRegistro)
+            { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonSellado", exRegistro); }
+        }
+
+        // ── v6.184 — LA EXPLOSIÓN DE LUZ CANÓNICA (la letra: «la
+        //    explosion de luz real que debes usar es la explosion de
+        //    luz de la mascota de luz Pequeño Recuerdo de Aethon… solo
+        //    debes escalar su tamaño»): el ojo hablante DETONA sobre la
+        //    presa el estallido DE LA MASCOTA a escala de dios — la
+        //    recogida de 6 agujas es el AVISO, el espectáculo es la
+        //    receta exacta de la casa (EstallidoLuzLib) ──
+        private void LanzarElEstallido(Player presa)
+        {
+            try
+            {
+                int idx = Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                    presa.Center, Vector2.Zero,
+                    ModContent.ProjectileType
+                        <Projectiles.Jefes.EstallidoSelladoProjectile>(),
+                    (int)(NPC.damage * 0.60f), 0f, NPC.target);
+                if (idx >= 0) Main.projectile[idx].timeLeft = 165;   // R23
+                Terraria.Audio.SoundEngine.PlaySound(
+                    SoundID.Item122.WithPitchOffset(-0.15f), NPC.Center);
             }
             catch (System.Exception exRegistro)
             { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonSellado", exRegistro); }

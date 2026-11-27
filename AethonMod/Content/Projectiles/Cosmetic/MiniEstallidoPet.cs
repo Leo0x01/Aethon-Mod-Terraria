@@ -299,7 +299,12 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             // arte del estallido de la mascota, EN TAMAÑO DIOS de
             // verdad: los rayos de 130 px llegan a 780, el núcleo que
             // inunda pasa de 130 a 780 px, la onda barre media ciudad.
-            float escDios = Projectile.ai[1] == -2f ? 6.0f : 1f;
+            float escDios = Projectile.ai[1] == -2f ? 6.0f
+                // v6.184 — LA ESCALA ABIERTA (la letra de la explosión
+                // canónica: «solo debes escalar su tamaño»): quien la
+                // siembre puede pedir SU tamaño en ai[2] (0 o 1 = la de
+                // la mascota tal cual — el contrato de siempre)
+                : (Projectile.ai[2] > 0f ? Projectile.ai[2] : 1f);
 
             VFXCore.CerrarLoteSiAbierto();
             try

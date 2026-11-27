@@ -177,7 +177,19 @@ namespace AethonMod.Content.Buffs
                 }
             }
             catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("IraSerExteriorRecargaBuff", exRegistro); }
-            return true;   // nosotros lo dibujamos TODO (vanilla no repite)
+            // v6.184 — EL SOLAPAMIENTO MUERE (la letra: «todos los buff
+            // que tenemos son creados usando buff de terraria como base…
+            // cuando el buff base se activa entonces el buff base y el
+            // que tenemos se solapan… ninguno de los buff o debuff que
+            // tenemos debe solaparse con otro»). LA CAUSA (verificada
+            // contra el decompile Main.DrawBuffIcon:56397): PreDraw
+            // devolviendo TRUE manda a vanilla a dibujar el icono OTRA
+            // VEZ ENCIMA del nuestro — el icono DOBLE sobre SU propia
+            // celda y el marco de luz derramándose en la del vecino
+            // (el Ahogamiento del usuario). Nosotros lo dibujamos TODO
+            // (la base gris, el recorte encendido y el marco): vanilla
+            // NO repite — return FALSE.
+            return false;
         }
 
         public override void Update(Player player, ref int buffIndex)

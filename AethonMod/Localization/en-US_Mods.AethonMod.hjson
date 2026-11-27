@@ -2511,6 +2511,14 @@ NPCs: {
 	}
 
 	AethonSelladoOjo.DisplayName: Sealed Eye
+
+	OjoSelladoMinion: {
+		// v6.184 — the eye minion (the letter: a minion with its full blink
+		// animation and iris)
+		DisplayName: Eye of the Seal
+		Bestiario: An eye torn from the sealed god's crown, sent to hunt: it blinks to its own rhythm and its iris never stops watching you. It dissolves into ink when its turn is over.
+	}
+
 	ElCronista.DisplayName: El Cronista
 }
 
@@ -4435,6 +4443,8 @@ Projectiles: {
 	ArcaneBolt.DisplayName: Arcane Bolt
 	HazSolarSelladoProjectile.DisplayName: Haz Solar Sellado Projectile
 	RayoSolarSelladoProjectile.DisplayName: Rayo Solar Sellado Projectile
+	EstallidoSelladoProjectile.DisplayName: Estallido Sellado Projectile
+	ParejaSelladoProjectile.DisplayName: Pareja Sellado Projectile
 }
 
 Registro: {

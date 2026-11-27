@@ -517,18 +517,29 @@ namespace AethonMod.Content.Globals
         /// a cualquier jefe, toda actividad del jefe cese» + «todos los
         /// jefes devorados mientras son devorados deben callar en todos
         /// los sentidos»): al ARRANCAR cualquier devoración (cena ·
-        /// festín · aspiradora), los proyectiles hostiles que vuelan a
+        /// festín · pedacito), los proyectiles hostiles que vuelan a
         /// menos de `radio` del preso SE APAGAN con una mota — nada del
-        /// jefe sigue volando mientras el libro come.</summary>
+        /// jefe sigue volando mientras el libro come.
+        /// v6.184 — LA PURGA NO SE COME AL FESTÍN (LA AUTOPSIA v4 del
+        /// banco headless: el festín del Devoramundo «no iniciaba» en
+        /// TRES versiones porque la purga mataba a SU PROPIA ANIMACIÓN:
+        /// el FauceDevoradorProjectile nace ENCIMA del preso con
+        /// friendly=false y la purga lo mató AL INSTANTE de nacer — el
+        /// festín clásico vivía porque purgaba ANTES de parirlo). LA
+        /// REGLA: la boca del festín JAMÁS muere en su propia mesa — la
+        /// purga salta al FauceDevoradorProjectile SIEMPRE.</summary>
         public static void PurgarProyectilesDelJefe(NPC jefe, float radio = 1000f)
         {
             if (jefe == null || Main.netMode == NetmodeID.MultiplayerClient) return;
+            int tipoFauce = ModContent.ProjectileType
+                <global::AethonMod.Content.Projectiles.Sombras.FauceDevoradorProjectile>();
             try
             {
                 for (int i = 0; i < Main.maxProjectiles; i++)
                 {
                     Projectile p = Main.projectile[i];
                     if (p == null || !p.active || p.friendly) continue;
+                    if (p.type == tipoFauce) continue;   // la boca del festín es intocable
                     if (p.Center.DistanceSQ(jefe.Center) > radio * radio) continue;
                     if (!Main.dedServ)
                     {
@@ -559,6 +570,10 @@ namespace AethonMod.Content.Globals
                 gCola.PedacitoVivo = true;
                 gCola.PedacitoTick = 0;
                 gCola.PedacitoPortador = PedacitoPortador;
+                // v6.184 — LA PURGA PRIMERO, LA BOCA DESPUÉS (la lección del
+                // banco: el clásico purga ANTES de parir la bruma — el
+                // pedacito purgaba DESPUÉS y mataba a su propia animación)
+                PurgarProyectilesDelJefe(cola, 700f);
                 // LA ANIMACIÓN ANTERIOR: la bruma del festín de siempre
                 // (el tentáculo que sale del portador y traga la elipse
                 // del preso — estilo 3, La Sombra de la Página).
@@ -573,8 +588,6 @@ namespace AethonMod.Content.Globals
                     Main.projectile[idx].timeLeft = 340;
                     Main.projectile[idx].localAI[0] = owner;
                 }
-                // v6.177 — LA PURGA DE LA MESA: el preso calla mientras come
-                PurgarProyectilesDelJefe(cola, 700f);
                 Terraria.Audio.SoundEngine.PlaySound(
                     SoundID.Item122.WithPitchOffset(-0.5f).WithVolumeScale(0.75f), cola.Center);
                 cola.netUpdate = true;
