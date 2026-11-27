@@ -1,6 +1,6 @@
 # SNAPSHOT ESTABLE — v6.183 — EL FESTÍN DE LA APARICIÓN, LOS ANILLOS SOLARES Y EL AJUAR DEL PORTADOR
 
-> **PUBLICADA — release de GitHub (ver el md5 en el release) · AethonMod v6.183 · tML 2026.09.3.1**
+> **PUBLICADA — release de GitHub 461019829 · md5 fe30a30c559ab20f4997417a1e783753 · AethonMod_v6.183.tmod · tML 2026.09.3.1**
 
 ## LOS DIEZ PUNTOS DE LA SESIÓN 35
 
