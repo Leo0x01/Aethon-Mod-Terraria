@@ -224,6 +224,16 @@ namespace AethonMod
         /// </summary>
         private static bool EsAnclaDeDescarga(System.Type t)
         {
+            // v6.179 — LOS ÍTEMS TAMBIÉN SON ANCLAS (la letra: «hay un error
+            // en el .log» — el warn «AethonMod mod class still using
+            // memory»): un `static Item` con un ítem del mod dentro
+            // sostiene SU ModItem (y todo lo que este agarre) tras la
+            // descarga — el pilar/altar con la ofrenda puesta era el
+            // ancla viva. Se ANULA el campo: el mundo lo re-crea al
+            // volver (LoadWorldData).
+            if (typeof(Terraria.Item).IsAssignableFrom(t))
+                return true;
+
             // Asset<Texture2D>, Asset<Effect>, ... (la referencia viva al
             // pipeline de assets de tML — vive en ReLogic.Content).
             if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(ReLogic.Content.Asset<>))

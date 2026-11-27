@@ -251,10 +251,34 @@ namespace AethonMod.Content.Systems
         /// acumulada, persistida con el mundo).</summary>
         public static int EsenciasConsagradas;
 
+        /// <summary>v6.179 — LA PUERTA VIVA (la letra: «al poner las 1000
+        /// esencias en el altar el boton de ir al mundo interior se
+        /// activa, pero si quito las 1000 esencias el boton desaparece,
+        /// esto no debe pasar, una vez activo debe estar activo
+        /// siempre»): el CERROJO PERMANENTE — la PRIMERA vez que las mil
+        /// están pagadas, la puerta SE LAS TRAGA (la letra de la sesión
+        /// 30: «consumir las 1000 esencias del eterno la primera vez que
+        /// se activa») y queda ABIERTA PARA SIEMPRE: PuertaViva viaja
+        /// con el archivo del mundo y JAMÁS se apaga. NADA de quitar
+        /// esencias cierra lo que ya se abrió.</summary>
+        public static bool PuertaViva;
+
         /// <summary>¿La puerta del altar está YA abierta? (las mil
-        /// esencias pagadas: el botón del interior vive en la ventana
-        /// del altar).</summary>
-        public static bool PuertaAbierta => EsenciasConsagradas >= EsenciasPuerta;
+        /// esencias pagadas O EL CERROJO VIVO de la primera vez: el
+        /// botón del interior vive en la ventana del altar).</summary>
+        public static bool PuertaAbierta => PuertaViva || EsenciasConsagradas >= EsenciasPuerta;
+
+        /// <summary>v6.179 — EL TRAGO DE LA PUERTA: la PRIMERA vez que las
+        /// mil están pagadas, la puerta SE LAS COME y queda viva para
+        /// siempre. Lo llaman los tres caminos que alimentan al altar y
+        /// la migración de los mundos viejos (los que ya tenían sus mil
+        /// guardadas SIN cerrojo: el trago corre también al cargar).</summary>
+        public static void TragarLaPuerta()
+        {
+            if (PuertaViva || EsenciasConsagradas < EsenciasPuerta) return;
+            PuertaViva = true;
+            EsenciasConsagradas -= EsenciasPuerta;   // las mil se COMEN: la primera vez es la ÚNICA
+        }
 
         // === EL VELO (la bruma que cubre el interior) ===
         private static Texture2D _softGlow;
@@ -317,6 +341,8 @@ namespace AethonMod.Content.Systems
             // v6.119 — la cuenta del altar muere con la descarga (vive
             // con el MUNDO: al recargar, LoadWorldData la devuelve).
             EsenciasConsagradas = 0;
+            // v6.179 — el cerrojo también muere con la descarga
+            PuertaViva = false;
             DevolverSolEclipse();
         }
 
@@ -416,6 +442,20 @@ namespace AethonMod.Content.Systems
             _ticksCalma = 0;
             _ciclosFestin = 0;
             _tinteCedido = 0f;
+            // v6.179 — LAS MARCAS DE LLAMADA MUEREN EN LA PUERTA: la marca
+            // del Devorador pendiente de FUERA (un ítem de invocación que
+            // vanilla no llegó a usar) no viaja adentro — dentro solo cuenta
+            // lo que el portador llame DENTRO.
+            try
+            {
+                for (int i = 0; i < Main.maxPlayers; i++)
+                {
+                    Player pj = Main.player[i];
+                    if (pj != null && pj.active)
+                        pj.GetModPlayer<global::AethonMod.Content.Players.ShardPlayer>().InvocacionDevoradorPendiente = false;
+                }
+            }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
             Transicion = true;
             _mundoPrincipal = Main.ActiveWorldFileData;
             // la vuelta cae ENCIMA del altar, dos tiles arriba — no dentro.
@@ -464,6 +504,24 @@ namespace AethonMod.Content.Systems
 
                 Main.maxTilesX = Ancho;
                 Main.maxTilesY = Alto;
+                // v6.179 — LA CIUDAD VACÍA (LA CURA DEL client.log: la
+                // «Excepción silenciosa:
+                // System.IndexOutOfRangeException en
+                // NPC.AI_007_FindGoodRestingSpot» 31 s después de entrar
+                // al interior): WorldGen.clearWorld limpia TILES, no
+                // NPCS — los vecinos del pueblo del mundo real seguían
+                // VIVOS en Main.npc, corriendo SU IA de pueblo dentro del
+                // cuerpo del dios… y buscando su cama con las coordenadas
+                // de casa DEL MUNDO GRANDE (homeTileX 3.400 en un mundo de
+                // 800×600 → Main.tile fuera de rango → el crash del log).
+                // El interior REGENERA su propio contenido: NINGÚN npc del
+                // mundo exterior lo acompaña. Al volver, el mundo real
+                // recarga del disco y sus vecinos vuelven a casa.
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    NPC viejo = Main.npc[i];
+                    if (viejo != null && viejo.active) viejo.active = false;
+                }
                 // v6.120 — EL NACIMIENTO EN EL LLANO: al LADO del pilar
                 // (SpawnX, en el aire limpio SOBRE la línea del llano —
                 // cae dos tiles y PISA la obsidiana; el pilar está a la
@@ -1409,17 +1467,30 @@ namespace AethonMod.Content.Systems
         // ================================================================
         public override void SaveWorldData(Terraria.ModLoader.IO.TagCompound tag)
         {
-            try { tag["esenciasConsagradasAltar"] = EsenciasConsagradas; }
+            try
+            {
+                tag["esenciasConsagradasAltar"] = EsenciasConsagradas;
+                // v6.179 — LA PUERTA VIVA viaja con el mundo: una vez
+                // abierta, abierta PARA SIEMPRE (la letra).
+                tag["puertaViva"] = PuertaViva;
+            }
             catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
         }
 
         public override void LoadWorldData(Terraria.ModLoader.IO.TagCompound tag)
         {
             EsenciasConsagradas = 0;
+            PuertaViva = false;
             try
             {
                 var n = tag.Get<int>("esenciasConsagradasAltar");
                 if (n > 0) EsenciasConsagradas = n;
+                PuertaViva = tag.GetBool("puertaViva");
+                // v6.179 — LA MIGRACIÓN DE LOS MUNDOS VIEJOS: los que ya
+                // tenían sus mil guardadas (y el botón que nacía y moría
+                // con la cuenta) — el trago corre AHORA: la puerta se las
+                // come y queda VIVA para siempre.
+                TragarLaPuerta();
             }
             catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
         }

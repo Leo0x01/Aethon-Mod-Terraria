@@ -1376,6 +1376,18 @@ namespace AethonMod.Content.Players
         public System.Collections.Generic.List<int> InvocacionesInteriorTipos = new System.Collections.Generic.List<int>();
         public System.Collections.Generic.List<int> InvocacionesInteriorCuenta = new System.Collections.Generic.List<int>();
 
+        /// <summary>v6.179 — LA LLAMADA PENDIENTE del Devorador: la marca
+        /// que dejan los caminos que el PORTADOR invoca de verdad (el ítem
+        /// de invocación en la mano · el pilar del interior). SOLO la
+        /// cabeza de Devorador que nace CON esta marca cuenta UNA
+        /// invocación (la oleada que paría cabezas por su cuenta JAMÁS
+        /// contaba — era la contaminación del reloj: el usuario borraba el
+        /// festín, invocaba dos veces… y el «== 2» ya no llegaba NUNCA
+        /// porque las cabezas de la oleada corrían el contador antes).
+        /// Vive en la sesión (no se guarda): una marca que no nació de una
+        /// invocación de verdad muere con el mundo.</summary>
+        public bool InvocacionDevoradorPendiente;
+
         /// <summary>La cuenta de invocaciones interior de ESTE jefe.</summary>
         public int InvocacionesInteriorDe(int npcType)
         {

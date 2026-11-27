@@ -1097,19 +1097,28 @@ namespace AethonMod.Content.Globals
                 //  por secciones y lo aspira como una aspiradora, esta
                 //  animacion se debe hacer solo la segunda vez que el
                 //  Devoramundos sea invocado» + «la aspiradora por algun
-                //  motivo solo parecer funcionar en el mundo interior»):
-                //  EL VIGÍA UNIVERSAL — cada CABEZA de Devorador (EoW o
-                //  Destructor) que NACE en el mundo cuenta UNA
-                //  invocación del portador más cercano (pilar del
-                //  interior · oleadas de hambre · comida de gusano en
-                //  el mundo real: TODO cuenta). La SEGUNDA invocación
+                //  motivo solo parecer funcionar en el mundo interior»).
+                //  v6.179 — SOLO LA LLAMADA DEL PORTADOR (la letra: «no se
+                //  activa el festin con el Devoramundos, el grimorio no
+                //  activa la animacion de devorar y no lo hace pese a que
+                //  se invoca mas de 2 veces despues de borrar la lista del
+                //  festin»): LA AUTOPSIA. La v6.177 contaba TODAS las
+                //  cabezas que nacían (pilar · oleadas · comida de gusano:
+                //  TODO) — y las OLEADAS parían cabezas de Devorador por
+                //  su cuenta entre invocación e invocación: el reloj
+                //  corría SOLO y el «== 2» exacto ya nunca caía en una
+                //  invocación de verdad. LA CURA: la marca PENDIENTE —
+                //  solo cuentan las cabezas que nacen de UNA LLAMADA DEL
+                //  PORTADOR (el ítem de invocación en la mano · el pilar
+                //  del interior, dentro o fuera): ShardPlayer.
+                //  InvocacionDevoradorPendiente. La SEGUNDA invocación
                 //  EXACTA arranca el cine espacial (la vigilía del
-                //  AspiradoraDevorador espera a que la cadena se
-                //  genere por completo). La primera y la tercera en
-                //  adelante: pelea normal, muerte normal con botín —
-                //  el grimorio NO se come a este jefe por las malas
-                //  (ver EsGusanoInvocado: la devoración normal del
-                //  gusano está MUERTA en todas partes).
+                //  AspiradoraDevorador espera a que la cadena se genere
+                //  por completo). La primera y la tercera en adelante:
+                //  pelea normal, muerte normal con botín — el grimorio
+                //  NO se come a este jefe por las malas (ver
+                //  EsGusanoInvocado: la devoración normal del gusano está
+                //  MUERTA en todas partes).
                 // ============================================================
                 if (npc.type == NPCID.EaterofWorldsHead || npc.type == NPCID.TheDestroyer)
                 {
@@ -1126,17 +1135,22 @@ namespace AethonMod.Content.Globals
                     if (portador != null)
                     {
                         var sp = portador.GetModPlayer<Players.ShardPlayer>();
-                        int veces = sp != null ? sp.MarcarInvocacionInterior(npc.type) : 1;
-                        if (veces == 2)   // SOLO la segunda: la letra manda
+                        if (sp != null && sp.InvocacionDevoradorPendiente)
                         {
-                            int p = Projectile.NewProjectile(npc.GetSource_FromAI(),
-                                npc.Center, Vector2.Zero,
-                                ModContent.ProjectileType
-                                    <global::AethonMod.Content.Projectiles.Sombras.AspiradoraDevoradorProjectile>(),
-                                0, 0f, portador.whoAmI, npc.whoAmI, portador.whoAmI);
-                            if (p >= 0) Main.projectile[p].timeLeft = 700;
-                            Terraria.Audio.SoundEngine.PlaySound(
-                                SoundID.Item122.WithPitchOffset(-0.6f).WithVolumeScale(0.7f), npc.Center);
+                            // la marca se gasta con ESTA cabeza: nació de la llamada
+                            sp.InvocacionDevoradorPendiente = false;
+                            int veces = sp.MarcarInvocacionInterior(npc.type);
+                            if (veces == 2)   // SOLO la segunda: la letra manda
+                            {
+                                int p = Projectile.NewProjectile(npc.GetSource_FromAI(),
+                                    npc.Center, Vector2.Zero,
+                                    ModContent.ProjectileType
+                                        <global::AethonMod.Content.Projectiles.Sombras.AspiradoraDevoradorProjectile>(),
+                                    0, 0f, portador.whoAmI, npc.whoAmI, portador.whoAmI);
+                                if (p >= 0) Main.projectile[p].timeLeft = 700;
+                                Terraria.Audio.SoundEngine.PlaySound(
+                                    SoundID.Item122.WithPitchOffset(-0.6f).WithVolumeScale(0.7f), npc.Center);
+                            }
                         }
                     }
                     return;   // la cabeza del gusano no sigue por el guardián

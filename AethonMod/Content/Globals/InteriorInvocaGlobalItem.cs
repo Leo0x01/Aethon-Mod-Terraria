@@ -52,12 +52,33 @@ namespace AethonMod.Content.Globals
 
         public override bool CanUseItem(Item item, Player player)
         {
+            // v6.179 — LA MARCA DE LA LLAMADA (la letra: «se invoca mas de
+            // 2 veces despues de borrar la lista del festin y no lo hace»):
+            // el ítem de invocación del Devorador en la MANO es una
+            // llamada del PORTADOR — la marca pendiente vive en el
+            // ShardPlayer y SOLO la cabeza de Devorador que nace con ella
+            // cuenta una invocación (el vigía de FaucesGlobalNPC la gasta).
+            // Cubre FUERA del interior (el camino de vanilla que sigue a
+            // este return)…
+            try
+            {
+                if ((item.type == ItemID.WormFood || item.type == ItemID.MechanicalWorm) &&
+                    !Systems.SubmundoGrimorio.Activo && !Main.gameMenu)
+                    player.GetModPlayer<Players.ShardPlayer>().InvocacionDevoradorPendiente = true;
+            }
+            catch { /* la marca es un plus: jamás rompe el uso */ }
+
             // SOLO dentro del Mundo Interior — afuera vanilla manda
             if (!Systems.SubmundoGrimorio.Activo || Main.gameMenu) return true;
             if (!Mapa.TryGetValue(item.type, out int tipoJefe)) return true;
             try
             {
                 if (Main.netMode == NetmodeID.MultiplayerClient) return false;
+
+                // …y DENTRO (el jefe de ESTA puerta): la marca va ANTES de
+                // que la cabeza nazca — el vigía la gasta al nacer.
+                if (tipoJefe == NPCID.EaterofWorldsHead || tipoJefe == NPCID.TheDestroyer)
+                    player.GetModPlayer<Players.ShardPlayer>().InvocacionDevoradorPendiente = true;
 
                 // LA POSICIÓN: delante del portador, en alto — clavada
                 // DENTRO del cuerpo del dios (el interior es 800×600:

@@ -2286,46 +2286,6 @@ Items: {
 			«Nmms profe, ni anduvimos»
 			'''
 	}
-	CartaQueNuncaLeDiste: {
-		DisplayName: La carta que nunca le diste
-		Tooltip: «Lleva tres años doblada en la mochila»
-	}
-	CapturaDelVisto: {
-		DisplayName: Captura del visto
-		Tooltip: «Leído a las 2:47 a.m. Nunca hubo respuesta»
-	}
-	NoEresTuSoyYo: {
-		DisplayName: El «no eres tú, soy yo»
-		Tooltip: «A partir de aquí todo se pone más difícil»
-	}
-	ProyectorDelSalon: {
-		DisplayName: Proyector del salón
-		Tooltip: «Nadie sabe dónde está el cable VGA. El profe pide ayuda»
-	}
-	ProyectorDeCine: {
-		DisplayName: Proyector de cine
-		Tooltip: «Función de las 10:40 p.m. Fuiste solo»
-	}
-	ProyectorImax: {
-		DisplayName: Proyector IMAX
-		Tooltip: «Tus emociones, ahora en 70 mm y con sonido envolvente»
-	}
-	FloresAmarillas: {
-		DisplayName: Flores amarillas que nadie recogió
-		Tooltip: «21 de septiembre. Las dejaste en la entrada»
-	}
-	YaLoSupere: {
-		DisplayName: El «ya lo superé»
-		Tooltip: «Tallado en piedra. Igual de falso»
-	}
-	HayMasPeces: {
-		DisplayName: Hay más peces en el mar
-		Tooltip: «Te lo dijo tu tía. Este casi te mata»
-	}
-	LunaQueTeIbaABajar: {
-		DisplayName: La luna que te ibas a bajar
-		Tooltip: «Al final la bajaste tú solo»
-	}
 	BolsaAuras: {
 
 		// v6.104 → v6.109: THE AURAS BAG — the aura research material
@@ -2471,14 +2431,6 @@ Items: {
 		Tooltip: "[c/FFD787:El ciclo dorado→morado de la casa: la copia viva de la Valquiria Lisa con el pulso rúnico completo — inmunidad a las caídas]"
 	}
 
-	EcoProyectado: {
-		DisplayName: Eco Proyectado
-		Tooltip:
-			'''
-			La esencia del portador sube por el haz...
-			· y del otro lado baja ÉL: el Cíclope.
-			'''
-	}
 }
 
 NPCs: {
@@ -2555,7 +2507,6 @@ NPCs: {
 
 	AethonSelladoOjo.DisplayName: Ojo Sellado
 	ElCronista.DisplayName: El Cronista
-	CiclopeProyectado.DisplayName: Cíclope Proyectado
 }
 
 Common: {
@@ -4186,10 +4137,7 @@ LibroEterno: {
 	TituloPaginaLore: Lore
 }
 
-Buffs: {	RecuperacionProyectada: {
-		DisplayName: Recuperándose de la proyectada
-		Description: Tus emociones se están recargando
-	}
+Buffs: {
 
 	IraSerExteriorRecargaBuff: {
 		DisplayName: Recarga: Ira de un Ser Exterior
@@ -4468,7 +4416,6 @@ Projectiles: {
 	// ArcaneBolt.DisplayName: Arcane Bolt
 }
 
-Ciclope.Grito: ¡AAAAH ME PROYECTO!
 
 Registro: {
 	Fallo: ¡Algo falló en {0}! El detalle quedó en el registro (tModLoader-Logs).
@@ -4488,30 +4435,20 @@ Mapa: {
 Proyectado: {
 	SinTecla: (sin tecla)
 	SinVisor: Sin visor no hay proyectada
-	AunNo: "Aún no ({0} s)"
-	Listo: Listo para proyectarte
 	Grito: ¡AAAAH ME PROYECTO!
-	Etapa: "Etapa: {0} (base {1})"
-	Siguiente: "Siguiente proyectada: {0} (base {1})"
-	Energia: "Energía proyectada: {0}/{1} (recarga +{2} %)"
-	EnergiaInfinita: Energía proyectada: infinita
-	Mejoras: "Proyectadas superadas: {0}/{1}"
-	Muertes: "Enemigos proyectados: {0} (+{1:0.#} % de {2:0.#} % máximo en esta etapa)"
-	Opcionales: "Jefes opcionales: {0}/{1} (+{2:0} %)"
-	Especial: "[{0}] Rayo proyectado: {1}"
-	Recargando: "recargando ({0} s)"
-	ListoCorto: listo
-	MasEnergia: "+{0} de energía proyectada"
-	InfinitaAnuncio: ¡PROYECTADA INFINITA!
-	Efecto: "+{0} de energía proyectada máxima"
-	EfectoInfinito: Desbloquea la proyectada infinita: el rayo del visor ya no gasta energía
-	EfectoRecarga: "+{0:0} % de velocidad de recarga"
-	YaSuperada: Esta ya la superaste
-	UnSoloUso: Un solo uso por personaje
-	HudInfinita: PROYECCIÓN INFINITA
-	HudEnfriamiento: "X en {0} s"
+	Etapa: Etapa: {0} (base {1})
+	Siguiente: Siguiente proyectada: {0} (base {1})
+	EnergiaInfinita: Energía proyectada: infinita (el arma ya está a su máxima capacidad)
+	Opcionales: Jefes opcionales: {0}/{1} (+{2:0} %)
+	// v6.179 — LAS DOS FASES DEL ARMA (la letra: «pueda cambiar entre
+	// las diferentes fases»): la tecla X o el clic derecho las cambian.
+	Fase1: el rayo continuo
+	Fase2: la proyección
+	FaseViva: Fase {0} · {1}
+	FaseCambio: → {0}
+	FaseCambioTip: Clic derecho o tecla {0}: cambiar de fase
 }
-Keybinds.RayoProyectado.DisplayName: Rayo proyectado (habilidad del visor)
+Keybinds.RayoProyectado.DisplayName: Cambiar la fase del visor
 
 Proyectado.Condicion1: Solo si es tu primer jefe mecánico
 Proyectado.Condicion2: Solo si es tu segundo jefe mecánico

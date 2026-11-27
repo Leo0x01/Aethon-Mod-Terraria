@@ -13,10 +13,6 @@ Items: {
 		Tooltip: Hold the use button — half a second of charge, then the beam follows the cursor up to 900 px
 	}
 
-	// v6.176 — THE CYCLOPS' WEAPON (the letter: what had to be built
-	// was a weapon — the eye projection of the video).
-	ProyeccionDelCiclope: {
-	}
 
 	// v6.170 — THE THRESHOLD CLICKER DIED (la letra: «esta
 	// horrible, lo puedes borrar»): claves extirpadas.
@@ -2311,55 +2307,15 @@ Items: {
 			'''
 	}
 
-	CartaQueNuncaLeDiste: {
-		DisplayName: The letter you never gave
-		Tooltip: Three years folded in your backpack
-	}
 
-	CapturaDelVisto: {
-		DisplayName: Read-receipt screenshot
-		Tooltip: Seen at 2:47 a.m. There was never an answer
-	}
 
-	NoEresTuSoyYo: {
-		DisplayName: The "it's not you, it's me"
-		Tooltip: From here on it all gets harder
-	}
 
-	ProyectorDelSalon: {
-		DisplayName: Classroom projector
-		Tooltip: Nobody knows where the VGA cable is. The teacher asks for help
-	}
 
-	ProyectorDeCine: {
-		DisplayName: Cinema projector
-		Tooltip: 10:40 p.m. showing. You went alone
-	}
 
-	ProyectorImax: {
-		DisplayName: IMAX projector
-		Tooltip: Your feelings, now in 70 mm with surround sound
-	}
 
-	FloresAmarillas: {
-		DisplayName: Yellow flowers nobody picked up
-		Tooltip: September 21st. You left them at the door
-	}
 
-	YaLoSupere: {
-		DisplayName: The "I'm over it"
-		Tooltip: Carved in stone. Just as fake
-	}
 
-	HayMasPeces: {
-		DisplayName: There are more fish in the sea
-		Tooltip: Your aunt said it. This one almost killed you
-	}
 
-	LunaQueTeIbaABajar: {
-		DisplayName: The moon you were going to get
-		Tooltip: In the end you got it yourself
-	}
 
 	BolsaAuras: {
 		// v6.104 → v6.109: THE AURAS BAG — the aura research material
@@ -2498,14 +2454,6 @@ Items: {
 		Tooltip: "[c/FFD787:The house's gold→purple cycle: the living copy of the Smooth Valkyrie with the full runic pulse — fall immunity]"
 	}
 
-	EcoProyectado: {
-		DisplayName: Projected Echo
-		Tooltip:
-			'''
-			The bearer's essence rises through the beam...
-			· and from the other side HE comes down: the Cyclops.
-			'''
-	}
 }
 
 NPCs: {
@@ -2582,7 +2530,6 @@ NPCs: {
 
 	AethonSelladoOjo.DisplayName: Sealed Eye
 	ElCronista.DisplayName: El Cronista
-	CiclopeProyectado.DisplayName: Projected Cyclops
 }
 
 Common: {
@@ -4214,10 +4161,6 @@ LibroEterno: {
 }
 
 Buffs: {
-	RecuperacionProyectada: {
-		DisplayName: Recovering from the projection
-		Description: Your feelings are recharging
-	}
 
 	IraSerExteriorRecargaBuff: {
 		DisplayName: Recharge: Wrath of an Outer Being
@@ -4321,7 +4264,6 @@ Projectiles: {
 	AgujeroRunicoPuroProjectile.DisplayName: Pure Runic Black Hole
 }
 
-Ciclope.Grito: AAAAH I PROJECT MYSELF!
 
 Registro: {
 	Fallo: Something failed in {0}! Details are in the log (tModLoader-Logs).
@@ -4339,33 +4281,20 @@ Mapa: {
 }
 
 Proyectado: {
-	SinTecla: (no key)
+	SinTecla: (sin tecla)
 	SinVisor: No visor, no projection
-	AunNo: Not yet ({0} s)
-	Listo: Ready to get projected
-	Grito: AAAAH I'M PROJECTING!
+	Grito: AAAAH I PROJECT MYSELF!
 	Etapa: Stage: {0} (base {1})
 	Siguiente: Next projection: {0} (base {1})
-	Energia: Projected energy: {0}/{1} (recharge +{2} %)
-	EnergiaInfinita: Projected energy: infinite
-	Mejoras: Projections overcome: {0}/{1}
-	Muertes: Projected foes: {0} (+{1:0.#} % of {2:0.#} % max at this stage)
+	EnergiaInfinita: Projected energy: infinite (the weapon ships at max capacity)
 	Opcionales: Optional bosses: {0}/{1} (+{2:0} %)
-	Especial: "[{0}] Projected beam: {1}"
-	Recargando: recharging ({0} s)
-	ListoCorto: ready
-	MasEnergia: +{0} projected energy
-	InfinitaAnuncio: INFINITE PROJECTION!
-	Efecto: +{0} max projected energy
-	EfectoInfinito: Unlocks infinite projection: the visor beam no longer drains energy
-	EfectoRecarga: +{0:0} % recharge speed
-	YaSuperada: You already got over this one
-	UnSoloUso: One use per character
-	HudInfinita: INFINITE PROJECTION
-	HudEnfriamiento: X in {0} s
-	Condicion1: Only if it is your first mechanical boss
-	Condicion2: Only if it is your second mechanical boss
-	Condicion3: Only if it is your third mechanical boss
+	// v6.179 — LAS DOS FASES DEL ARMA (la letra: «pueda cambiar entre
+	// las diferentes fases»): la tecla X o el clic derecho las cambian.
+	Fase1: the continuous beam
+	Fase2: the projection
+	FaseViva: Phase {0} · {1}
+	FaseCambio: → {0}
+	FaseCambioTip: Right click or {0} key: change phase
 }
 
-Keybinds.RayoProyectado.DisplayName: Projected beam (visor ability)
+Keybinds.RayoProyectado.DisplayName: Change the visor phase

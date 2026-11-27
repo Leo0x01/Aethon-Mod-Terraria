@@ -303,13 +303,17 @@ namespace AethonMod.Content.UI
         private static void DepositarLasEsencias(Item pila)
         {
             int topePuerta = Submundo.EsenciasPuerta;
-            int falta = topePuerta - Submundo.EsenciasConsagradas;
-            if (falta <= 0)
+            // v6.179 — LA PUERTA YA VIVA no vuelve a cobrar (la letra:
+            // «una vez activo debe estar activo siempre»): con el trago
+            // de la primera vez, la cuenta vuelve a 0 y el cerrojo
+            // PuertaViva manda — las esencias se quedan en la mano.
+            if (Submundo.PuertaViva || topePuerta - Submundo.EsenciasConsagradas <= 0)
             {
                 Decir("PuertaYaAbierta", ChatOro);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                 return;
             }
+            int falta = topePuerta - Submundo.EsenciasConsagradas;
             int toma = Math.Min(falta, pila.stack);
             bool yaAbierta = Submundo.PuertaAbierta;
             Submundo.EsenciasConsagradas += toma;
@@ -320,6 +324,9 @@ namespace AethonMod.Content.UI
                 AnunciarLaPuerta();
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113.WithPitchOffset(-0.7f));
             }
+            // v6.179 — EL TRAGO DE LA PRIMERA VEZ: las mil se COMEN y la
+            // puerta queda VIVA PARA SIEMPRE (PuertaViva — nada la cierra).
+            Submundo.TragarLaPuerta();
             pila.stack -= toma;
             if (pila.stack <= 0) pila.TurnToAir();
             LluviaDeBruma(Math.Min(30, 8 + toma / 40), 4f);
@@ -460,6 +467,9 @@ namespace AethonMod.Content.UI
                 AnunciarLaPuerta();
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113.WithPitchOffset(-0.7f));
             }
+            // v6.179 — EL TRAGO DE LA PRIMERA VEZ: las mil se COMEN y la
+            // puerta queda VIVA PARA SIEMPRE (PuertaViva — nada la cierra).
+            Submundo.TragarLaPuerta();
             Decir(esArma ? "ConsagradaHechaArma" : "ConsagradaHechaMaterial", ChatVioleta, nombre);
             Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113.WithPitchOffset(-0.45f));
             LluviaDeBruma(22, 8f);
@@ -470,13 +480,15 @@ namespace AethonMod.Content.UI
         private static void DepositarUnMonton(Item pila, bool prestada)
         {
             int topePuerta = Submundo.EsenciasPuerta;
-            int falta = topePuerta - Submundo.EsenciasConsagradas;
-            if (falta <= 0)
+            // v6.179 — LA PUERTA YA VIVA no vuelve a cobrar (la letra:
+            // «una vez activo debe estar activo siempre»).
+            if (Submundo.PuertaViva || topePuerta - Submundo.EsenciasConsagradas <= 0)
             {
                 Decir("PuertaYaAbierta", ChatOro);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
                 return;                         // la pila queda donde está
             }
+            int falta = topePuerta - Submundo.EsenciasConsagradas;
             int toma = Math.Min(falta, pila.stack);
             bool yaAbierta = Submundo.PuertaAbierta;
             Submundo.EsenciasConsagradas += toma;
@@ -489,9 +501,12 @@ namespace AethonMod.Content.UI
                 AnunciarLaPuerta();
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.Item113.WithPitchOffset(-0.7f));
             }
+            // v6.179 — EL TRAGO DE LA PRIMERA VEZ: las mil se COMEN y la
+            // puerta queda VIVA PARA SIEMPRE (PuertaViva — nada la cierra).
+            Submundo.TragarLaPuerta();
             LluviaDeBruma(22, 8f);
             if (prestada) _armaOrigen = null;
-            else if (_arma.IsAir) _arma = new Item();
+            else if (_arma == null || _arma.IsAir) _arma = new Item();   // v6.179: nulo-seguro (el barrendero puede anular el estático)
         }
 
         /// <summary>ENTREGAR al inventario lo ya sellado (o la ofrenda que
@@ -867,6 +882,11 @@ namespace AethonMod.Content.UI
         {
             _abierta = false;
             _armaOrigen = null;
+            // v6.179 — LA OFRENDA FÍSICA muere con el mundo (vive en SU
+            // archivo: LoadWorldData la devuelve al volver) — el campo
+            // estático con un ítem del mod dentro era UN ANCLA de memoria
+            // (el warn del client.log «still using memory»).
+            _arma = null;
         }
 
         public override void Unload()

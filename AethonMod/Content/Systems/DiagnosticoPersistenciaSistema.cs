@@ -140,18 +140,41 @@ namespace AethonMod.Content.Systems
         {
             var submundo = ModContent.GetInstance<SubmundoGrimorio>();
             var tag = new TagCompound();
-            // v6.178 — EL BANCO NO TOCA LA PARTIDA: el valor REAL se guarda
-            // y se devuelve (el diagnóstico es un espejo, no un ladrillo).
-            int original = SubmundoGrimorio.EsenciasConsagradas;
-            int antes = 1000;      // la puerta ABIERTA de las mil
-            SubmundoGrimorio.EsenciasConsagradas = antes;
+            // v6.179 — EL CONTRATO NUEVO DE LA PUERTA (la letra: «una vez
+            // activo debe estar activo siempre… consumir las 1000 esencias
+            // la primera vez que se activa»): el banco prueba TRES cosas —
+            // (1) el TRAGO: al cargar un mundo con las mil pagadas, la
+            // puerta SE LAS COME (quedan 0) y queda VIVA (PuertaViva);
+            // (2) el CERROJO: sin las esencias encima (EsenciasConsagradas
+            // = 0 — el «si quito las 1000 esencias» del usuario) la puerta
+            // SIGUE ABIERTA para SIEMPRE;
+            // (3) NADA SE FUGA: el mundo real queda EXACTAMENTE como
+            // estaba (las DOS variables se restauran — el banco de la
+            // v6.178 dejaba la cuenta viva y un banco descuidado habría
+            // ABIERTO la puerta de verdad para siempre).
+            int originalCuenta = SubmundoGrimorio.EsenciasConsagradas;
+            bool originalViva = SubmundoGrimorio.PuertaViva;
+            SubmundoGrimorio.EsenciasConsagradas = 1000;      // las mil pagadas
+            SubmundoGrimorio.PuertaViva = false;
             submundo.SaveWorldData(tag);
             SubmundoGrimorio.EsenciasConsagradas = 0;
+            SubmundoGrimorio.PuertaViva = false;
             submundo.LoadWorldData(tag);
-            Decir("PUERTA: " + (SubmundoGrimorio.EsenciasConsagradas == antes && SubmundoGrimorio.PuertaAbierta
-                ? $"VIVA ({SubmundoGrimorio.EsenciasConsagradas}/{SubmundoGrimorio.EsenciasPuerta} — abierta)"
-                : $"PERDIDA (quedó {SubmundoGrimorio.EsenciasConsagradas}) — EL BUG DEL USUARIO"));
-            SubmundoGrimorio.EsenciasConsagradas = original;   // el mundo real queda COMO ESTABA
+            bool seLasComio = SubmundoGrimorio.EsenciasConsagradas == 0;
+            bool cerrojoVivo = SubmundoGrimorio.PuertaViva;
+            // EL «SI QUITO LAS 1000 ESENCIAS» DEL USUARIO: la cuenta a
+            // cero NO cierra lo que ya se abrió.
+            SubmundoGrimorio.EsenciasConsagradas = 0;
+            bool sigueAbierta = SubmundoGrimorio.PuertaAbierta;
+            Decir("PUERTA-TRAGO: " + (seLasComio && cerrojoVivo
+                ? "COMIDAS ✔ (0/1000 y PuertaViva — la primera vez es la ÚNICA)"
+                : $"MAL (quedó {SubmundoGrimorio.EsenciasConsagradas}/1000, cerrojo {cerrojoVivo})"));
+            Decir("PUERTA-CERROJO: " + (sigueAbierta
+                ? "ABIERTA PARA SIEMPRE ✔ (sin las esencias encima, el botón NO desaparece)"
+                : "SE CIERRA — EL BUG DEL USUARIO"));
+            // el mundo real queda COMO ESTABA (las DOS variables)
+            SubmundoGrimorio.EsenciasConsagradas = originalCuenta;
+            SubmundoGrimorio.PuertaViva = originalViva;
         }
 
         private static void ProbarElSello()

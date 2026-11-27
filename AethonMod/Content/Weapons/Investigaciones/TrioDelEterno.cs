@@ -165,6 +165,22 @@ namespace AethonMod.Content.Weapons.Investigaciones
         // ================================================================
         //  LA LECTURA DEL ALTAR: el trío del inventario del portador
         //  (o null si no lleva ninguno).
+        //
+        //  v6.179 — EL TRÍO MÁS ARMADO (la letra: «los slot de armas del
+        //  trio del eterno en el altar todavia se muestran vacios cuando
+        //  entro, el item solo vuelve a aparecer si lo desequipo y lo
+        //  vuelvo a equipar»): LA AUTOPSIA. La persistencia estaba VIVA
+        //  (el banco headless v6.178 probó el ciclo disco→reinicio y las
+        //  tres ranuras sobrevivían) — el fantasma era OTRO: si el
+        //  portador lleva DOS tríos (la receta es de 5 maderas) y el
+        //  ARMADO cambia de sitio en el inventario, la lectura de ANTES
+        //  devolvía el PRIMERO que encontraba… que podía ser el VACÍO:
+        //  el altar mostraba sus ranuras VACÍAS aunque el arma estaba
+        //  (viva) en el otro. «Desequipar y volver a equipar» armaba el
+        //  trío que la lectura encontraba — y por eso el arma «volvía».
+        //  LA CURA: el altar lee SIEMPRE el trío MÁS ARMADO del
+        //  inventario (a igualdad, el primero) — el arma ya no depende
+        //  del sitio que ocupe.
         // ================================================================
         public static TrioDelEterno Del(Player p)
         {
@@ -172,12 +188,20 @@ namespace AethonMod.Content.Weapons.Investigaciones
             {
                 int tipo = ModContent.ItemType<TrioDelEterno>();
                 if (p == null || !p.active) return null;
+                TrioDelEterno mejor = null;
+                int mejorArmadas = -1;
                 for (int i = 0; i < 58; i++)
                 {
                     Item it = p.inventory[i];
-                    if (it != null && !it.IsAir && it.type == tipo)
-                        return it.ModItem as TrioDelEterno;
+                    if (it == null || it.IsAir || it.type != tipo) continue;
+                    if (it.ModItem is not TrioDelEterno trio) continue;
+                    int armadas = 0;
+                    if (trio.Ranuras != null)
+                        for (int r = 0; r < trio.Ranuras.Length && r < 3; r++)
+                            if (trio.Ranuras[r] != null && !trio.Ranuras[r].IsAir) armadas++;
+                    if (armadas > mejorArmadas) { mejorArmadas = armadas; mejor = trio; }
                 }
+                return mejor;
             }
             catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TrioDelEterno", exRegistro); }
             return null;

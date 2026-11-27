@@ -96,6 +96,12 @@ namespace AethonMod.Content.Items
                 //     a llevarse ENTERO al Devoramundos.
                 sp.InvocacionesInteriorTipos?.Clear();
                 sp.InvocacionesInteriorCuenta?.Clear();
+                // v6.179 — LA MARCA PENDIENTE TAMBIÉN SE BORRA: el olvido
+                //     es COMPLETO — desde la página en blanco, la PRÓXIMA
+                //     segunda invocación del Devorador vuelve a encender
+                //     la aspiradora (la letra: «debe volver a comerse al
+                //     Devoramundos con su segunda invocacion desde ahi»).
+                sp.InvocacionDevoradorPendiente = false;
                 // v6.50.121 — LA MARCA DE LA CAÍDA también se borra: el
                 //     cielo vuelve a estar en blanco y el cometa cruzará
                 //     la primera noche del portador otra vez (las

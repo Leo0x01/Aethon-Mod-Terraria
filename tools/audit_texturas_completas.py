@@ -90,7 +90,13 @@ for dirpath, _, archivos in os.walk(RAIZ):
             for b in bases:
                 if b in MODS:
                     tipo_directo[clase] = b
-            posiciones[clase] = (ruta, texto, m.start())
+            # v6.179 — LAS CLASES PARTIAL CUENTAN TODAS (la cura del falso
+            # positivo: AtaqueJefeProjectile vive partida en DOS archivos
+            # y el override Texture en solo UNO de ellos — si el walk caía
+            # en el archivo sin override, el guardián lloraba PNG que SÍ
+            # existía. Ahora cada declaración se guarda y la búsqueda del
+            # override recorre TODOS los cuerpos de la clase).
+            posiciones.setdefault(clase, []).append((ruta, texto, m.start()))
 
 TIPOS = {}          # clase → el ModX de su cadena
 
@@ -114,16 +120,32 @@ def tipo_de(clase, visto=None):
 
 
 encontradas = {}      # clase → dict(tipo, cs, abstracta, png, entrada, modo)
-for clase, (ruta, texto, ini) in posiciones.items():
+# v6.179 — EL CUERPO COMPLETO DE LA CLASE: TODAS sus declaraciones (las
+# `partial` del partido de los gigantes) — el override puede vivir en
+# CUALQUIERA de sus archivos.
+for clase, decls in posiciones.items():
     tipo = tipo_de(clase)
     if not tipo:
         continue
-    abstracta = 'abstract ' in texto[max(0, ini - 20):ini + 90]
-    marcas = sorted(p[2] for p in posiciones.values() if p[0] == ruta)
-    i = marcas.index(ini)
-    cuerpo = texto[ini:marcas[i + 1] if i + 1 < len(marcas) else len(texto)]
-    rel = os.path.relpath(ruta, RAIZ)
-    prestamo = PRESTADA.search(cuerpo)
+    rel = None
+    abstracta = False
+    hasoutlines = False
+    hl_propia = False
+    prestamo = None
+    inis_por_ruta = {}
+    for ruta, texto, ini in decls:
+        inis_por_ruta.setdefault(ruta, []).append(ini)
+    for ruta, texto, ini in decls:
+        abstracta = abstracta or 'abstract ' in texto[max(0, ini - 20):ini + 90]
+        marcas = sorted(inis_por_ruta[ruta])
+        i = marcas.index(ini)
+        cuerpo = texto[ini:marcas[i + 1] if i + 1 < len(marcas) else len(texto)]
+        if rel is None:
+            rel = os.path.relpath(ruta, RAIZ)
+        if not prestamo:
+            prestamo = PRESTADA.search(cuerpo)
+        hasoutlines = hasoutlines or bool(HASOUTLINES.search(cuerpo))
+        hl_propia = hl_propia or bool(HL_PROPIA.search(cuerpo))
     if prestamo:
         png, entrada = ruta_png(prestamo.group(1))
         # v6.111 — LA EXENCIÓN VANILLA: una textura prestada de VANILLA
@@ -135,14 +157,13 @@ for clase, (ruta, texto, ini) in posiciones.items():
     else:
         # LA PROPIA: la convención de tML — la carpeta del .cs (la casa
         # mantiene namespace == carpeta) + el nombre de la clase
-        carpeta = os.path.dirname(ruta)[len(RAIZ.rstrip('/')) + 1:]
+        carpeta = os.path.dirname(decls[0][0])[len(RAIZ.rstrip('/')) + 1:]
         png = os.path.join(RAIZ, carpeta, clase + '.png')
         entrada = carpeta + '/' + clase
         modo = 'propia'
     encontradas[clase] = {'tipo': tipo, 'cs': rel, 'abstracta': abstracta,
                           'png': png, 'entrada': entrada, 'modo': modo,
-                          'hasoutlines': bool(HASOUTLINES.search(cuerpo)),
-                          'hl_propia': bool(HL_PROPIA.search(cuerpo))}
+                          'hasoutlines': hasoutlines, 'hl_propia': hl_propia}
 
 faltan_disco, total = [], 0
 for clase, info in encontradas.items():

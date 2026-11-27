@@ -1,29 +1,16 @@
-# SNAPSHOT ESTABLE — v6.178 — EL RAYO DE VERDAD, LA BRUMA PEQUEÑA Y LA NOCHE PRESTADA
+# SNAPSHOT ESTABLE — v6.179 — LA PUERTA VIVA, EL TRÍO MÁS ARMADO Y EL ARMA MÁXIMA
 
-> **PUBLICADA — release de GitHub + CDN verificado (md5 bbe8f5054d421ee0bd7024b2ae45e3a6 · release 459785886)**
+> **PUBLICADA — release de GitHub (md5 fdb1a422b4cd624a8042e8422f969b3b · AethonMod_v6.179.tmod)**
 
-## LOS ONCE PUNTOS DE LA SESIÓN 31
+## LOS SIETE PUNTOS DE LA SESIÓN 32
 
-1. **EL RAYO DE VERDAD** (la letra: «debes copiar su tecnica»): la técnica del .tmod del usuario (decompilado) reencarnada 100% con material de la casa en **HazProyectadoLib** — la misma línea en SEIS CAPAS (envolventes ×2 con tapas + el cuerpo que FLUYE en tramos alineados tileables + el segundo flujo + los bordes que arden + las dos luces) con el CONTORNO ONDULANTE de tres octavas que viaja con el flujo y las puntas en sqrt. Tres consumidores: el rayo continuo del visor (18 px), LA PROYECCIÓN de la X (100 px) y el barrido del faro (66 px) — los parámetros EXACTOS del plano, con fallback a la pila de siempre.
-2. **La cura del client.log** (116 fallos/sesión): la clave `Proyectado.Opcionales` pide {0}/{1}/{2} y viajaban DOS argumentos — los TRES viajan (`TotalOpcionales` = 6).
-3. **LA BRUMA PEQUEÑA DE LA BASE** (la cura de los 5 fps): las tumbas de niebla v6.177 (radios ~1100 px) MUEREN, el cielo del interior vuelve al estado pre-bruma — y nace UNA bruma PEQUEÑA por tentáculo (52-138 px, calidad 0.16-0.18, alfa bajo). R24 en el MAESTRO.
-4. **LA NOCHE PRESTADA UNIVERSAL**: las IA vanilla huyen del mediodía eterno (EncourageDespawn por IsItDay — decompile) — la noche prestada pasa de SOLO SkeletronHead a TODO NPC: en el interior NADIE ve el amanecer y TODOS los jefes se quedan.
-5. **LA VIDA CONTADA** (los spikes eternos del Rey Slime 26): el default vanilla de `timeLeft` es 3600 ticks = 60 s y el Spike NO tiene override — TODA volea de TODOS los jefes nace con 180 ticks. R23 en el MAESTRO.
-6. **EL VIGÍA BORRADO POR LA PÁGINA**: la Página en Blanco también limpia el reloj de invocaciones del Devorador — desde el olvido, la SEGUNDA invocación vuelve a soltar la ASPIRADORA.
-7. **El blanco de las ranuras EXORCIZADO**: el banco de pruebas **DiagnosticoPersistenciaSistema** (headless) reproduce el reinicio de verdad (disco → ítem nuevo) y su veredicto es VERDE: ranuras · modo · albedrío · sello · PUERTA (1000/1000) SOBREVIVEN — la persistencia era inocente. La cura visual: icono blindado + EL NOMBRE DEL ARMA COSIDO debajo de cada ranura.
-8. **El faro con MUCHOS VFX**: LA CORONA FANTASMA curada (los 22 picos dibujaban con `VFXCore.Quad` que SOLO ACUMULA sin Flush: INVISIBLES desde la v6.177) + LA ESTELA DEL BARRIDO + LA CAMPANADA por vuelta + EL CHOQUE DE PUNTA (LaserScan + chispas).
-9. **Los botones con GARANTÍA ABSOLUTA**: piso de legibilidad 0.72 + ELIPSIS — si al piso no cabe, se recorta con «…»: NADA desborda NUNCA (altar y pilar).
-10. **La lección del fósil COMPLETA**: el build Y EL SERVIDOR (cada carga) auto-pueblan el en-US fuente con ~180 claves DisplayName/Tooltip (el tick 18:39:00 lo cazó) — la fuente se restaura antes del commit, el .tmod nace limpio, el gate AUDIT mide contra el .tmod (paridad 1901=1901).
-11. **Las docs**: MAESTRO (R23/R24 + la técnica + la cronología) + EFECTOS-Y-LIBRERIAS (§0 la corona fantasma + §4.3b HazProyectadoLib + el mapa) + CHANGES con la letra.
+1. **EL TRÍO MÁS ARMADO** (la letra: «los slot… todavia se muestran vacios cuando entro, el item solo vuelve a aparecer si lo desequipo y lo vuelvo a equipar»): la persistencia estaba VIVA — el fantasma era que el trío es CRAFTABLE y el portador llevaba DOS; el altar leía EL PRIMERO, que podía ser el vacío. Ahora `Del()` devuelve SIEMPRE el trío MÁS ARMADO (R27).
+2. **EL SLOT MUDO + LA VENTANA QUE SE LEE**: el cuadro del slot del trío NO lleva NINGÚN texto (el nombre cosido moría encogido a lo invisible para caber en 60 px y el dígito muere con él) — y TODOS los textos crecen: celda 50 · icono 36 · título 1.3 · placa 1.2 · pila 0.95 · líneas 1.0-1.1 · títulos 1.1 · botones 1.2 con piso de legibilidad 1.0 + elipsis.
+3. **LA PUERTA VIVA** (la letra: «una vez activo debe estar activo siempre»): el cerrojo `PuertaViva` viaja con el mundo y JAMÁS se apaga — la PRIMERA vez que las mil están pagadas, la puerta SE LAS TRAGA (`TragarLaPuerta` ×3 caminos + migración de mundos viejos) y queda abierta para siempre. El banco headless lo prueba: PUERTA-TRAGO COMIDAS ✔ · PUERTA-CERROJO ABIERTA PARA SIEMPRE ✔.
+4. **SOLO EL ARMA, YA MÁXIMA, CON SUS DOS FASES** (la letra: «solo necesito el arma… cualquier otra cosa del mod puedes borrarlo, ademas que el arma ya este en su maxima capacidad y pueda cambiar entre las diferentes fases»): las diez mejoras, el Cíclope, su Eco, sus drops y el buff de recarga MUEREN. El arma nace a su máxima capacidad (energía infinita 300/300 — nada se gasta ni recarga; el rótulo de la fase vive donde vivía la barra) y las fases se cambian con la TECLA X o el CLIC DERECHO: fase 1 el rayo continuo ⇄ fase 2 la proyección enorme (sin enfriamiento — una a la vez). La fase viaja con el jugador.
+5. **EL FESTÍN DE LA LLAMADA** (la letra: «pese a que se invoca mas de 2 veces despues de borrar la lista del festin»): las oleadas parían cabezas de Devorador por su cuenta y el «== 2» exacto nunca caía en una invocación de verdad. LA MARCA DE LA LLAMADA (R26): solo cuentan las cabezas que nacen de la llamada del portador (ítem en la mano dentro/fuera + pilar; la gasta el OnSpawn). La Página en Blanco borra la marca con el resto del olvido.
+6. **LA CURA DEL client.log** (la letra: «hay un error en el log»): el crash `AI_007_FindGoodRestingSpot` era los VECINOS DEL PUEBLO del mundo real vivos dentro del interior con homeTile del mundo grande — `WorldGen.clearWorld()` limpia tiles, NO NPCs. LA CIUDAD VACÍA (R25): al entrar se apagan todos los NPC del exterior. El warn de memoria: el barrendero cuenta los ÍTEMS como anclas (R28). El warn FNA: las 528 imágenes escaneadas, TODAS sanas (el aviso nace del ciclo de recompilado del tML, no del mod).
+7. **EL GUARDIÁN APRENDE LOS PARTIAL**: el gate de texturas guardaba solo la ÚLTIMA declaración de cada clase — las `partial` (v6.177) con su override en el otro archivo daban falsos positivos. Ahora lee TODAS las declaraciones. (Mejora de herramienta documentada.)
 
 ## VERIFICACIÓN
-Oráculo 0/0 (488 .cs) · build 0/0 · GUARDIÁN ✔ (las 4 texturas del rayo dentro) · AUDIT v6.178 ✔ (tumba muerta · 3 brumas · 3 argumentos · noche universal · 4 voleas · vigía borrable · paridad 1901=1901) · headless 0 exc + DiagnosticoPersistencia TODO VIVO · loop sin regresiones (fósiles 180→0) · sim del rayo SHIP (la ola viaja · puntas sqrt · costura 1/255) · QA VLM 7/10.
-
-## LO QUE SE ESPERA EN JUEGO
-- El rayo del visor y LA PROYECCIÓN se ven como EL ARMA REAL (las seis capas fluyendo).
-- El faro: corona picada VISIBLE + estela + campanada + choque de punta.
-- El interior a FPS normales + los tentáculos de fondo con SU bruma pequeña en la base.
-- El Ojo de Cthulhu (y TODOS los jefes) se quedan a pelear en el interior.
-- Los proyectiles de los jefes mueren en 3 segundos.
-- La Página en Blanco reestrena la aspiradora del Devoramundos.
-- El tooltip del visor sin excepciones (el log limpio).
+Oráculo 0/0 (484 .cs) · build REAL 0/0 + Packaging (538 entradas, 22.027.632 B, md5 fdb1a422b4cd624a8042e8422f969b3b) · GUARDIÁN TODO VIVE ✔ (442 clases) · AUDIT v6.179 TODO VERIFICADO ✔ (paridad 1860=1860 · mejoras/NPC/buff muertos con sus sprites fuera · firmas vivas · fósiles purgados 2× — lección del fósil del servidor aplicada) · headless 0 excepciones + DiagnosticoPersistencia TODO VIVO · sim UI SHIP (título 1.3 en banda de 50 · celdas 50 · placa 1.2 · piso 1.0).

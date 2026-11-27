@@ -48,11 +48,17 @@ namespace AethonMod.Content.UI
         private static readonly Color TintaOro = new(168, 108, 44);
         private static readonly Color TintaApagado = new(118, 96, 70);
 
-        // LA CUADRÍCULA: 6 columnas de 44 px, iconos de 32.
+        // LA CUADRÍCULA: 6 columnas de 50 px, iconos de 36.
+        // v6.179 — LA VENTANA QUE SE LEE (la letra: «la ventana flotante
+        // para elegir el arma tiene unos textos muy pequeños que no se
+        // ven, revisa el tamaño de los textos»): la celda crece 44→50,
+        // el icono 32→36, el título 1.0→1.3, la placa del nombre
+        // 0.92→1.2 y la pila 0.78→0.95 — TODO se lee de un vistazo.
         private const int Columnas = 6;
-        private const int Celda = 44;
+        private const int Celda = 50;
+        private const int Icono = 36;
         private const int FilasVisibles = 5;         // por defecto: 30 candidatos a la vista
-        private const int AltoTitulo = 44;   // v6.177: el título GRANDE (la letra: «un texto muy pequeño y no se puede leer»)
+        private const int AltoTitulo = 50;   // v6.177: el título GRANDE (la letra: «un texto muy pequeño y no se puede leer»)
         private const int AltoPie = 22;               // la pista de la rueda (solo si hay scroll)
 
         // EL ESTADO (cliente puro): el ancla (el control que la abrió),
@@ -196,7 +202,9 @@ namespace AethonMod.Content.UI
                 // EL TÍTULO (la letra de cada bandeja — medido para caber)
                 // v6.177 — EL TÍTULO SE LEE (la letra: «esta tiene un
                 // texto muy pequeño y no se puede leer»): escala base 1.0
-                float escT = LibroLineas.EscalaQueCabe(_titulo, 1.0f, r.Width - 24f);
+                // v6.179 — MÁS GRANDE TODAVÍA (la letra volvió: «unos
+                // textos muy pequeños que no se ven»): 1.3 y banda de 50.
+                float escT = LibroLineas.EscalaQueCabe(_titulo, 1.3f, r.Width - 24f);
                 LibroLineas.Texto(sb, _titulo, new Vector2(r.Center.X, r.Y + AltoTitulo * 0.5f),
                     TintaVioleta, escT, 0.5f, 0.5f);
                 // el filete del título (el estilo del libro)
@@ -261,12 +269,12 @@ namespace AethonMod.Content.UI
                     sb.Draw(px, celda, hov ? PapelSombra * 1.15f : PapelSombra * 0.7f);
                     LibroMarco.Marco(sb, celda, hov ? TintaVioleta : TintaOro * 0.35f);
                     Texture2D tex = TextureAssets.Item[it.type].Value;
-                    float esc = Math.Min(32f / tex.Width, 32f / tex.Height);
+                    float esc = Math.Min(Icono / (float)tex.Width, Icono / (float)tex.Height);
                     sb.Draw(tex, celda.Center.ToVector2(), null, Color.White, 0f,
                         tex.Size() * 0.5f, esc, SpriteEffects.None, 0f);
                     if (it.stack > 1)
                         LibroLineas.Texto(sb, it.stack.ToString(),
-                            new Vector2(celda.Right - 3f, celda.Bottom - 5f), Tinta, 0.78f, 1f, 0.85f);
+                            new Vector2(celda.Right - 3f, celda.Bottom - 5f), Tinta, 0.95f, 1f, 0.85f);
                 }
 
                 // EL NOMBRE DEL ÍTEM bajo el cursor — CON SU PLACA DE PAPEL
@@ -275,7 +283,7 @@ namespace AethonMod.Content.UI
                 if (hover >= 0)
                 {
                     string nombre = _lista[hover].Name;
-                    float escN = LibroLineas.EscalaQueCabe(nombre, 0.92f, 260f);
+                    float escN = LibroLineas.EscalaQueCabe(nombre, 1.2f, 300f);
                     var mN = fuente.MeasureString(nombre) * escN;
                     Rectangle placa = new Rectangle(
                         (int)(r.Center.X - mN.X * 0.5f - 10f),
@@ -297,7 +305,7 @@ namespace AethonMod.Content.UI
                     string vacio = Language.GetTextValue(_paraTrio
                         ? "Mods.AethonMod.Items.TrioSinConsagradas"
                         : "Mods.AethonMod.Items.BandejaVacia");
-                    float escV = LibroLineas.EscalaQueCabe(vacio, 0.9f, r.Width - 30f);
+                    float escV = LibroLineas.EscalaQueCabe(vacio, 1.05f, r.Width - 30f);
                     LibroLineas.Texto(sb, vacio, new Vector2(r.Center.X, vitrina.Center.Y),
                         TintaApagado, escV, 0.5f, 0.5f);
                 }
@@ -306,7 +314,7 @@ namespace AethonMod.Content.UI
                 if (_filas > _filasVis)
                 {
                     string pista = Language.GetTextValue("Mods.AethonMod.Altar.SelectorRueda");
-                    float escP = LibroLineas.EscalaQueCabe(pista, 0.78f, r.Width - 24f);
+                    float escP = LibroLineas.EscalaQueCabe(pista, 1.0f, r.Width - 24f);
                     LibroLineas.Texto(sb, pista, new Vector2(r.Center.X, r.Bottom - 4f),
                         TintaApagado, escP, 0.5f, 1f);
                 }

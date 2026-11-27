@@ -960,25 +960,12 @@ namespace AethonMod.Content.Items.Bolsas
             // v6.174 — EL FARO DEL ECLIPSE (el rayo concentrado ORIGINAL:
             // 26 capas sobre TajoLib + VFXCore, el conducto sigue al cursor).
             l.Add((ModContent.ItemType<Weapons.Investigaciones.FaroDelEclipse>(), 1));
-            // v6.175 — EL ECO PROYECTADO (la llamada del Cíclope Proyectado
-            // — la recreación del vídeo «Me Proyecte» de Chopilas).
-            l.Add((ModContent.ItemType<Items.NPCs.EcoProyectado>(), 3));
-            // v6.177 — EL VISOR DEL PROYECTADO (la letra: «el arma del
-            // ciclope no tiene nada que ver te voy a dar el archivo .tmod»
-            // — el arma de verdad del meme, recreada 100 % por la casa
-            // sobre el plano del .tmod) + SUS DIEZ MEJORAS (las que sueltan
-            // los jefes — aquí para probarlas).
+            // v6.179 — EL VISOR DEL PROYECTADO, SOLO EL ARMA (la letra:
+            // «solo necesito el arma visor del proyectado cualquier otra
+            // cosa del mod puedes borrarlo»): el Cíclope, su Eco, sus
+            // drops y las diez mejoras que dolían MURIERON — queda el
+            // arma YA MÁXIMA (energía infinita 300) con SUS DOS FASES.
             l.Add((ModContent.ItemType<Items.Investigaciones.VisorDelProyectado>(), 1));
-            l.Add((ModContent.ItemType<Items.Investigaciones.CartaQueNuncaLeDiste>(), 1));
-            l.Add((ModContent.ItemType<Items.Investigaciones.CapturaDelVisto>(), 1));
-            l.Add((ModContent.ItemType<Items.Investigaciones.NoEresTuSoyYo>(), 1));
-            l.Add((ModContent.ItemType<Items.Investigaciones.ProyectorDelSalon>(), 1));
-            l.Add((ModContent.ItemType<Items.Investigaciones.ProyectorDeCine>(), 1));
-            l.Add((ModContent.ItemType<Items.Investigaciones.ProyectorImax>(), 1));
-            l.Add((ModContent.ItemType<Items.Investigaciones.FloresAmarillas>(), 1));
-            l.Add((ModContent.ItemType<Items.Investigaciones.YaLoSupere>(), 1));
-            l.Add((ModContent.ItemType<Items.Investigaciones.HayMasPeces>(), 1));
-            l.Add((ModContent.ItemType<Items.Investigaciones.LunaQueTeIbaABajar>(), 1));
             // v6.86 — R5 — EL ALTAR DE OFRENDAS (el altar que consagra
             // la ofrenda por el Eterno).
             l.Add((ModContent.ItemType<Items.Altar.AltarOfrendasItem>(), 1));

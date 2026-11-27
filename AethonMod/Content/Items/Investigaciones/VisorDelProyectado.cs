@@ -9,29 +9,34 @@ using AethonMod.Content.Players;
 namespace AethonMod.Content.Items.Investigaciones
 {
     // ======================================================================
-    //  VisorDelProyectado — v6.177 — EL ARMA DEL CÍCLOPE, LA DE VERDAD.
+    //  VisorDelProyectado — v6.179 — EL ARMA DEL CÍCLOPE, SOLO EL ARMA.
     //
-    //  LA LETRA (sesión 30): «el arma del ciclope no tiene nada que ver
-    //  te voy a dar el archivo .tmod del ciclope proyectado» — el .tmod
-    //  fue EL PLANO (mecánica y espíritu del meme de Chopilas); TODO lo
-    //  demás es de la casa: código, sprites, textos y sonidos vanilla.
+    //  LA LETRA (sesión 32): «solo necesito el arma visor del proyectado
+    //  cualquier otra cosa del mod puedes borrarlo, ademas que el arma
+    //  ya este en su maxima capacidad y pueda cambiar entre las
+    //  diferentes fases».
     //
-    //  QUÉ ES: un VISOR de una sola lente magenta. Mantén el CLIC y el
-    //  rayo óptico continuo sale de tu ojo y sigue al cursor (no gasta
-    //  maná: gasta ENERGÍA PROYECTADA, una barra propia de 100). La
-    //  tecla X es LA PROYECCIÓN de verdad: te quitas el visor, se te
-    //  enciende el ojo y sueltas un rayo ENORME que atraviesa todo (20 s
-    //  de enfriamiento, no gasta energía).
+    //  LA CIRUGÍA: las diez mejoras que dolían, el Cíclope, su Eco y los
+    //  drops de jefe MURIERON — queda SOLO EL ARMA, y NACE A SU MÁXIMA
+    //  CAPACIDAD (energía 300/300 INFINITA — la luna ya está bajada de
+    //  fábrica; nada que recoger, nada que esperar).
     //
-    //  EL DAÑO escala SOLO: es daño MÁGICO (las armaduras y accesorios
-    //  de mago lo visten) y sube con cada jefe de Terraria caído (las
-    //  11 etapas), +5% por cada jefe opcional y un bono por enemigos
-    //  caídos con tope por etapa. Cada jefe suelta su MEJORA (una de un
-    //  solo uso que sube la energía máxima y acelera la recarga — la del
-    //  Señor de la Luna da la PROYECCIÓN INFINITA).
+    //  LAS DOS FASES (cambian con la TECLA X o el CLIC DERECHO):
+    //   · FASE 1 — EL RAYO CONTINUO: mantén el clic; el haz fino sale de
+    //     tu ojo y sigue al cursor (la de siempre).
+    //   · FASE 2 — LA PROYECCIÓN: cada clic suelta el rayo ENORME que
+    //     atraviesa todo (el cine completo: el visor se levanta, el ojo
+    //     se enciende, 100 px de ancho — SIN enfriamiento, una
+    //     proyección a la vez).
+    //
+    //  EL DAÑO sigue escalando SOLO (las 11 etapas por los jefes de
+    //  Terraria caídos + los opcionales + la desesperación acumulada).
     // ======================================================================
     public class VisorDelProyectado : ModItem
     {
+        /// <summary>El rayo grande de la fase 2 golpea ×3 (el plano de la v6.177).</summary>
+        public const float MultiplicadorProyeccion = 3f;
+
         public override void SetDefaults()
         {
             Item.width = 44;
@@ -55,25 +60,48 @@ namespace AethonMod.Content.Items.Investigaciones
 
         public override bool CanUseItem(Player player)
         {
-            var pr = player.GetModPlayer<ProyectadoPlayer>();
-            if (!pr.PuedeDisparar) return false;
+            // FASE 2 — LA PROYECCIÓN: una proyección a la vez (el cine dura
+            // sus seis segundos — ese ES el ritmo; nada de enfriamientos
+            // falsos en un arma YA MÁXIMA).
+            if (player.GetModPlayer<ProyectadoPlayer>().Fase == 2)
+                return player.ownedProjectileCounts[ModContent.ProjectileType
+                    <global::AethonMod.Content.Projectiles.Investigaciones.RayoProyectado>()] == 0;
+            // FASE 1 — EL RAYO CONTINUO: un canal a la vez (y nada de
+            // disparar mientras la proyección grande vive).
             if (player.ownedProjectileCounts[ModContent.ProjectileType
                     <global::AethonMod.Content.Projectiles.Investigaciones.RayoOpticoProyectado>()] > 0)
                 return false;
-            // durante la proyección grande el visor no dispara
             if (player.ownedProjectileCounts[ModContent.ProjectileType
                     <global::AethonMod.Content.Projectiles.Investigaciones.RayoProyectado>()] > 0)
                 return false;
             return true;
         }
 
+        public override bool Shoot(Player player, Terraria.DataStructures.EntitySource_ItemUse_WithAmmo source,
+            Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+        {
+            // FASE 2 — LA PROYECCIÓN: el clic suelta EL RAYO ENORME (el
+            // cine completo, sin enfriamiento) y el rayo fino NO nace.
+            if (player.GetModPlayer<ProyectadoPlayer>().Fase == 2)
+            {
+                int dano = (int)(damage * MultiplicadorProyeccion);
+                float kb = knockback * 2f;
+                Vector2 rumbo = velocity.SafeNormalize(Vector2.UnitX * player.direction);
+                Projectile.NewProjectile(source, player.Center, rumbo,
+                    ModContent.ProjectileType
+                        <global::AethonMod.Content.Projectiles.Investigaciones.RayoProyectado>(),
+                    dano, kb, player.whoAmI);
+                return false;   // el rayo óptico fino de la fase 1 no nace
+            }
+            return true;        // FASE 1: el canal de siempre (el óptico fino)
+        }
+
         public override void ModifyWeaponDamage(Player player, ref StatModifier damage)
         {
-            var pr = player.GetModPlayer<ProyectadoPlayer>();
             int etapa = ProyectadoPlayer.EtapaActual();
             damage *= (float)ProyectadoPlayer.Etapas[etapa].dano / ProyectadoPlayer.Etapas[0].dano;
             damage *= 1f + ProyectadoPlayer.BonoOpcionales();
-            damage *= 1f + ProyectadoPlayer.BonoMuertes(pr.Muertes, etapa);
+            damage *= 1f + ProyectadoPlayer.BonoMuertes(player.GetModPlayer<ProyectadoPlayer>().Muertes, etapa);
         }
 
         public override void ModifyTooltips(List<TooltipLine> tooltips)
@@ -93,40 +121,28 @@ namespace AethonMod.Content.Items.Investigaciones
                         Language.GetTextValue("Mods.AethonMod.Proyectado.Siguiente",
                             ProyectadoPlayer.Etapas[etapa + 1].nombre, ProyectadoPlayer.Etapas[etapa + 1].dano))
                     { OverrideColor = apagado });
-                string energia = pr.Infinito
-                    ? Language.GetTextValue("Mods.AethonMod.Proyectado.EnergiaInfinita")
-                    : Language.GetTextValue("Mods.AethonMod.Proyectado.Energia",
-                        (int)pr.Energia, (int)pr.EnergiaMax, (int)((pr.MultiplicadorRecarga - 1f) * 100f));
-                tooltips.Add(new TooltipLine(Mod, "ProyectadoEnergia", energia) { OverrideColor = vivo });
-                tooltips.Add(new TooltipLine(Mod, "ProyectadoMejoras",
-                    Language.GetTextValue("Mods.AethonMod.Proyectado.Mejoras",
-                        pr.CantidadUsados, ProyectadoPlayer.PuntosMejora.Length))
-                { OverrideColor = apagado });
-                tooltips.Add(new TooltipLine(Mod, "ProyectadoMuertes",
-                    Language.GetTextValue("Mods.AethonMod.Proyectado.Muertes", pr.Muertes,
-                        ProyectadoPlayer.BonoMuertes(pr.Muertes, etapa) * 100f,
-                        ProyectadoPlayer.TopeMuertes(etapa) * 100f)));
-                tooltips.Add(new TooltipLine(Mod, "ProyectadoOpcionales",
-                    Language.GetTextValue("Mods.AethonMod.Proyectado.Opcionales",
-                        // v6.178 — LA CURA DEL client.log (116 fallos por
-                        // sesión: «System.FormatException: Index (zero
-                        // based) must be greater than or equal to zero…»):
-                        // la clave pide {0}/{1}/{2} y solo viajaban DOS
-                        // argumentos — el {2} (el bono %) nacía muerto y
-                        // la excepción saltaba en cada frame del tooltip.
-                        ProyectadoPlayer.JefesOpcionales(), ProyectadoPlayer.TotalOpcionales,
-                        ProyectadoPlayer.BonoOpcionales() * 100f)));
-                // LA TECLA viva: el nombre de la tecla de habilidad
+                // v6.179 — LA CAPACIDAD MÁXIMA, A LA VISTA: la energía es
+                // INFINITA (nada se gasta, nada se recarga — ya está toda).
+                tooltips.Add(new TooltipLine(Mod, "ProyectadoEnergia",
+                    Language.GetTextValue("Mods.AethonMod.Proyectado.EnergiaInfinita"))
+                { OverrideColor = vivo });
+                // LAS FASES (la letra: «pueda cambiar entre las diferentes
+                // fases»): la viva primero, la otra detrás.
                 string tecla = Language.GetTextValue("Mods.AethonMod.Proyectado.SinTecla");
                 var kb = global::AethonMod.Content.Systems.ProyectadoSistema.TeclaProyectarse;
                 var asignadas = kb?.GetAssignedKeys(Terraria.GameInput.InputMode.Keyboard);
                 if (asignadas != null && asignadas.Count > 0) tecla = asignadas[0];
-                string listo = pr.Enfriamiento > 0
-                    ? Language.GetTextValue("Mods.AethonMod.Proyectado.Recargando", pr.Enfriamiento / 60 + 1)
-                    : Language.GetTextValue("Mods.AethonMod.Proyectado.ListoCorto");
-                tooltips.Add(new TooltipLine(Mod, "ProyectadoEspecial",
-                    Language.GetTextValue("Mods.AethonMod.Proyectado.Especial", tecla, listo))
-                { OverrideColor = pr.Enfriamiento > 0 ? apagado : vivo });
+                tooltips.Add(new TooltipLine(Mod, "ProyectadoFase",
+                    Language.GetTextValue("Mods.AethonMod.Proyectado.FaseViva",
+                        pr.Fase, Language.GetTextValue("Mods.AethonMod.Proyectado.Fase" + pr.Fase)))
+                { OverrideColor = vivo });
+                tooltips.Add(new TooltipLine(Mod, "ProyectadoFaseCambio",
+                    Language.GetTextValue("Mods.AethonMod.Proyectado.FaseCambioTip", tecla))
+                { OverrideColor = apagado });
+                tooltips.Add(new TooltipLine(Mod, "ProyectadoOpcionales",
+                    Language.GetTextValue("Mods.AethonMod.Proyectado.Opcionales",
+                        ProyectadoPlayer.JefesOpcionales(), ProyectadoPlayer.TotalOpcionales,
+                        ProyectadoPlayer.BonoOpcionales() * 100f)));
             }
             catch (System.Exception exRegistro)
             { global::AethonMod.Content.Systems.RegistroSistema.Fallo("VisorDelProyectado", exRegistro); }
