@@ -1,6 +1,6 @@
 # SNAPSHOT ESTABLE — v6.184 — LA PURGA QUE SE COMÍA SU PROPIA MESA, EL DIOS SEPARADO Y LA LUZ CANÓNICA
 
-> **PUBLICADA — md5 15c9176fbbe834921cd045bd3dd13e20 · AethonMod_v6.184.tmod · tML 2026.09.3.1**
+> **PUBLICADA — release de GitHub 461165625 · md5 15c9176fbbe834921cd045bd3dd13e20 (CDN verificado byte a byte) · AethonMod_v6.184.tmod · tML 2026.09.3.1**
 
 ## LOS SIETE PUNTOS DE LA SESIÓN 36
 
