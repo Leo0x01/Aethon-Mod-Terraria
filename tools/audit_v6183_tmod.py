@@ -166,9 +166,17 @@ es_txt = TXT["es-ES"]
 texto_vacio = "El Fuego de Vacío reconoce a su dueño y da una pequeña mejora" in es_txt
 texto_pedacito = ("Esto es asqueroso, un pedacito es suficiente." in es_txt
                   and "prefiero comerme al Rey Slime que a esta porquería" in es_txt)
+# v6.183 — DOS FORMAS, UNA CLAVE: el build de tML NORMALIZA el hjson
+# fuente y la entrada sin Description puede venir APANADA
+# (MundoInteriorBuff: { DisplayName }) o PUNTO (MundoInteriorBuff.DisplayName)
+# — la clave viva es la misma y la DESCRIPCIÓN no existe en ninguna.
 texto_buff = re.search(r"MundoInteriorBuff: \{\n\t\tDisplayName: Mundo Interior\n\t\}", es_txt)
-buff_solo_nombre = texto_buff is not None and "Description" not in (
-    es_txt[texto_buff.start():texto_buff.end()])
+buff_solo_nombre = (
+    (texto_buff is not None and "Description" not in (
+        es_txt[texto_buff.start():texto_buff.end()]))
+    or re.search(r"MundoInteriorBuff\.DisplayName: Mundo Interior", es_txt) is not None)
+buff_solo_nombre = buff_solo_nombre and (
+    "MundoInteriorBuff.Description" not in es_txt)
 print(f"  LA DESCRIPCIÓN DEL VACÍO EXTERIOR (la letra exacta): {'✔' if texto_vacio else 'MAL'}")
 print(f"  EL DIÁLOGO DEL PEDACITO (la letra exacta): {'✔' if texto_pedacito else 'MAL'}")
 print(f"  EL BUFF SOLO DICE «Mundo Interior» (sin descripción): "
