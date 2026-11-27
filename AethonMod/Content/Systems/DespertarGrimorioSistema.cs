@@ -679,7 +679,15 @@ namespace AethonMod.Content.Systems
             {
                 if (p == null || !p.active) return;
                 if (alma == null) return;
-                if (alma.NivelDespertar != 19) return;          // la víspera exacta
+                // v6.183 — LA VÍSPERA QUE SE ESPERA (la letra: «es un
+                // item importante para llegar a nivel de despertar 20»):
+                // era un DISPARO EXACTO al 19 — si el libro caía al
+                // suelo y se perdía (o el alijo se llenó y pasó algo),
+                // la puerta del 20 se quedaba con la llave perdida
+                // hasta un 50 % de la Muralla. Ahora la víspera vive
+                // MIENTRAS la llave falte: al 19 o a CUALQUIERA que
+                // venga después — el Eterno no se queda con la llave.
+                if (alma.NivelDespertar < 19) return;               // la víspera (y lo que siga)
                 if (alma.LibroCorruptoConsumido) return;         // su puerta ya nació paga
                 if (LlevaElLibro(p)) return;                     // ya lo lleva encima
 
@@ -1150,7 +1158,7 @@ namespace AethonMod.Content.Systems
                 // v6.89 — LA VÍSPERA DEL LIBRO (la letra: «tienes que
                 //     darle el libro corrupto al jugador»): al SUBIR al
                 //     19, el Despertar 20 ya tiene su llave en la bolsa.
-                if (nivel == 19)
+                if (nivel >= 19)   // v6.183: la víspera se repite mientras la llave falte
                     RevisarEntregaDelLibro(p, alma);
 
                 // EL NUEVO NIVEL CAMINA (el daño del portador lo lee su

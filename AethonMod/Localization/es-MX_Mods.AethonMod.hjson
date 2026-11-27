@@ -2319,6 +2319,12 @@ Items: {
 		// Tooltip: ""
 	}
 
+	BolsaAjuarPortador: {
+		DisplayName: El Ajuar del Portador
+		// Tooltip: ""
+	}
+
+
 	CodiceHabilidades: {
 		DisplayName: Códice de Habilidades
 		// Tooltip: ""
@@ -3772,6 +3778,9 @@ FormaEterna: {
 // and also summon Aethon using a window with buttons to choose").
 Pergamino: {
 	Titulo: Páginas informativas del grimorio
+	// v6.183 — EL SUBTÍTULO COSIDO (la letra: el texto en crudo de la página del libro): el rótulo que viaja junto al título.
+	Subtitulo: cosido al lomo por el Cronista
+
 	SecAltar: EL ALTAR DE LA CONSAGRACIÓN
 	Altar1: • La ofrenda: un arma gana +5% a TODAS sus stats y su etiqueta; un material solo su etiqueta; las esencias suben +1 a la puerta.
 	Altar2: • No valen: ya consagradas, herramientas, accesorios ni dinero. Las ESENCIAS SÍ: el Eterno las devora enteras.

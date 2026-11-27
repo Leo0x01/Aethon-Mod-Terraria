@@ -269,7 +269,13 @@ namespace AethonMod.Content.NPCs
                     int n when n < 10  => "Mods.AethonMod.Cronista.ChatPortador" + (n - 4),
                     int n when n < 13  => "Mods.AethonMod.Cronista.ChatOleadas" + (n - 9),
                     13                => "Mods.AethonMod.Cronista.ChatDespertar",
-                    int n when n < 16  => "Mods.AethonMod.Cronista.ChatSellado" + (n - 14),
+                    // v6.183 — LA CUENTA DE LOS SELLADOS (la letra: el
+                    // chat del Cronista pintando «ChatSellado0» crudo):
+                    // la familia vale n=14,15 y las claves vivas son
+                    // ChatSellado1 y ChatSellado2 — el «- 14» paría un
+                    // CERO inexistente la mitad de las veces. Ahora
+                    // n-13 cae en 1 y 2, donde viven.
+                    int n when n < 16  => "Mods.AethonMod.Cronista.ChatSellado" + (n - 13),
                     int n when n < 19  => "Mods.AethonMod.Cronista.ChatObjetos" + (n - 15),
                     _                 => "Mods.AethonMod.Cronista.ChatCierre" + (familia - 18),
                 };

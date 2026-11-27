@@ -810,6 +810,47 @@ namespace AethonMod.Content.Items.Bolsas
     //  kit de pruebas de la casa).
     // ==================================================================
 
+    // ======================================================================
+    //  v6.183 — EL AJUAR DEL PORTADOR (la letra: «a partir de ahora ya
+    //  no es necesario que el jugador reciba lo siguiente en vez de eso
+    //  ponlo en una bolsa y esa bolsa ponla dentro de la Bolsa Maestra
+    //  junto con todas las demas bolsas»): los TRECE REGALOS de la
+    //  casa — las cuatro LUCES del portador (Forma Ascendida 2/3/4/8),
+    //  su PEQUEÑO RECUERDO y los OCHO TESOROS del oficio — mueren como
+    //  entrega directa al entrar al mundo y viven aquí, cosidos en
+    //  oro, DENTRO del Cofre del Arsenal.
+    // ======================================================================
+    public class BolsaAjuarPortador : BolsaCategoria
+    {
+        protected override string Titulo => "El Ajuar del Portador — Los Regalos de la Casa";
+        protected override string NombreCorto => "El Ajuar del Portador";
+        protected override Color ColorFiesta => new(255, 214, 130);
+        protected override string Nota => "Los trece regalos que la casa cosió en oro para su portador";
+
+        protected override List<(int tipo, int pila)> Contenido()
+        {
+            var l = new List<(int, int)>();
+            // LAS CUATRO LUCES (Forma Ascendida 2 · 3 · 4 · 8)
+            l.Add((ModContent.ItemType<Items.Cosmetics.FormaAscendidaDosItem>(), 1));
+            l.Add((ModContent.ItemType<Items.Cosmetics.FormaAscendidaTresItem>(), 1));
+            l.Add((ModContent.ItemType<Items.Cosmetics.FormaAscendidaCuatroItem>(), 1));
+            l.Add((ModContent.ItemType<Items.Cosmetics.FormaAscendidaOchoItem>(), 1));
+            // EL PEQUEÑO RECUERDO DE AETHON
+            l.Add((ModContent.ItemType<Items.Llamados.AethonMenorItem>(), 1));
+            // LOS ADORNOS (el arcoíris de la Forma 3 · los soles rúnicos)
+            l.Add((ModContent.ItemType<Items.Cosmetics.HaloArcoirisItem>(), 1));
+            l.Add((ModContent.ItemType<Items.Cosmetics.BrilloSolarItem>(), 1));
+            // LOS TESOROS DEL OFICIO
+            l.Add((ModContent.ItemType<Weapons.TresCasas.CoroDeLosProfundos>(), 1));
+            l.Add((ModContent.ItemType<Weapons.TresCasas.PlumaDelEscribaSanto>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Regla.LaReglaDelCielo>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Auras.CoronaDePlumas>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Auras.DerrameDeTinta>(), 1));
+            l.Add((ModContent.ItemType<Weapons.Definitivas.LaUltimaPalabra>(), 1));
+            return l;
+        }
+    }
+
     public class BolsaMaestra : BolsaCategoria
     {
         protected override string Titulo => "El Cofre del Arsenal — Todas las Bolsas";
@@ -865,6 +906,11 @@ namespace AethonMod.Content.Items.Bolsas
             // darselas al jugador en una bolsa») — también DIRECTO en el
             // regalo de pruebas.
             l.Add((ModContent.ItemType<BolsaSuperforja>(), 1));
+            // v6.183 — EL AJUAR DEL PORTADOR (bolsa 29 del cofre): los
+            // trece regalos que antes caían DIRECTO al entrar al mundo
+            // (la letra: «ponlo en una bolsa y esa bolsa ponla dentro de
+            // la Bolsa Maestra junto con todas las demas bolsas»).
+            l.Add((ModContent.ItemType<BolsaAjuarPortador>(), 1));
             // v6.100 — LA BOLSA DEL TALLER MURIÓ con el taller entero (la
             // letra: las armas de la bolsa del taller y las de las tres
             // casas SE BORRAN). Sus dos favoritos (Coro y Pluma) y la

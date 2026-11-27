@@ -826,7 +826,14 @@ namespace AethonMod.Content.UI
                 bool ahora = !trio.Seleccionada(slotT);
                 trio.PonerSeleccion(slotT, ahora);
                 Terraria.Audio.SoundEngine.PlaySound(SoundID.MenuTick);
-                DecirItem(ahora ? "TrioMarcaPuesta" : "TrioMarcaQuitada",
+                // v6.183 — EL GUARDIÁN DE LAS LLAVES (la letra: la
+                // captura del chat PINTANDO «Mods.AethonMod.Items.
+                // TrioMarcaPuesta» crudo): las claves de la selección
+                // viven en la categoría ALTAR (Altar.TrioMarcaPuesta)
+                // y esta mano usaba el helper de Items — cada clic en
+                // una ranura imprimía la clave cruda. Decir() es el
+                // helper del ALTAR: el que apunta a donde viven.
+                Decir(ahora ? "TrioMarcaPuesta" : "TrioMarcaQuitada",
                     ahora ? ChatVioleta : ChatApagado, slotT + 1);
             }
             catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AltarOfrendasUI", exRegistro); }

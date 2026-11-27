@@ -1388,34 +1388,14 @@ namespace AethonMod.Content.Players
         // ================================================================
         public bool DevoramundosPedacito;
 
-        /// <summary>v6.182 — LA LLAMADA PENDIENTE: el portador acaba de
-        /// INVOCAR al Devoramundos (pilar · comida de gusano). Vive
-        /// segundos (caduca sola) — la consume la cabeza que nace.</summary>
-        private bool _llamadaDevoramundos;
-        private ulong _llamadaDevoramundosTick;
+        /// <summary>v6.183 — LA MIGRACIÓN ÚNICA del cerrojo quemado por
+        /// las oleadas de la era v6.180/.181 (ver OnEnterWorld).</summary>
+        public bool DevoramundosPedacitoMigrado;
 
-        /// <summary>v6.182 — EL PORTADOR LLAMA: marca la invocación real
-        /// (10 s de vida — si vanilla rechaza el uso, la marca caduca
-        /// sola sin quemar nada).</summary>
-        public void MarcarLlamadaDevoramundos()
-        {
-            _llamadaDevoramundos = true;
-            _llamadaDevoramundosTick = Main.GameUpdateCount;
-        }
-
-        /// <summary>v6.182 — ¿NACE UNA CABEZA DE LA LLAMADA? La consume
-        /// (una invocación, una cabeza).</summary>
-        public bool ConsumirLlamadaDevoramundos()
-        {
-            if (!_llamadaDevoramundos) return false;
-            if (Main.GameUpdateCount - _llamadaDevoramundosTick > 600ul)
-            {
-                _llamadaDevoramundos = false;   // caducó: la llamada se enfrió
-                return false;
-            }
-            _llamadaDevoramundos = false;       // consumida por ESTA cabeza
-            return true;
-        }
+        // (v6.183 — LA MARCA DE LA LLAMADA MURIÓ ENTERA, campo incluido:
+        // la aparición del Devoramundo es la llave del festín ahora —
+        // OnSpawn la sirve sin intermediarios. La era de la marca
+        // v6.179-v6.182 queda contada en el CHANGES de esta versión.)
 
         /// <summary>v6.180 — LA PRIMERA VEZ CON EL CRONISTA (la letra:
         /// «hay que dejar claro que el lore lo escribió el mismo
@@ -1582,6 +1562,22 @@ namespace AethonMod.Content.Players
             // funcional, vanidad o misceláneo — no se repite).
             if (Player.whoAmI == Main.myPlayer && !Main.dedServ)
                 EntregarRegaloDePruebas();
+
+            // v6.183 — LA MIGRACIÓN DEL CERROJO QUEMADO (la letra:
+            // «la animacion para devorar al Devoramundos SIGUE sin
+            // activarse»): la era v6.180/.181 dejó cerrojos
+            // DevoramundosPedacito quemados por guardianes de OLEADA
+            // (el pedacito servido en la bruma, lejos de la vista —
+            // nadie lo vio) y v6.182 curó el futuro pero no el pasado:
+            // el cerrojo muerto vivía en el .plr para siempre. UNA
+            // sola vez por portador, el cerrojo viejo VUELVE A LA MESA
+            // — la aparición del Devoramundo (v6.183) lo quemará de
+            // verdad, a la vista de todos.
+            if (DevoramundosPedacito && !DevoramundosPedacitoMigrado)
+            {
+                DevoramundosPedacito = false;
+                DevoramundosPedacitoMigrado = true;
+            }
         }
 
         // ================================================================
@@ -1626,26 +1622,17 @@ namespace AethonMod.Content.Players
                     }
                 }
                 catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ShardPlayer", exRegistro); }
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Items.Cosmetics.FormaAscendidaDosItem>());
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Items.Cosmetics.FormaAscendidaTresItem>());
-                // v6.50.53 — LA FORMA ASCENDIDA 4 (EL SERAFÍN — la cuarta luz).
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Items.Cosmetics.FormaAscendidaCuatroItem>());
+                // v6.183 — LAS FORMAS ASCENDIDAS 2/3/4/8 MURIERON como
+                // entrega directa (la letra: «ponlo en una bolsa y esa
+                // bolsa ponla dentro de la Bolsa Maestra»): viven en EL
+                // AJUAR DEL PORTADOR (Bolsas.BolsaAjuarPortador), dentro
+                // del Cofre del Arsenal — como las demás bolsas.
                 // v6.112 — LAS LUCES 5, 6, 7, 9 Y 10 MURIERON por la letra
                 // del usuario («las otras formas 5, 6, 7, 9, 10 pueden ser
                 // borradas») — su entrega directa también (la 8 VIVE abajo).
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Items.Llamados.AethonMenorItem>());
-                // v6.50.54 — EL HALO ARCOÍRIS (el arcoíris de la Forma 3
-                // hecho adorno: pequeño, alrededor de la cabeza).
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Items.Cosmetics.HaloArcoirisItem>());
-                // v6.51.3 — EL BRILLO DE LOS SOLES RÚNICOS (los destellos
-                // de 4 puntas de los soles de 3 anillos+, hechos adorno).
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Items.Cosmetics.BrilloSolarItem>());
+                // v6.183 — EL RECUERDO, EL HALO Y EL BRILLO murieron
+                // directos (misma letra): viven en EL AJUAR DEL PORTADOR
+                // junto con las formas y los tesoros del oficio.
                 // v6.153 — EL TOMO II MURIÓ con la purga de las sombras extra.
                 // v6.153 — EL TOMO IV MURIÓ con la purga de las sombras extra.
                 // v6.153 — EL TOMO V MURIÓ con la purga de las sombras extra.
@@ -1657,10 +1644,8 @@ namespace AethonMod.Content.Players
                 // favoritos (el canon de SPRITES-FAVORITOS) y la mascota
                 // del taller siguen VIVOS — y llegan SOLOS (la regla
                 // permanente: nada nuevo queda sin llegar al jugador).
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Weapons.TresCasas.CoroDeLosProfundos>());
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Weapons.TresCasas.PlumaDelEscribaSanto>());
+                // v6.183 — EL CORO Y LA PLUMA murieron directos
+                // (misma letra): viven en EL AJUAR DEL PORTADOR.
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Llamados.VastagoDelEternoItem>());
                 // v6.100 — LAS ARMAS NUEVAS DE LA SESIÓN (las auras y
@@ -1675,14 +1660,10 @@ namespace AethonMod.Content.Players
                 // arma, su ataque seran lineas en el aire a gran
                 // velocidad»): La Regla del Cielo — también DIRECTO
                 // (la regla de la casa: nada nuevo sin entrega).
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Weapons.Regla.LaReglaDelCielo>());
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Weapons.Auras.CoronaDePlumas>());
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Weapons.Auras.DerrameDeTinta>());
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Weapons.Definitivas.LaUltimaPalabra>());
+                // v6.183 — LA REGLA DEL CIELO, LA CORONA, EL DERRAME
+                // Y LA ÚLTIMA PALABRA murieron directas (misma letra):
+                // viven en EL AJUAR DEL PORTADOR — la regla de la casa
+                // cambia por la letra: lo nuevo llega EN SU BOLSA.
                 // v6.104 — EL AURA DE JUICIO MURIÓ en la v6.109 (la
                 // letra: «ya puedes borrar los otros 2 estandarte» — el
                 // puerto del warbanner y el estandarte original cayeron
@@ -1697,13 +1678,8 @@ namespace AethonMod.Content.Players
                 // Bolsa de las Auras (la regla de la casa: DIRECTO).
                 entregados += EntregarSiNoTiene(ModContent.ItemType
                     <global::AethonMod.Content.Items.Accessories.AuraDeJuicio2Item>());
-                // v6.110 — LA FORMA ASCENDIDA 8 (la letra: «y ademas crear
-                // la forma ascendida 8, 9 y 10» — la v6.111 la re-creó como
-                // LAS OFANIM y la v6.112 la CONSERVA: la única de la
-                // segunda década que vive). La regla permanente: todo lo
-                // nuevo llega DIRECTO.
-                entregados += EntregarSiNoTiene(ModContent.ItemType
-                    <global::AethonMod.Content.Items.Cosmetics.FormaAscendidaOchoItem>());
+                // v6.183 — LA FORMA ASCENDIDA 8 murió directa (misma
+                // letra): vive en EL AJUAR DEL PORTADOR con sus hermanas.
                 // v6.114 — LA BOLSA DE LA FORMA ETERNA (la letra: «los
                 // accesorios mencionados se deben guardar en una nueva
                 // bolsa junto con el accesorio definitivo»): el kit del
@@ -1836,6 +1812,7 @@ namespace AethonMod.Content.Players
                 // v6.175 — LAS INVOCACIONES DEL PILAR (la segunda llamada
                 // del Devorador desata la ASPIRADORA del grimorio)
                 tag["devoramundosPedacito"] = DevoramundosPedacito;
+                tag["devoramundosPedacitoMigrado"] = DevoramundosPedacitoMigrado;
                 // v6.182 — LA MIGRACIÓN DEL FÓSIL DEL FESTÍN: los
                 // guardados de la era v6.180-v6.181 pudieron quemar la
                 // marca con un GUARDIÁN DE OLEADA (la autopsia del festín
@@ -1915,6 +1892,7 @@ namespace AethonMod.Content.Players
                 // v6.175 — LAS INVOCACIONES DEL PILAR (ausente = lista
                 // vacía: los guardados viejos estrenan su Devorador)
                 DevoramundosPedacito = tag.GetBool("devoramundosPedacito");
+                DevoramundosPedacitoMigrado = tag.GetBool("devoramundosPedacitoMigrado");
                 // v6.182 — LA MIGRACIÓN DEL FÓSIL: los guardados de la era
                 // v6.180-v6.181 traen la marca quemada por el agujero de
                 // las oleadas — la mecánica NUEVA la revive una única vez

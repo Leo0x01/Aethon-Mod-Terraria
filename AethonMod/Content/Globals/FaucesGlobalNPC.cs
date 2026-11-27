@@ -913,31 +913,32 @@ namespace AethonMod.Content.Globals
                 _cenaActiva = -1;
 
             // ============================================================
-            //  v6.182 — EL GUARDIÁN DEL HOGAR (LA CURA DEL client.log: la
+            //  v6.183 — EL GUARDIÁN DEL HOGAR v2 (la letra: «sobre el
+            //  nuevo log, busca el error entre los ultimos» — la tercera
             //  «Excepción silenciosa:
             //  System.IndexOutOfRangeException en
-            //  NPC.AI_007_FindGoodRestingSpot» — esta vez 5 minutos
-            //  DESPUÉS de entrar al interior). LA CAUSA RAÍZ (verificada
-            //  en el decompile de NPC.cs:56255): FindGoodRestingSpot
-            //  dibuja su rejilla de búsqueda con EL HOGAR DEL NPC
-            //  (homeTileX/Y), no con su posición — un solo vecino con el
-            //  homeTile del MUNDO GRANDE (p. ej. 3.400 en un interior de
-            //  800×600) revienta Main.tile en la NOCHE ETERNA del
-            //  interior. La Ciudad Vacía (v6.179) apagó a los que
-            //  ENTRARON vivos; éste es el CERROJO PERMANENTE: dentro del
-            //  interior, TODO NPC de pueblo cuyo hogar esté fuera del
-            //  cuerpo del dios lo coge prestado AQUÍ (su propio tile,
-            //  clamped) — el crash es matemáticamente imposible venga
+            //  NPC.AI_007_FindGoodRestingSpot», ahora con el v6.182 YA
+            //  CARGADO EN EL JUEGO). LA CAUSA RAÍZ COMPLETA (decompile,
+            //  la función ENTERA esta vez): la rejilla de reposo de
+            //  vanilla lee
+            //  Main.tile[homeX−7 … homeX+7, homeY−6 … homeY+1] SIN
+            //  NINGÚN clamp — y el cerrojo v6.182 dejaba el hogar en el
+            //  tile 5 («>= 5»): 5 − 7 = −2 → FUERA DEL MUNDO. El margen
+            //  real de la rejilla es 7 en X y 6 en Y; EL CERROJO v2 usa
+            //  MARGEN 12 en los cuatro lados (la rejilla + aire) y ya NO
+            //  es solo para el interior: TODO NPC de pueblo de TODO
+            //  mundo con el hogar fuera del rectángulo seguro lo coge
+            //  prestado AQUÍ (su propio tile, clamped) — el crash es
+            //  matemáticamente imposible venga
             //  de donde venga (mudanza natural, Cronista, transformación).
             // ============================================================
-            if (global::AethonMod.Content.Systems.SubmundoGrimorio.Activo &&
-                npc.townNPC && npc.homeTileX >= 0 &&
-                (npc.homeTileX < 5 || npc.homeTileX >= Main.maxTilesX - 5 ||
-                 npc.homeTileY < 5 || npc.homeTileY >= Main.maxTilesY - 5))
+            if (npc.townNPC && npc.homeTileX >= 0 &&
+                (npc.homeTileX < 12 || npc.homeTileX >= Main.maxTilesX - 12 ||
+                 npc.homeTileY < 12 || npc.homeTileY >= Main.maxTilesY - 12))
             {
-                npc.homeTileX = Math.Clamp((int)(npc.Center.X / 16f), 5, Main.maxTilesX - 6);
-                npc.homeTileY = Math.Clamp((int)(npc.Center.Y / 16f), 5, Main.maxTilesY - 6);
-                npc.homeless = true;   // sin cama que buscar: pasea el cuerpo del dios
+                npc.homeTileX = Math.Clamp((int)(npc.Center.X / 16f), 12, Main.maxTilesX - 13);
+                npc.homeTileY = Math.Clamp((int)(npc.Center.Y / 16f), 12, Main.maxTilesY - 13);
+                npc.homeless = true;   // sin cama que buscar: pasea su mundo
                 npc.netUpdate = true;
             }
 
@@ -1241,20 +1242,38 @@ namespace AethonMod.Content.Globals
                     //  también). Las oleadas, los orbes rotos y cualquier
                     //  otro nacimiento JAMÁS queman la marca.
                     // ========================================================
+                    // v6.183 — LA APARICIÓN ES LA LLAVE (la letra:
+                    // «podrias hacer que a penas aparezca el
+                    // Devoramundo el grimorio del eterno arranque una
+                    // seccion y se la coma cumpliendo asi el evento de
+                    // Festin»). LA MARCA DE LA LLAMADA MUERE: dependía
+                    // del CAMINO de invocación (pilar · comida de gusano)
+                    // y los cerrojos quemados en la era v6.180/.181 por
+                    // los guardianes de oleada dejaron el festín muerto
+                    // para siempre. AHORA: la PRIMERA VEZ que el
+                    // Devoramundo APARECE a ≤2600 px de un portador CON
+                    // EL LIBRO, el pedacito se sirve — el evento es LA
+                    // APARICIÓN. (El ancla del pilar nace a 100 tiles =
+                    // 1600 px del pilar: dentro. La comida de gusano y
+                    // los orbes rotos: al lado del portador: dentro.)
+                    // El cerrojo de una-vez-por-portador sigue vivo (la
+                    // Página en Blanco lo devuelve a la mesa) y LOS
+                    // GUARDIANES DE OLEADA VETAN la mesa el mismo tick
+                    // en que nacen (abajo, en GrimorioFuriaSistema).
                     Player portador = null;
-                    float mejorD = 3000f * 3000f;
+                    float mejorD = 2600f * 2600f;
                     for (int i = 0; i < Main.maxPlayers; i++)
                     {
                         Player p = Main.player[i];
                         if (p == null || !p.active || p.dead) continue;
+                        if (!TieneEternoEnInventario(p)) continue;   // el festín es del LIBRO: sin libro no hay festín
                         float d = p.Center.DistanceSQ(npc.Center);
                         if (d < mejorD) { mejorD = d; portador = p; }
                     }
                     if (portador != null && npc.TryGetGlobalNPC<FaucesGlobalNPC>(out var gPedacito))
                     {
                         var spPedacito = portador.GetModPlayer<Players.ShardPlayer>();
-                        if (spPedacito != null && !spPedacito.DevoramundosPedacito &&
-                            spPedacito.ConsumirLlamadaDevoramundos())
+                        if (spPedacito != null && !spPedacito.DevoramundosPedacito)
                         {
                             // el festín se SIRVE una sola vez por
                             // portador (la Página en Blanco la borra con

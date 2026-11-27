@@ -2319,6 +2319,11 @@ Items: {
 		// Tooltip: ""
 	}
 
+	BolsaAjuarPortador: {
+		DisplayName: El Ajuar del Portador
+		// Tooltip: ""
+	}
+
 	CodiceHabilidades: {
 		DisplayName: Códice de Habilidades
 		// Tooltip: ""
@@ -3768,6 +3773,9 @@ FormaEterna: {
 // and also summon Aethon using a window with buttons to choose").
 Pergamino: {
 	Titulo: Páginas informativas del grimorio
+	// v6.183 — THE STITCHED SUBTITLE (the letter: the raw text on
+	// the book page): the tagline that rides beside the title.
+	Subtitulo: cosido al lomo por el Cronista
 	SecAltar: EL ALTAR DE LA CONSAGRACIÓN
 	Altar1: • La ofrenda: un arma gana +5% a TODAS sus stats y su etiqueta; un material solo su etiqueta; las esencias suben +1 a la puerta.
 	Altar2: • No valen: ya consagradas, herramientas, accesorios ni dinero. Las ESENCIAS SÍ: el Eterno las devora enteras.
@@ -4181,9 +4189,7 @@ Buffs: {
 		Description: Una estrella de neutrones gira a tu lado, sus haces rañando a tus enemigos
 	}
 
-	MundoInteriorBuff: {
-		DisplayName: Mundo Interior
-	}
+	MundoInteriorBuff.DisplayName: Mundo Interior
 
 	NebulaJellyfishBuff: {
 		DisplayName: Medusa Nebular
@@ -4411,6 +4417,8 @@ Projectiles: {
 	// LaMiradaProyectil.DisplayName: La Mirada Proyectil
 	// LaMiradaRayo.DisplayName: La Mirada Rayo
 	// ArcaneBolt.DisplayName: Arcane Bolt
+	// HazSolarSelladoProjectile.DisplayName: Haz Solar Sellado Projectile
+	// RayoSolarSelladoProjectile.DisplayName: Rayo Solar Sellado Projectile
 }
 
 Registro: {

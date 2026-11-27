@@ -52,31 +52,11 @@ namespace AethonMod.Content.Globals
 
         public override bool CanUseItem(Item item, Player player)
         {
-            // v6.182 — LA MARCA DE LA LLAMADA DEL DEVORAMUNDOS (la autopsia
-            //  del festín que no iniciaba): la v6.180 armaba el pedacito
-            //  con CUALQUIER cabeza de Devorador nacida cerca del portador
-            //  — y los GUARDIANES DE LAS OLEADAS también son Devoradores
-            //  (LosSeis): el primer guardián de oleada quemaba la marca
-            //  sin que el portador viera nada. AHORA SOLO la COMIDA DE
-            //  GUSANO marca la llamada (dentro Y fuera del interior — el
-            //  camino de vanilla sigue a este return), y OnSpawn la
-            //  consume al nacer ESA cabeza. La marca caduca sola si
-            //  vanilla rechaza el uso.
-            if (item.type == ItemID.WormFood)
-            {
-                var spMarca = player.GetModPlayer<global::AethonMod.Content.Players.ShardPlayer>();
-                if (spMarca != null && !spMarca.DevoramundosPedacito)
-                    spMarca.MarcarLlamadaDevoramundos();
-            }
-
-            // v6.179 — LA MARCA DE LA LLAMADA (la letra: «se invoca mas de
-            // 2 veces despues de borrar la lista del festin y no lo hace»):
-            // el ítem de invocación del Devorador en la MANO es una
-            // llamada del PORTADOR — la marca pendiente vive en el
-            // ShardPlayer y SOLO la cabeza de Devorador que nace con ella
-            // cuenta una invocación (el vigía de FaucesGlobalNPC la gasta).
-            // Cubre FUERA del interior (el camino de vanilla que sigue a
-            // este return)…
+            // v6.183 — LA MARCA DE LA LLAMADA MURIÓ (la letra: «a penas
+            //  aparezca el Devoramundo el grimorio arranque una seccion
+            //  y se la coma»): la APARICIÓN de la cabeza es la llave del
+            //  festín (FaucesGlobalNPC.OnSpawn) — este ítem ya no marca
+            //  nada; come tu gusano en paz, dentro o fuera.
             // SOLO dentro del Mundo Interior — afuera vanilla manda
             if (!Systems.SubmundoGrimorio.Activo || Main.gameMenu) return true;
             if (!Mapa.TryGetValue(item.type, out int tipoJefe)) return true;

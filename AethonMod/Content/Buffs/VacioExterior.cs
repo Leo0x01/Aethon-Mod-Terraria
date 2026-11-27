@@ -21,7 +21,9 @@ namespace AethonMod.Content.Buffs
     /// empuña) — pero su fuego no quema: COBRA. Mientras un solo impío
     /// arda con la Quemadura del Vacío Exterior de su propiedad:
     ///
-    ///  · +10% a TODO el ataque (el hambre afilada del grimorio).
+    ///  · +10% al daño MÁGICO y +10% al de INVOCACIÓN (v6.183: la
+    ///     letra descubrió que la mejora solo se notaba en lo mágico
+    ///     — el grimorio también muerde con su CAMADA).
     ///  · +10 de defensa (la piel del vacío protege a su dueño).
     ///  · −15% del consumo de maná (la tinta fluye más barata).
     ///
@@ -41,9 +43,18 @@ namespace AethonMod.Content.Buffs
         public override void Update(Player player, ref int buffIndex)
         {
             // EL COBRO DEL VACÍO — mientras el fuego del enemigo arde:
-            player.statDefense += 10;                                   // la piel del vacío
-            player.GetDamage(Terraria.ModLoader.DamageClass.Generic) += 0.10f;  // el hambre afilada
-            player.manaCost -= 0.15f;                                   // la tinta barata
+            // v6.183 — LA MEJORA EXPLÍCITA (la letra: «me doy cuenta que
+            // la mejora de Vacío Exterior solo afecta al daño magico,
+            // recuerda que el grimorio tambien tiene daño de invocacion,
+            // asi que tambien debe afecar a ese daño»): el +10% genérico
+            // no llegaba a la CAMADA del escuadrón — ahora las DOS
+            // plumas del grimorio cobran EXACTO: la magia del libro y
+            // los colmillos de la camada, +10% cada uno, sin depender
+            // de la cascada de clases del motor.
+            player.statDefense += 10;                                              // la piel del vacío
+            player.GetDamage(Terraria.ModLoader.DamageClass.Magic) += 0.10f;       // el hambre afilada — LA PLUMA
+            player.GetDamage(Terraria.ModLoader.DamageClass.Summon) += 0.10f;      // …y LA CAMADA
+            player.manaCost -= 0.15f;                                             // la tinta barata
 
             // EL FUEGO DEL DUEÑO — el portador también ARDE: las mismas
             // llamas negras de la quemadura (núcleo negro + halo violeta,
