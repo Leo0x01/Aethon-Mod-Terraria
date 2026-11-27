@@ -76,6 +76,14 @@ def ruta_png(ruta_asset):
 
 # PASADA A: el mapa de herencia del árbol entero
 herencia, tipo_directo, posiciones = {}, {}, {}
+# v6.181 — LA LECCIÓN DEL SELLADO (la v6.180 no cargó en el cliente): el
+# mapa de marcas debe cubrir TODAS las declaraciones de TODAS las clases
+# de CADA archivo (los «hermanos» también cierran cuerpos). El fix partial
+# v6.179 construyó las marcas solo con las declaraciones DE LA PROPIA clase:
+# en un archivo multi-clase el cuerpo de la primera se tragaba a sus
+# hermanas — con SUS overrides — y una clase SIN textura «pedía prestada»
+# la de su hermana: OK falso, crash del cliente («Disabling Mod: AethonMod»).
+decls_por_archivo = {}
 for dirpath, _, archivos in os.walk(RAIZ):
     for a in archivos:
         if not a.endswith('.cs'):
@@ -96,7 +104,12 @@ for dirpath, _, archivos in os.walk(RAIZ):
             # en el archivo sin override, el guardián lloraba PNG que SÍ
             # existía. Ahora cada declaración se guarda y la búsqueda del
             # override recorre TODOS los cuerpos de la clase).
-            posiciones.setdefault(clase, []).append((ruta, texto, m.start()))
+            # v6.181 — la tupla ahora lleva la CABECERA de la declaración
+            # (los modificadores de ESTA clase — el «abstract» se lee de
+            # aquí, jamás de una ventana a ciegas que puede robar el de una
+            # clase hermana y exentar a esta sin querer).
+            posiciones.setdefault(clase, []).append((ruta, texto, m.start(), m.group(0)))
+            decls_por_archivo.setdefault(ruta, []).append(m.start())
 
 TIPOS = {}          # clase → el ModX de su cadena
 
@@ -132,12 +145,12 @@ for clase, decls in posiciones.items():
     hasoutlines = False
     hl_propia = False
     prestamo = None
-    inis_por_ruta = {}
-    for ruta, texto, ini in decls:
-        inis_por_ruta.setdefault(ruta, []).append(ini)
-    for ruta, texto, ini in decls:
-        abstracta = abstracta or 'abstract ' in texto[max(0, ini - 20):ini + 90]
-        marcas = sorted(inis_por_ruta[ruta])
+    # v6.181 — LAS MARCAS GLOBALES DEL ARCHIVO: TODA declaración de clase
+    # cierra el cuerpo de la anterior (la hermana también). El cuerpo JAMÁS
+    # se traga a una clase que no es — la lección del SELLADO de la v6.180.
+    for ruta, texto, ini, cabecera in decls:
+        abstracta = abstracta or 'abstract ' in cabecera
+        marcas = sorted(decls_por_archivo[ruta])
         i = marcas.index(ini)
         cuerpo = texto[ini:marcas[i + 1] if i + 1 < len(marcas) else len(texto)]
         if rel is None:

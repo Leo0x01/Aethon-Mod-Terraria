@@ -66,15 +66,35 @@ def claves(lineas):
 
 def main():
     ok = 0
+    # v6.181 — LA CUARENTENA (la lección de la v6.181): la regeneración es
+    # PERDEDORA — aplasta los valores '''+multilinea a una sola línea y se
+    # come las líneas en blanco de las secciones (25 líneas del canon es-MX
+    # en una sola corrida). Por DEFECTO este sync SOLO VERIFICA (espejo +
+    # paridad); para regenerar de verdad hace falta --escribir y SABER que
+    # se pierde el formato (recuperable: git checkout del espejo).
+    escribir = "--escribir" in sys.argv
     # (A) los espejos puros: es-MX byte a byte del es-ES
     for fuente, espejo in ESPEJOS:
         ruta_f, ruta_e = os.path.join(BASE, fuente), os.path.join(BASE, espejo)
         assert os.path.isfile(ruta_f), f"FALTA la fuente {ruta_f}"
         c = cuerpo(ruta_f)
-        with open(ruta_e, "w", encoding="utf-8") as f:
-            f.write(CABECERA_ESPEJO + "\n" + "\n".join(c))
-        assert cuerpo(ruta_e) == c, f"{espejo}: el espejo no quedó idéntico"
-        print(f"OK: {espejo} regenerado ({len(c)} líneas, espejo exacto de {fuente})")
+        if not escribir:
+            actual = cuerpo(ruta_e)
+            if actual == c:
+                print(f"OK (verificación): {espejo} ES espejo exacto de {fuente}")
+            else:
+                dif = sum(1 for a, b in zip(actual, c) if a != b) + abs(len(actual) - len(c))
+                print(f"¡DIVERGENCIA!: {espejo} ya NO es espejo de {fuente} "
+                      f"(~{dif} líneas) — para regenerarlo: --escribir "
+                      f"(PIERDE los ''' multilinea y las líneas en blanco)")
+                ok = -1
+                break
+        else:
+            with open(ruta_e, "w", encoding="utf-8") as f:
+                f.write(CABECERA_ESPEJO + "\n" + "\n".join(c))
+            assert cuerpo(ruta_e) == c, f"{espejo}: el espejo no quedó idéntico"
+            print(f"OK: {espejo} regenerado ({len(c)} líneas, espejo exacto de {fuente}) "
+                  f"[--escribir: formato perdedor — revisar el diff]")
         ok += 1
     # (B) los fallbacks: en-US RESPETADO — solo paridad de claves
     for fuente, fallback in FALLBACKS:
@@ -82,12 +102,17 @@ def main():
         cf, cb = cuerpo(ruta_f), cuerpo(ruta_b)
         faltan = [k for k in claves(cf) if k not in claves(cb)]
         if faltan:
-            # las claves que faltan se agregan con el texto español (el
-            # fallback de siempre) al final del cuerpo
-            with open(ruta_b, "a", encoding="utf-8") as f:
-                for sangria, k in faltan:
-                    f.write(f"{sangria}{k}: {{{len(faltan)}\n")  # nunca debería pasar: aviso
-            print(f"AVISO: {fallback}: {len(faltan)} claves faltantes (verificar a mano)")
+            # v6.181 — LA MINA MUERE (la lección de la v6.181): este camino
+            # ESCRIBÍA basura literal («Clave: {480» — una llave sin cerrar)
+            # al final del en-US y el hjson quedaba ROTO para el parser real.
+            # Lo que falte se LISTA en consola (el aviso de siempre) — el
+            # archivo JAMÁS se toca por este camino.
+            print(f"AVISO: {fallback}: {len(faltan)} claves faltantes "
+                  f"(verificar a mano):")
+            for sangria, k in faltan[:12]:
+                print(f"    {k}")
+            if len(faltan) > 12:
+                print(f"    … y {len(faltan) - 12} más")
         else:
             print(f"OK: {fallback} respeta sus traducciones y tiene TODAS las claves de {fuente}")
         ok += 1

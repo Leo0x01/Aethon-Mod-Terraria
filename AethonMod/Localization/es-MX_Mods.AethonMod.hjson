@@ -4156,6 +4156,7 @@ Buffs: {
 	AuraVacioBuff: {
 		DisplayName: Aura del vacío
 		Description: El poder de vacío de un ser Exterior te rodea, dañando a todo el que se acerque.
+		Trabajando: ✦ El vacío está cobrando una presa
 	}
 
 	CriaEstelarBuff: {

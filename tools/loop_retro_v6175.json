@@ -14,16 +14,15 @@
  "Immediate": 60,
  "vfx_archivos": 80,
  "vfx_lineas": 49279,
- "loc_es": 1861,
- "loc_en": 2041,
+ "loc_es": 1862,
+ "loc_en": 2042,
  "loc_faltan_en": 0,
  "loc_faltan_es": 180,
- "loc_en_igual_es": 1276,
+ "loc_en_igual_es": 1277,
  "claves_faltantes_es": [
   "Altar.",
   "Armas.DagaInvocada",
   "Armas.EscuadronMejora",
-  "Buffs.AuraVacioBuff.Trabajando",
   "Cronista.LoreHabla",
   "Duende.Burla",
   "Duende.Miedo",
@@ -38,8 +37,8 @@
   "Pergamino.",
   "PilarInterior.IraSellado"
  ],
- "claves_faltantes_es_n": 17,
- "png_n": 509,
+ "claves_faltantes_es_n": 16,
+ "png_n": 511,
  "png_invalidos": [],
  "_fuente": "loop_retro_v6175.py"
 }

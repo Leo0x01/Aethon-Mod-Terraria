@@ -4167,6 +4167,7 @@ Buffs: {
 	AuraVacioBuff: {
 		DisplayName: Aura Vacio Buff
 		Description: Mods.AethonMod.Buffs.AuraVacioBuff.Description
+		Trabajando: ✦ El vacío está cobrando una presa
 	}
 
 	CriaEstelarBuff: {
