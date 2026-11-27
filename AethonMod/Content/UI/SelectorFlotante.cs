@@ -268,10 +268,14 @@ namespace AethonMod.Content.UI
                     if (it == null || it.IsAir) continue;
                     sb.Draw(px, celda, hov ? PapelSombra * 1.15f : PapelSombra * 0.7f);
                     LibroMarco.Marco(sb, celda, hov ? TintaVioleta : TintaOro * 0.35f);
-                    Texture2D tex = TextureAssets.Item[it.type].Value;
-                    float esc = Math.Min(Icono / (float)tex.Width, Icono / (float)tex.Height);
-                    sb.Draw(tex, celda.Center.ToVector2(), null, Color.White, 0f,
-                        tex.Size() * 0.5f, esc, SpriteEffects.None, 0f);
+                    // v6.180 — EL ICONO CARGADO DE VERDAD (la misma causa
+                    // raíz de las ranuras del trío: la textura vanilla
+                    // LAZY — GetItemDrawFrame es el camino del inventario,
+                    // carga la textura y respeta el frame animado).
+                    Main.GetItemDrawFrame(it.type, out Texture2D tex, out Rectangle frame);
+                    float esc = Math.Min(Icono / (float)frame.Width, Icono / (float)frame.Height);
+                    sb.Draw(tex, celda.Center.ToVector2(), frame, Color.White, 0f,
+                        frame.Size() * 0.5f, esc, SpriteEffects.None, 0f);
                     if (it.stack > 1)
                         LibroLineas.Texto(sb, it.stack.ToString(),
                             new Vector2(celda.Right - 3f, celda.Bottom - 5f), Tinta, 0.95f, 1f, 0.85f);
@@ -300,14 +304,38 @@ namespace AethonMod.Content.UI
                 }
 
                 // LA LISTA VACÍA (su aviso, centrado en la vitrina)
+                // v6.180 — EL AVISO QUE SE LEE (la letra: «justo en el
+                // centro de la ventana hay un pequeño texto que no se
+                // puede leer… debe decir que no hay armas disponibles,
+                // solo armas magicas»): el texto viejo era LARGO y la
+                // escala de UNA sola línea lo encogía a lo ilegible.
+                // AHORA: texto CORTO, en DOS líneas si hace falta, con
+                // PISO de legibilidad (0.80) — nunca más un jeroglífico.
                 if (total == 0)
                 {
                     string vacio = Language.GetTextValue(_paraTrio
                         ? "Mods.AethonMod.Items.TrioSinConsagradas"
                         : "Mods.AethonMod.Items.BandejaVacia");
-                    float escV = LibroLineas.EscalaQueCabe(vacio, 1.05f, r.Width - 30f);
-                    LibroLineas.Texto(sb, vacio, new Vector2(r.Center.X, vitrina.Center.Y),
-                        TintaApagado, escV, 0.5f, 0.5f);
+                    float escV = Math.Max(0.80f, LibroLineas.EscalaQueCabe(vacio, 0.95f, r.Width - 24f));
+                    var mV = fuente.MeasureString(vacio) * escV;
+                    if (mV.X <= r.Width - 24f)
+                        LibroLineas.Texto(sb, vacio, new Vector2(r.Center.X, vitrina.Center.Y),
+                            TintaApagado, escV, 0.5f, 0.5f);
+                    else
+                    {
+                        // DOS LÍNEAS: parte por la mitad más cercana al
+                        // espacio y cada mitad se mide para SU línea.
+                        int corte = vacio.Length / 2, ajuste = 0;
+                        while (corte + ajuste < vacio.Length && vacio[corte + ajuste] != ' ') ajuste++;
+                        int idxCorte = Math.Min(vacio.Length, corte + ajuste);
+                        string l1 = vacio.Substring(0, idxCorte).TrimEnd();
+                        string l2 = vacio.Substring(idxCorte).TrimStart();
+                        float altoV = fuente.MeasureString("Ag").Y * escV + 2f;
+                        LibroLineas.Texto(sb, l1, new Vector2(r.Center.X, vitrina.Center.Y - altoV * 0.5f),
+                            TintaApagado, escV, 0.5f, 0.5f);
+                        LibroLineas.Texto(sb, l2, new Vector2(r.Center.X, vitrina.Center.Y + altoV * 0.5f),
+                            TintaApagado, escV, 0.5f, 0.5f);
+                    }
                 }
 
                 // EL PIE: la pista de la rueda (solo cuando hay algo que recorrer)

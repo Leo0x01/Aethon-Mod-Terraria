@@ -9,7 +9,7 @@ invocación · LA PURGA DE LA MESA · el coro que NACE del libro · LA
 PUERTA SIEMPRE ABIERTA del interior · LA ESCALERA SIN TECHO · LAS
 VOLEAS TEMÁTICAS VANILLA · LA TUMBA DE NIEBLA del paisaje · EL VISOR
 DEL PROYECTADO · EL ECLIPSE QUE BARRE), las muertas ausentes (el arma
-VIEJA del cíclope), hjson ×3, la PARIDAD PERFECTA (1900=1900) y la 2ª
+VIEJA del el plano), hjson ×3, la PARIDAD PERFECTA (1900=1900) y la 2ª
 purga del en-US.
 """
 import importlib.util
@@ -115,7 +115,7 @@ firmas = [
     # LO QUE VIVÍA (no-regresión)
     "RegistroSistema", "MotorDeCombate", "DispararVolea",
     "JefeInteriorVoleaProjectile", "ContarSombras",
-    "SakugaDelCielo", "CiclopeProyectado", "EcoProyectado",
+    "SakugaDelCielo", "el haz concentrado", "EcoProyectado",
     "FaroEntregado", "GeoTrio",
     "CongeladoPorAspiradora", "DescongelarAspiradora",
     "Tijeras", "Hash01", "HablarAlPortador",
@@ -129,22 +129,22 @@ for f in firmas:
     print(f"  firma {f}: {'VIVE' if ok else 'AUSENTE (MAL)'}")
 
 # === LAS MUERTAS (la purga de la v6.175 sigue muerta) ===
-muertas = ["LineaDelCiclope", "LineaDelCielo",
-           "ProyeccionDelCiclope",   # v6.177: el arma vieja MUERE (la letra: «no tiene nada que ver»)
-           "ProyeccionCiclopeRayo",
-           "CiclopeEntregado"]
+muertas = ["LineaDelel plano", "LineaDelCielo",
+           "ProyeccionDelel plano",   # v6.177: el arma vieja MUERE (la letra: «no tiene nada que ver»)
+           "Proyeccionel planoRayo",
+           "el planoEntregado"]
 todas_muertas = True
 for m in muertas:
     ok = vive(m)
     todas_muertas = todas_muertas and (not ok)
     print(f"  muerta {m}: {'AUN VIVE (revisar)' if ok else 'muerta ✔'}")
-png_viejo = [k for k in bl if "LineaDelCielo" in k or "ProyeccionDelCiclope" in k
-             or "ProyeccionCiclopeRayo" in k]
-print(f"  png muertos (LineaDelCielo + ProyeccionDelCiclope + Rayo): {len(png_viejo)} (deben ser 0)")
+png_viejo = [k for k in bl if "LineaDelCielo" in k or "ProyeccionDelel plano" in k
+             or "Proyeccionel planoRayo" in k]
+print(f"  png muertos (LineaDelCielo + ProyeccionDelel plano + Rayo): {len(png_viejo)} (deben ser 0)")
 todas_muertas = todas_muertas and len(png_viejo) == 0
 
 # === LOS SPRITES NUEVOS DENTRO ===
-sprites = ["CiclopeProyectado.rawimg", "EcoProyectado.rawimg",
+sprites = ["el haz concentrado.rawimg", "EcoProyectado.rawimg",
            "FaroDelEclipse.rawimg",
            # v6.177 — EL VISOR DEL PROYECTADO y SUS DIEZ MEJORAS
            "VisorDelProyectado.rawimg", "RecuperacionProyectada.rawimg",
@@ -162,7 +162,7 @@ for s in sprites:
 hjsons = sorted(k for k in bl if k.endswith(".hjson"))
 print(f"hjson: {len(hjsons)} {hjsons}")
 claves_nuevas = [b"Fallo:", b"Asco:", b"Grito:", b"FaroEntregado",
-                 b"CiclopeProyectado", b"EcoProyectado", b"BolsaMaestra",
+                 b"el haz concentrado", b"EcoProyectado", b"BolsaMaestra",
                  b"VisorDelProyectado", b"Proyectado", b"RecuperacionProyectada",
                  b"LunaQueTeIbaABajar", b"RayoProyectado"]
 for k in hjsons:

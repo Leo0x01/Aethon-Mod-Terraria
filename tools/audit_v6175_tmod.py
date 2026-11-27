@@ -5,7 +5,7 @@
 Con el parser canónico parse_tmod.py: identidad, EOF exacto, blobs, las
 FIRMAS VIVAS de la versión (el loop de retroalimentación · el motor de
 combate de la arena · la barra del jefe interior · el coro de sombras ·
-la aspiradora del Devorador · el tajo sakuga · el Cíclope Proyectado),
+la aspiradora del Devorador · el tajo sakuga · el el plano del haz),
 las muertas ausentes (LineaDelCielo purge), hjson ×3 y las claves
 nuevas en los tres idiomas.
 """
@@ -68,8 +68,8 @@ firmas = [
     "EsGusanoInvocado",           # la devoración normal desactivada
     # EL TAJO SAKUGA (el arma recreada)
     "SakugaDelCielo",             # el proyectil nuevo
-    # EL CÍCLOPE PROYECTADO (la recreación del vídeo)
-    "CiclopeProyectado",          # el jefe nuevo
+    # EL HAZ CONCENTRADO (la recreación de la técnica)
+    "el haz concentrado",          # el jefe nuevo
     "EcoProyectado",              # su ítem de llamada
     # LA ENTREGA DEL FARO
     "FaroEntregado",              # la clave del aviso de entrega
@@ -97,7 +97,7 @@ todas_muertas = todas_muertas and len(png_viejo) == 0
 
 # === LOS SPRITES NUEVOS DENTRO (los que TIENEN PNG propio — SakugaDelCielo
 #     dibuja con SoftGlow procedural: NO lleva rawimg, su firma vive arriba) ===
-sprites = ["CiclopeProyectado.rawimg", "EcoProyectado.rawimg"]
+sprites = ["el haz concentrado.rawimg", "EcoProyectado.rawimg"]
 for s in sprites:
     ok = any(k.endswith(s) for k in bl)
     print(f"  sprite {s}: {'DENTRO' if ok else 'FALTA (MAL)'}")
@@ -110,7 +110,7 @@ print(f"hjson: {len(hjsons)} {hjsons}")
 # NOMBRES de las claves nuevas; los VALORES distintivos se buscan EN SU
 # IDIOMA (es-*: «asqueroso»/«ME PROYECTO» · en-US: «disgusting»/«PROJECT»)
 claves_nuevas = [b"Fallo:", b"Asco:", b"Grito:", b"FaroEntregado",
-                 b"CiclopeProyectado", b"EcoProyectado"]
+                 b"el haz concentrado", b"EcoProyectado"]
 for k in hjsons:
     texto = bl[k]
     es_idioma = "en-US" not in k

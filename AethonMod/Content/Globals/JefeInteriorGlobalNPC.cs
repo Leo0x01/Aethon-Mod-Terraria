@@ -830,7 +830,7 @@ namespace AethonMod.Content.Globals
             try
             {
                 if (npc.TryGetGlobalNPC<FaucesGlobalNPC>(out var g) &&
-                    (g.DevorarEstado != 0 || g.CongeladoPorAspiradora))
+                    (g.DevorarEstado != 0))
                     return true;
                 return false;
             }

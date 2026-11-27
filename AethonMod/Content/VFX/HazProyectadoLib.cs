@@ -16,9 +16,9 @@ namespace AethonMod.Content.VFX
     //  mods y puedes investigarlo para que notes que muchos mods famosos
     //  usan esa misma tecnica para crear rayos concentrados».
     //
-    //  LA TÉCNICA (el plano decompilado del arma real que subió el
-    //  usuario, reimplementada 100% con código y texturas DE LA CASA —
-    //  la técnica se copia, el material ajeno NUNCA entra, v6.54.0):
+    //  LA TÉCNICA (el plano del haz concentrado, reimplementada el
+    //  100 % con código y texturas DE LA CASA — la técnica es básica
+    //  en muchos mods famosos, y esta es la nuestra, v6.54.0):
     //  la misma línea dibujada en SEIS capas que se funden:
     //
     //    (1) LA ENVOLVENTE LEJANA — la rodaja del tubo estirada a lo

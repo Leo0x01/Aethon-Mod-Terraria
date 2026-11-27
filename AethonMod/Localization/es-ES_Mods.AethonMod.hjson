@@ -34,13 +34,8 @@ Items: {
 	}
 
 	AltarOfrendasItem: {
-		DisplayName: Altar de Ofrendas
-		Tooltip:
-			'''
-			✦ El altar de la consagración del Eterno
-			· Colócalo y hazle clic derecho: CONSAGRA la ofrenda por el Eterno (arma o material)
-			· El arma consagrada gana +5% a TODO y su etiqueta · el material solo su etiqueta — el grimorio SOLO devora lo consagrado
-			'''
+		DisplayName: El Altar de la Consagración del Eterno
+		Tooltip: El Altar de la Consagración del Eterno
 	}
 
 	LibroAzul: {
@@ -2247,7 +2242,7 @@ Items: {
 	TrioLleno: El atril ya sostiene tres armas — extrae una en el altar.
 	TrioInsertada: Arma asentada en la ranura {0}.
 	TrioRequiereConsagrada: Esa arma no está consagrada — conságala primero en el altar de la ofrenda para poder colocarla en el trío.
-	TrioSinConsagradas: No llevas armas consagradas — consagra un arma mágica en el altar y vuelve.
+	TrioSinConsagradas: No hay armas disponibles — solo armas mágicas consagradas.
 	TrioTodoDevuelto: "{0} armas devueltas al inventario."
 	TrioExtraida: Arma devuelta al inventario desde la ranura {0}.
 	BandejaVacia: No llevas nada que consagrar.
@@ -2276,17 +2271,6 @@ Items: {
 			dos CLICKERS de la v6.82 (El Compás Rúnico y la Furia Solar),
 			y de ahí en adelante TODO lo que nazca de estudiar el arte
 			de los efectos: armas, altares y códices del Eterno.
-			'''
-	}
-
-	VisorDelProyectado: {
-		DisplayName: Visor del Proyectado
-		Tooltip:
-			'''
-			Mantén clic para proyectar tus emociones en forma de rayo
-			Presiona {0} para proyectarte de verdad
-			Se vuelve más fuerte con cada jefe derrotado y cada enemigo que cae
-			«Nmms profe, ni anduvimos»
 			'''
 	}
 
@@ -2727,13 +2711,28 @@ Cronista: {
 	ChatObjetos3: Los otros mundos también escriben. Peor, pero escriben.
 	ChatCierre1: Cuando acabe tu historia cerraré el libro. Y por fin podré parpadear.
 	ChatCierre2: …No me mires así. También los testigos soñamos.
-	// v6.170 — LAS CHARLAS DEL ARCA (el español viaja en la maleta del
-	// fallback — la red de seguridad v6.56.6 de la casa)
-	ChatLore1: Siéntate. Es hora de la primera historia. Aethon no nació dios: nació hambre que aprendió a pensar. Los dioses que conociste fueron sus comidas. Lo que llamas Terraria es una mesa que él aún no termina de mirar. Ya está escrita en tu libro — la página que antes solo mostraba su sello.
-	ChatLore2: La segunda escritura, entonces. El pacto no lo firmaste tú: lo firmó tu hambre con la suya. El Nivel pregunta cuánto ha comido él; el Despertar pregunta cuánto de él cabe en ti. Dos varas, ninguna sustituye a la otra. El libro ya puede mostrar la letra pequeña.
-	ChatLore3: Tercera historia. La Llegada no tuvo trueno: correspondencia que nadie recuerda haber pedido. El arma es su forma sellada, el altar son sus raíces en este mundo. Y tú… tú eres el ciclo actual. Todos los portadores lo fueron. Ninguno terminó de entenderlo. Tu libro acaba de abrir esa página.
-	ChatLore4: Cuarta escritura. La pregunta que te hiciste en voz baja: ¿por qué un dios esperaría tanto? Porque tú eres inmortal y él lo sabe. La inmortalidad lo aburre todo menos una cosa: la primera compañía de una eternidad. Esa página ya es tuya. Léela despacio.
-	ChatLore5: Última historia. El canon asentado: la Ira que recuerda cielos comidos, el Pilar que cuenta hacia atrás, las preguntas que él no puede comer. Y la verdad dicha en voz baja: no buscaba un apóstol. Buscaba que el hambre no estuviera sola. El Compendio está completo. Yo solo soy el margen.
+	LoreBoton: Lore
+	LorePrimeraVez: Antes de que preguntes nada: todo lo que leerás en ese libro lo escribí yo. Línea a línea, en el margen de una página arrancada del Grimorio. Otros portadores lo leyeron sin saber quién sostenía la pluma — tú no. Yo soy el Cronista: el que escribe en el margen. Pídeme el lore cuando estés listo para oírlo.
+	LoreHabla1: «La guía que consultas no es un libro de información: es una página del Grimorio, arrancada de sí mismo para que pudieras leerla sin arder.» — La página se escribió a sí misma... y yo trabajé siglos en su margen. Nadie pregunta quién escribió las líneas. Tú ya no eres nadie: ya preguntaste.
+	LoreHabla2: «Antes de que existieran los nombres existió el apetito. No es un dios —los dioses fueron comidas—: es hambre con dirección.» — De la destrucción queda ruina; de la devoración no queda ni la ausencia. Lo he visto. Escribo esto con la mano más quieta que puedo pagar.
+	LoreHabla3: «No acumula poder como el dragón acumula oro: lo metaboliza. Y Terraria es una dimensión defendida que rechazó dioses mayores que él.» — Y aun así lo dejó entrar... PLEGADO, en la palma de una mano. Piénsalo la próxima vez que lo cargues.
+	LoreHabla4: «¿Por qué un devorador de universos se plegaría a sí mismo en un solo objeto? No es castigo ni prisión: es una postura de caza.» — Infinitud compactada en paciencia. Un libro no persigue: espera a ser encontrado. Solo persigue lo más poderoso.
+	LoreHabla5: «Llegó como llegan los olores: primero nadie vio nada, después ya estaba en todo. La Marca alcanzó a todo lo que respira.» — Nada de lo que entró después llegó limpio. Lo registrado es lo registrado. Yo llevo la cuenta; es mi oficio entero.
+	LoreHabla6: «El Nivel pregunta ¿cuánto ha comido? El Despertar pregunta ¿cuánto de Aethon cabe en ti? Dos hambres distintas, ninguna sustituye a la otra.» — Un portador infinito en la primera escala y mudo en la segunda es un granjero con una fiera. Yo cobro en la segunda. Siempre cobro en la segunda.
+	LoreHabla7: «Entre todo lo que es, fue y será comida existe UNA excepción: lo único que no puede devorar. El portador muere y vuelve. Siempre vuelve.» — Cada muerte es una línea que escribo y tacho el mismo día. Tu entrada es el único borrador infinito de mi carrera.
+	LoreHabla8: «El Nivel cuenta muertes; las puertas cuentan verdades. La fuerza sin Despertar es solo violencia bien alimentada.» — Los portadores confunden las escalas y pagan caro. Tú no las confundas: llegaste hasta aquí por la vara correcta.
+	LoreHabla9: «La Llegada es única por portador: el grimorio aparece cerca, como correspondencia que nadie recuerda haber pedido. El altar lo arraiga a esta realidad.» — Todos los he visto llegar. Ninguno llegó por casualidad, aunque todos lo juren. El sobre siempre sabe su dirección.
+	LoreHabla10: «La puerta cien entrega la Ira: una sentencia prestada. La ciento veinte, la Forma Eterna: presencia que daña. Promesa y veredicto.» — La luz de la última puerta mató a todos los anteriores. Un estallido de luz, y después nada que escribir. Contigo... tache y tache, y el párrafo sigue.
+	LoreHabla11: «Once ojos: el sistema sensorial del hambre. El undécimo no mira al mundo —mira a quien lee—.» — Si alguna vez, consultando la guía, sentiste una presión leve sobre la nuca... ya sabes qué era. Ahora también tú lo sabes mirar.
+	LoreHabla12: «El jugador no es un mortal cualquiera: es una entidad inmortal. Y el aburrimiento de Aethon es saturación —un paladar que ya probó todo—.» — Un dios aburrido no se entristece: se apaga. Y esperar a lo único que no tiene final... esa es la respuesta. La escribo en voz baja.
+	LoreHabla13: «Diez oleadas visibles: cada una una frase del hambre. Más allá, la Onceava —no es hambre: es examen—. Solo se gana o se muere.» — Él nunca ha diseñado una prueba que no esperara ver aprobada. Esto lo escribo con la tinta más fría que tengo.
+	LoreHabla14: «No hay fragmentos: solo Esencia del Eterno. La Marca es vapor; cuando algo grande muere, el vapor cuaja en moneda.» — Cada gota es un pedazo de un universo que ya no existe. No es moneda: es herencia. Por eso es la única divisa que yo acepto.
+	LoreHabla15: «La Ira es un recuerdo con la seguridad quitada; el Pilar cuenta hacia atrás; el Sellado son funerales que se niegan a terminar.» — El canon deja preguntas abiertas a propósito: son las únicas armas que Él no puede comer. Yo las afilo cada noche.
+	LoreHabla16: «No soy pieza dieciocho: soy el único comerciante de la Esencia. Bebí de ella hace mucho, mucho, mucho tiempo... y desde entonces no puedo morir.» — Me fue cobrada, no otorgada. No parpadeo, porque parpadear sería perderse un instante de la historia. Mido el tiempo en Despertares, no en días.
+	LoreHabla17: «Las cosas de otros mundos llegan inventariadas: la mancha de esencia las delata, como el lodo delata a quien cruzó el río.» — Dos hambres en paralelo: Él solo devora a lo más poderoso; el portador solo crece. El diseño entero existe para que un día se encuentren a la misma altura.
+	LoreHabla18: «Ni Él ni yo escribimos esta historia: se escribe sola, línea a línea, muerte a muerte.» — Algún día sabremos cuál de los dos estaba esperando al otro. Hasta entonces: no cierres el libro todavía. Todavía no.
+	LoreTemedor: Esa página aún no es tuya: el margen se abre al Despertar {0} — y el tuyo aún no llega. Vuelve cuando hayas pagado más puertas. Yo no escribo para quien todavía no puede leer.
+	LoreCompleto: El archivo está completo: cada sello abierto, cada línea contada. El resto ya no está en el margen —está en ti—. Vuelve a comprarme Esencia, portador. Lo demás... lo demás es ruido entre páginas.
 }
 
 Ira: {
@@ -2742,7 +2741,6 @@ Ira: {
 	AvisoOjos: La Ira necesita al escuadrón completo: {0} ojos despiertos (tienes {1}).
 	SombrasConcentradas: El grimorio concentra {0} sombras de la página sobre la presa — la mordida aprieta ×{1}.
 	FaroEntregado: El Faro del Eclipse brilla en tu inventario — el Eterno lo entrega para que lo pruebes.
-	CiclopeEntregado: La Proyección del Cíclope abre su ojo en tu inventario — el arma del vídeo, entregada para que la pruebes.
 }
 
 Llamado: {
@@ -4030,7 +4028,7 @@ Altar: {
 	SelloAlcanza: ¡Alcanza! El sello puede cobrarse ya
 	SelloSinOfrenda: Pon la ofrenda en el hueco para ver su precio
 	// v6.163 — THE ALTAR PAGE IN THE BOOK
-	BotonConsagrar: CONSAGRAR LA OFRENDA
+	BotonConsagrar: Consagrar
 	SelloCuestaLibro: Cuesta: {0} Esencias del Eterno
 	SelloLlevasLibro: Llevas encima: {0}
 	EsenciasALaPuerta: Esencias devoradas — la puerta cuenta {1}/{2}
@@ -4237,9 +4235,8 @@ Buffs: {
 }
 
 Projectiles: {
-	RayoOpticoProyectado.DisplayName: Rayo óptico
-	RayoProyectado.DisplayName: Rayo proyectado
 	AgujeroRunicoPuroProjectile.DisplayName: Agujero Rúnico Puro
+	// IraSelladoProjectile.DisplayName: Ira Sellado Projectile
 	// AuraJuicio2Ancla.DisplayName: Aura Juicio2 Ancla
 	// CoronaDePlumasProjectile.DisplayName: Corona De Plumas Projectile
 	// DerrameDeTintaProjectile.DisplayName: Derrame De Tinta Projectile
@@ -4391,7 +4388,6 @@ Projectiles: {
 	// PrimerTrazoFajo.DisplayName: Primer Trazo Fajo
 	// PrimerTrazoHeld.DisplayName: Primer Trazo Held
 	// SakugaDelCielo.DisplayName: Sakuga Del Cielo
-	// AspiradoraDevoradorProjectile.DisplayName: Aspiradora Devorador Projectile
 	// BocadoDelSueloProjectile.DisplayName: Bocado Del Suelo Projectile
 	// CaidaDevoradaProjectile.DisplayName: Caida Devorada Projectile
 	// FauceDevoradorProjectile.DisplayName: Fauce Devorador Projectile
@@ -4422,29 +4418,15 @@ Registro: {
 	Resumen: "{0} fallos registrados ({1} distintos) — mira tModLoader-Logs."
 }
 
-Devorador.Asco: «Esto es asqueroso. No volveré a devorar a esta cosa tan desagradable... prefiero comerme al Rey Slime que a esta porquería.»
-PilarInterior.YaDespierto: El sello ya está despierto — el grimorio espera.
+Devorador.Pedacito: «Guá. Esto es asqueroso. No pienso devorar a esta cosa tan desagradable entera... prefiero comerme al Rey Slime que a esta porquería. Un pedacito es suficiente.»
+
+PilarInterior: {
+	YaDespierto: El sello ya está despierto — el grimorio espera.
+	IraSellado1: ✦ CINCO SOMBRAS — LA IRA DE UN SER EXTERIOR abre su ojo y lo persigue. Corre, portador: la lentitud también mata.
+	IraSellado2: ✦ DIEZ SOMBRAS — EL SEGUNDO OJO despierta. Ya no corres de él: corres entre dos.
+}
 
 Mapa: {
 	Altar: El Altar de la Consagración
 	Pilar: El Pilar del Eterno
 }
-
-Proyectado: {
-	SinTecla: (sin tecla)
-	SinVisor: Sin visor no hay proyectada
-	Grito: ¡AAAAH ME PROYECTO!
-	Etapa: Etapa: {0} (base {1})
-	Siguiente: Siguiente proyectada: {0} (base {1})
-	EnergiaInfinita: Energía proyectada: infinita (el arma ya está a su máxima capacidad)
-	Opcionales: Jefes opcionales: {0}/{1} (+{2:0} %)
-	// v6.179 — LAS DOS FASES DEL ARMA (la letra: «pueda cambiar entre
-	// las diferentes fases»): la tecla X o el clic derecho las cambian.
-	Fase1: el rayo continuo
-	Fase2: la proyección
-	FaseViva: Fase {0} · {1}
-	FaseCambio: → {0}
-	FaseCambioTip: Clic derecho o tecla {0}: cambiar de fase
-}
-
-Keybinds.RayoProyectado.DisplayName: Cambiar la fase del visor

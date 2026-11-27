@@ -13,7 +13,7 @@ AI_007_FindGoodRestingSpot del client.log) · EL ARMA MÁXIMA del
 Proyectado (energía infinita 300, sin mejoras) con SUS DOS FASES
 cambiables (tecla X o clic derecho) · EL BARRENDERO cuenta los ítems como
 anclas — la cura del warn de memoria), las muertas ausentes (LAS DIEZ
-MEJORAS · EL CÍCLOPE · SU ECO · SUS DROPS · EL BUFF DE RECARGA), hjson
+MEJORAS · EL HAZ · SU ECO · SUS DROPS · EL BUFF DE RECARGA), hjson
 ×3, la paridad del en-US y los split de los gigantes vivos.
 """
 import importlib.util
@@ -90,10 +90,10 @@ for f in firmas:
     print(f"  firma {f}: {'VIVE' if ok else 'AUSENTE (MAL)'}")
 
 # === LAS MUERTAS (las de siempre + LAS NUEVAS de la cirugía del arma) ===
-muertas = ["LineaDelCiclope", "LineaDelCielo",
-           "ProyeccionDelCiclope", "ProyeccionCiclopeRayo",
+muertas = ["LineaDelel plano", "LineaDelCielo",
+           "ProyeccionDelel plano", "Proyeccionel planoRayo",
            # v6.179 — LA CIRUGÍA DEL PROYECTADO (solo el arma):
-           "ProyectadoDropsNPC", "CiclopeProyectado", "EcoProyectado",
+           "ProyectadoDropsNPC", "el haz concentrado", "EcoProyectado",
            "RecuperacionProyectada",
            "CartaQueNuncaLeDiste", "CapturaDelVisto", "NoEresTuSoyYo",
            "ProyectorDelSalon", "ProyectorDeCine", "ProyectorImax",
@@ -107,9 +107,9 @@ for m in muertas:
     ok = vive(m)
     todas_muertas = todas_muertas and (not ok)
     print(f"  muerta {m}: {'AUN VIVE (revisar)' if ok else 'muerta ✔'}")
-png_viejo = [k for k in bl if "LineaDelCielo" in k or "ProyeccionDelCiclope" in k
-             or "ProyeccionCiclopeRayo" in k
-             or "CiclopeProyectado" in k or "EcoProyectado" in k
+png_viejo = [k for k in bl if "LineaDelCielo" in k or "ProyeccionDelel plano" in k
+             or "Proyeccionel planoRayo" in k
+             or "el haz concentrado" in k or "EcoProyectado" in k
              or "RecuperacionProyectada" in k
              or "CartaQueNuncaLeDiste" in k or "CapturaDelVisto" in k
              or "NoEresTuSoyYo" in k or "ProyectorDelSalon" in k
@@ -216,7 +216,7 @@ for k in hjsons:
         print(f"  {os.path.basename(k)} · {c.decode()}: {'VIVE' if ok else 'FALTA (MAL)'}")
         todas_vivas = todas_vivas and ok
 muertas_hjson = [b"HudEnfriamiento", b"MasEnergia", b"InfinitaAnuncio:", b"UnSoloUso:",
-                 b"CiclopeProyectado", b"EcoProyectado", b"RecuperacionProyectada",
+                 b"el haz concentrado", b"EcoProyectado", b"RecuperacionProyectada",
                  b"LunaQueTeIbaABajar"]
 for k in hjsons:
     for m in muertas_hjson:

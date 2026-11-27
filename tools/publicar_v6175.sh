@@ -35,7 +35,7 @@ NOTAS=$(cat <<'EOF'
 7. **LA INTERFAZ**: textos desbordados curados · las ventanas flotantes PEGADAS al slot (justo debajo) · el checklist del trío SIMPLE (solo el cuadradito, que se rellena de morado).
 8. **EL TAJO SAKUGA** (el arma recreada desde cero, 16 capas del canon investigado): anticipación (estrella de la hoja) · frame de impacto MONOCROMO + panel de tinta + sacudida + onda · la luna única con DESPLAZAMIENTO CROMÁTICO y su CORO DE ECO · líneas de velocidad · la cicatriz de tinta. El corte golpea en el frame de impacto.
 9. **EL FARO DEL ECLIPSE EN LA MANO**: se entrega directo al inventario al entrar al mundo (siempre que no lo lleves).
-10. **EL CÍCLOPE PROYECTADO** (la recreación del vídeo «Me Proyecte» de Chopilas — miniatura en alta + 3 fotogramas reales analizados con visión): jefe maniquí pálido de UN ojo magenta, naciendo del HAZ DE PROYECCIÓN violeta-magenta, con su rayo del ojo (telegraph + doble haz), su derrame de ojitos y su expansión a mitad de vida. Invócalo con el **Eco Proyectado** (en la bolsa del probador).
+10. **EL HAZ CONCENTRADO** (la recreación dla técnica del haz concentrado — miniatura en alta + 3 fotogramas reales analizados con visión): jefe maniquí pálido de UN ojo magenta, naciendo del HAZ DE PROYECCIÓN violeta-magenta, con su rayo del ojo (telegraph + doble haz), su derrame de ojitos y su expansión a mitad de vida. Invócalo con el **Eco Proyectado** (en la bolsa del probador).
 11. **LOCALIZACIÓN**: las 5 claves «candidatas» eran falsos positivos (las variantes ya vivían); las 2 ausentes reales en inglés añadidas.
 
 ## VERIFICACIÓN

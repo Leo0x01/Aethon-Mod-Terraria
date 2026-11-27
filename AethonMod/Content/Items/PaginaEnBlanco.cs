@@ -86,22 +86,13 @@ namespace AethonMod.Content.Items
                 // easter egg de la Mazmorra vuelve a poder ocurrir (el
                 // probador de PRIMERAS VECES las borra TODAS)
                 sp.GuardianMazmorraDevorado = false;
-                // v6.178 — EL VIGÍA TAMBIÉN SE BORRA (la letra: «si uso
-                //     el item pagina en blanco para borrar el festin,
-                //     entonces debe volver a comerse al Devoramundos con
-                //     su segunda invocacion desde ahi»): el reloj de
-                //     invocaciones del Devorador vuelve a CERO — desde
-                //     este olvido, la SEGUNDA vez que el gusano nazca
-                //     (pilar, oleada o mundo real) la ASPIRADORA vuelve
-                //     a llevarse ENTERO al Devoramundos.
-                sp.InvocacionesInteriorTipos?.Clear();
-                sp.InvocacionesInteriorCuenta?.Clear();
-                // v6.179 — LA MARCA PENDIENTE TAMBIÉN SE BORRA: el olvido
-                //     es COMPLETO — desde la página en blanco, la PRÓXIMA
-                //     segunda invocación del Devorador vuelve a encender
-                //     la aspiradora (la letra: «debe volver a comerse al
-                //     Devoramundos con su segunda invocacion desde ahi»).
-                sp.InvocacionDevoradorPendiente = false;
+                // v6.180 — EL FESTÍN DEL DEVORAMUNDOS SE REINICIA (la
+                //     letra: «al igual que los demas jefes su festin se
+                //     reinicie con la pagina en blanco»): el pedacito
+                //     vuelve a la mesa — la PRÓXIMA vez que el
+                //     Devoramundos aparezca, el grimorio vuelve a
+                //     comerse UNA sección y a decir su pensamiento.
+                sp.DevoramundosPedacito = false;
                 // v6.50.121 — LA MARCA DE LA CAÍDA también se borra: el
                 //     cielo vuelve a estar en blanco y el cometa cruzará
                 //     la primera noche del portador otra vez (las

@@ -59,6 +59,25 @@ namespace AethonMod.Content.Projectiles.Jefes
         //  PANTALLA (OndaLib/StormLib/TajoLib/LumenLib/OrbitaLib/RiftLib);
         //  (3) el lote del pase reabierto TAL CUAL (cerrado→cerrado).
         // ==================================================================
+
+        /// <summary>v6.180 — LA ESTRELLA LIMPIA (la letra del Recuerdo:
+        /// «su explocion tiene textura, cuando antes no tenia texturas
+        /// y era una explocion limpiea» — sus ataques «llenos de
+        /// texturas raras»): el destello de 4 puntas de la casa vuelve
+        /// a ser 100 % CÓDIGO — DOS cuadros limpios cruzados (el aspa
+        /// larga en el eje + la cruz corta perpendicular), pura luz
+        /// procedural SIN textura raster. La textura DestelloFinal
+        /// MURIÓ del arsenal entero del Recuerdo.</summary>
+        private static void EstrellaLimpia(Vector2 pos, Color c, Vector2 tam, float rot = 0f)
+        {
+            // EL ASPA (el eje del proyectil — la punta larga)
+            VFXCore.Quad(pos, c, new Vector2(tam.X, tam.Y * 0.42f), rot);
+            // LA CRUZ (las dos puntas cortas perpendiculares)
+            VFXCore.Quad(pos, c * 0.88f, new Vector2(tam.X * 0.42f, tam.Y), rot);
+            // EL CORAZÓN (el núcleo sólido que une las puntas)
+            VFXCore.Quad(pos, c * 0.95f, new Vector2(tam.Y * 0.42f, tam.Y * 0.42f), rot);
+        }
+
         public override bool PreDraw(ref Color lightColor)
         {
             if (Main.dedServ) return false;
@@ -86,68 +105,65 @@ namespace AethonMod.Content.Projectiles.Jefes
                 Vector2 pos = Projectile.Center - Main.screenPosition;
 
                 // === FASE 1 — EL BÚFER DE QUADS (coords de MUNDO) ===
-                // v6.104 — LA PURGA DE LAS TEXTURAS PLANAS (la letra:
-                //     «muchos de sus ataques son texuras planas, solo un
-                //     rectangulo y estan mal implementadas… asegurate de
-                //     no dejar texturas planas, lisas o raras»): los
-                //     CUERPOS de los proyectiles pequeños ya NO son
-                //     glows estirados (rectángulos de luz) — son
-                //     DESTELLOS DE 4 PUNTAS texturizados (la estrella de
-                //     la casa, VFXCore.DestelloFinal) con SU núcleo y SU
-                //     giro: cada proyectil se lee como lo que ES.
+                // v6.180 — EL ARSENAL 100 % LIMPIO (la letra: «sus
+                //     ataque estan llenos de texturas raras, por ejemplo
+                //     su explocion tiene textura, cuando antes no tenia
+                //     texturas y era una explocion limpiea»): TODO el
+                //     arsenal del Recuerdo es pura LUZ PROCEDURAL —
+                //     cada cuerpo es la ESTRELLA LIMPIA de la casa (dos
+                //     cuadros cruzados + el corazón, cero texturas
+                //     raster): la v6.104 los había vestido con la
+                //     textura DestelloFinal y esa cruz raster MURIÓ.
                 switch (Estilo)
                 {
                     case EstiloPuaSagrario:
-                        VFXCore.Quad(Projectile.Center, TealCristal * 0.90f,
-                            new Vector2(16f, 38f), Projectile.rotation, VFXCore.DestelloFinal);
-                        VFXCore.Quad(Projectile.Center, BlancoCaliente * 0.7f,
-                            new Vector2(7f, 15f), Projectile.rotation, VFXCore.DestelloFinal);
+                        EstrellaLimpia(Projectile.Center, TealCristal * 0.90f,
+                            new Vector2(16f, 38f), Projectile.rotation);
+                        EstrellaLimpia(Projectile.Center, BlancoCaliente * 0.7f,
+                            new Vector2(7f, 15f), Projectile.rotation);
                         break;
 
                     case EstiloCoroCristal:
-                        VFXCore.Quad(Projectile.Center, TealCristal * 0.95f,
-                            new Vector2(20f, 20f), Projectile.rotation + t * 0.6f,
-                            VFXCore.DestelloFinal);
+                        EstrellaLimpia(Projectile.Center, TealCristal * 0.95f,
+                            new Vector2(20f, 20f), Projectile.rotation + t * 0.6f);
                         break;
 
                     case EstiloViroteVacio:
-                        VFXCore.Quad(Projectile.Center, TealVacio * 0.95f,
-                            new Vector2(38f, 13f), Projectile.velocity.ToRotation(),
-                            VFXCore.DestelloFinal);
-                        VFXCore.Quad(Projectile.Center, VioletaVacio * 0.55f,
+                        EstrellaLimpia(Projectile.Center, TealVacio * 0.95f,
+                            new Vector2(38f, 13f), Projectile.velocity.ToRotation());
+                        EstrellaLimpia(Projectile.Center, VioletaVacio * 0.55f,
                             new Vector2(20f, 12f), Projectile.velocity.ToRotation());
                         break;
 
                     case EstiloFlechaEstelar:
                         VFXCore.Quad(Projectile.Center, AmbarEstelar * 0.95f,
-                            new Vector2(30f, 11f), Projectile.rotation, VFXCore.DestelloFinal);
-                        VFXCore.Quad(Projectile.Center, BlancoCaliente * 0.7f,
-                            new Vector2(12f, 5f), Projectile.rotation, VFXCore.DestelloFinal);
+                            new Vector2(30f, 11f), Projectile.rotation);
+                        EstrellaLimpia(Projectile.Center, BlancoCaliente * 0.7f,
+                            new Vector2(12f, 5f), Projectile.rotation);
                         break;
 
                     case EstiloMinaEstelar:
                     {
                         float pulso = 0.9f + 0.1f * MathF.Sin(t * 8f + Seed);
-                        VFXCore.Quad(Projectile.Center, AmbarEstelar * (0.85f * pulso),
-                            new Vector2(24f, 24f), t * 0.8f + Seed, VFXCore.DestelloFinal);
-                        VFXCore.Quad(Projectile.Center, OroGrimorio * 0.6f,
+                        EstrellaLimpia(Projectile.Center, AmbarEstelar * (0.85f * pulso),
+                            new Vector2(24f, 24f), t * 0.8f + Seed);
+                        EstrellaLimpia(Projectile.Center, OroGrimorio * 0.6f,
                             new Vector2(11f, 11f));
                         break;
                     }
 
                     case EstiloEstrellaFugaz:
                         VFXCore.Quad(Projectile.Center, OroGrimorio * 0.95f,
-                            new Vector2(26f, 26f), Projectile.rotation + t * 1.2f,
-                            VFXCore.DestelloFinal);
-                        VFXCore.Quad(Projectile.Center, BlancoCaliente * 0.85f,
-                            new Vector2(12f, 12f), Projectile.rotation, VFXCore.DestelloFinal);
+                            new Vector2(26f, 26f), Projectile.rotation + t * 1.2f);
+                        EstrellaLimpia(Projectile.Center, BlancoCaliente * 0.85f,
+                            new Vector2(12f, 12f), Projectile.rotation);
                         break;
 
                     case EstiloCuchillaOrbit:
-                        VFXCore.Quad(Projectile.Center, EmberPortador * 0.95f,
-                            new Vector2(28f, 10f), Projectile.rotation, VFXCore.DestelloFinal);
-                        VFXCore.Quad(Projectile.Center, BlancoCaliente * 0.65f,
-                            new Vector2(11f, 4f), Projectile.rotation, VFXCore.DestelloFinal);
+                        EstrellaLimpia(Projectile.Center, EmberPortador * 0.95f,
+                            new Vector2(28f, 10f), Projectile.rotation);
+                        EstrellaLimpia(Projectile.Center, BlancoCaliente * 0.65f,
+                            new Vector2(11f, 4f), Projectile.rotation);
                         break;
 
                     case EstiloCorteRealidad:
@@ -164,10 +180,10 @@ namespace AethonMod.Content.Projectiles.Jefes
                         // viva.
                         Color cLuzP = Par >= 2f ? new Color(110, 30, 170) : LuzPrimordial;
                         Color cOroP = Par >= 2f ? new Color(48, 14, 76) : OroGrimorio;
-                        VFXCore.Quad(Projectile.Center, cLuzP * 0.95f,
+                        EstrellaLimpia(Projectile.Center, cLuzP * 0.95f,
                             new Vector2(22f, 22f),
-                            Projectile.rotation + t * 0.5f + Seed, VFXCore.DestelloFinal);
-                        VFXCore.Quad(Projectile.Center, cOroP * 0.7f,
+                            Projectile.rotation + t * 0.5f + Seed);
+                        EstrellaLimpia(Projectile.Center, cOroP * 0.7f,
                             new Vector2(9f, 9f));
                         break;
                     }
@@ -357,7 +373,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                             float h = VFXCore.Hash01(Seed, i, 91 + (beatIdx % 7));
                             VFXCore.Quad(g, ColorOroEclipse * (0.55f + 0.45f * h),
                                 new Vector2(9f + 6f * h, 9f + 6f * h),
-                                ang + t * 0.8f + i, VFXCore.DestelloFinal);
+                                ang + t * 0.8f + i);
                         }
                         break;
                     }
@@ -413,10 +429,10 @@ namespace AethonMod.Content.Projectiles.Jefes
                             Vector2 dirR = new Vector2(MathF.Cos(ang), MathF.Sin(ang));
                             // LA PUNTA-ESTRELLA (la cuenta de luz del borde —
                             // el sello de cada rayo, texturizado).
-                            VFXCore.Quad(cE + dirR * (46f + largo),
+                            EstrellaLimpia(cE + dirR * (46f + largo),
                                 BlancoCaliente * (0.75f * alfaR),
                                 new Vector2(16f + 10f * h3, 16f + 10f * h3),
-                                ang + t * 1.1f + i, VFXCore.DestelloFinal);
+                                ang + t * 1.1f + i);
                         }
 
                         // === (b) EL ANILLO SEGMENTADO (14 EMISORES creciendo
@@ -433,7 +449,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                                 float angE = giro * 1.6f + i * MathHelper.TwoPi / 14f;
                                 float hE = VFXCore.Hash01(Seed, i, 60 + (beatE % 5));
                                 Vector2 e = cE + new Vector2(MathF.Cos(angE), MathF.Sin(angE)) * rAnillo;
-                                VFXCore.Quad(e,
+                                EstrellaLimpia(e,
                                     BlancoCaliente * (0.80f * alfaA * (0.7f + 0.3f * hE)),
                                     new Vector2(26f + 10f * hE, 26f + 10f * hE));
                                 VFXCore.Quad(e, OroGrimorio * (0.45f * alfaA),
@@ -487,11 +503,10 @@ namespace AethonMod.Content.Projectiles.Jefes
                             // estrella de 4 puntas de la casa).
                             VFXCore.Quad(Projectile.Center + dirV * (60f + largoD),
                                 BlancoCaliente * (0.60f * alfaT * fadeV),
-                                new Vector2(20f, 20f), angV + t * 1.4f + i,
-                                VFXCore.DestelloFinal);
+                                new Vector2(20f, 20f), angV + t * 1.4f + i);
                         }
                         // EL CUBO de la rueda (el núcleo que la sostiene).
-                        VFXCore.Quad(Projectile.Center,
+                        EstrellaLimpia(Projectile.Center,
                             BlancoCaliente * (0.55f * alfaT * fadeV),
                             new Vector2(95f, 95f));
                         VFXCore.Quad(Projectile.Center,
@@ -533,8 +548,7 @@ namespace AethonMod.Content.Projectiles.Jefes
                                 //     (el filo blanco + el halo con SU ruido).
                                 //     Aquí vive SOLO el corazón-estrella.
                                 VFXCore.Quad(Projectile.Center, BlancoCaliente * 0.9f,
-                                    new Vector2(22f, 22f), Projectile.rotation + t * 1.2f,
-                                    VFXCore.DestelloFinal);
+                                    new Vector2(22f, 22f), Projectile.rotation + t * 1.2f);
                             }
                         }
                         break;
@@ -704,26 +718,23 @@ namespace AethonMod.Content.Projectiles.Jefes
 
                             // LAS FORMAS (esquirlas-estrella girando que vuelan
                             // hacia afuera — cada una SU rumbo y SU giro).
-                            Texture2D destSol = VFXCore.DestelloFinal;
-                            if (destSol != null)
+                            // v6.180 — LAS FORMAS SON ESTRELLAS LIMPIAS: la
+                            // textura raster murió — esquirlas de pura luz.
+                            for (int i = 0; i < 12; i++)
                             {
-                                for (int i = 0; i < 12; i++)
-                                {
-                                    float hF = VFXCore.Hash01(Seed + 2, i, 11);
-                                    float angF = hF * MathHelper.TwoPi +
-                                        fp * (0.6f + hF * 0.8f) * (i % 2 == 0 ? 1f : -1f);
-                                    float distF = 120f + 420f * fp * (0.4f + hF * 0.6f);
-                                    Vector2 forma = Projectile.Center + new Vector2(
-                                        MathF.Cos(angF), MathF.Sin(angF)) * distF;
-                                    float tamF = (40f + 70f * hF) * derrite;
-                                    if (tamF < 2f) continue;
-                                    Color cF = i % 3 == 0
-                                        ? new Color(255, 90, 40)
-                                        : i % 3 == 1 ? OroGrimorio : BlancoCaliente;
-                                    VFXCore.Quad(forma, cF * (0.55f * derrite),
-                                        new Vector2(tamF, tamF), angF + t * 0.06f,
-                                        destSol);
-                                }
+                                float hF = VFXCore.Hash01(Seed + 2, i, 11);
+                                float angF = hF * MathHelper.TwoPi +
+                                    fp * (0.6f + hF * 0.8f) * (i % 2 == 0 ? 1f : -1f);
+                                float distF = 120f + 420f * fp * (0.4f + hF * 0.6f);
+                                Vector2 forma = Projectile.Center + new Vector2(
+                                    MathF.Cos(angF), MathF.Sin(angF)) * distF;
+                                float tamF = (40f + 70f * hF) * derrite;
+                                if (tamF < 2f) continue;
+                                Color cF = i % 3 == 0
+                                    ? new Color(255, 90, 40)
+                                    : i % 3 == 1 ? OroGrimorio : BlancoCaliente;
+                                EstrellaLimpia(forma, cF * (0.55f * derrite),
+                                    new Vector2(tamF, tamF), angF + t * 0.06f);
                             }
                         }
                         break;
@@ -1331,19 +1342,20 @@ namespace AethonMod.Content.Projectiles.Jefes
                             (150f + 190f * crecS) * escS, OroGrimorio,
                             0.55f * fadeS, t, 2.6f);
 
-                        // LA ESTRELLA DE DESTELLO (el flare de 8 rayos + núcleo
-                        // caliente — la rotación LENTA de la imagen).
-                        Texture2D dest = VFXCore.DestelloFinal;
-                        if (dest != null)
-                        {
-                            float esc = (1500f * crecS * escS) / dest.Width *
-                                (0.92f + 0.08f * MathF.Sin(t * 3.4f));
-                            Main.spriteBatch.Draw(dest, pos, null,
-                                OrbitaLib.Tint(BlancoCaliente, 0.60f * fadeS),
-                                t * 0.06f,
-                                new Vector2(dest.Width, dest.Height) * 0.5f, esc,
-                                SpriteEffects.None, 0f);
-                        }
+                        // v6.180 — LA ESTRELLA LIMPIA (la letra: «su
+                        // explocion tiene textura, cuando antes no tenia
+                        // texturas y era una explocion limpiea»): la cruz
+                        // raster de 1500 px MURIÓ — el flare vuelve a ser
+                        // PURA LUZ: el latido doble de bloom + el anillo
+                        // interior que respira (nada de textura).
+                        LumenLib.Bloom(Main.spriteBatch, pos,
+                            (180f + 260f * crecS) * escS,
+                            new Color(255, 244, 214), 0.55f * fadeS *
+                            (0.90f + 0.10f * MathF.Sin(t * 3.4f)), 2);
+                        OndaLib.Pulse(Main.spriteBatch, pos,
+                            MathHelper.Clamp(_edad / 46f, 0f, 1f),
+                            (340f + 210f * crecS) * escS, OroGrimorio,
+                            0.42f * fadeS, Seed + 11);
 
                         // LA ONDA EXPANSIVA (el frente que barre — una sola,
                         // clara: el golpe ya pasó, esto es la firma).
@@ -1405,23 +1417,17 @@ namespace AethonMod.Content.Projectiles.Jefes
                             (95f + 45f * naceSol2) * escSol2, cSolOro,
                             0.60f * naceSol2 * fadeSol, t, gigante2 ? 4.6f : 2.4f);
 
-                        // LA ESTRELLA DE DESTELLO (el flare de 8 rayos ×2).
-                        Texture2D destS2 = VFXCore.DestelloFinal;
-                        if (destS2 != null)
-                        {
-                            float escS2 = (560f * naceSol2 * escSol2) / destS2.Width *
-                                (0.92f + 0.08f * MathF.Sin(t * 3.4f));
-                            Main.spriteBatch.Draw(destS2, pos, null,
-                                OrbitaLib.Tint(cSol2, 0.60f * naceSol2 * fadeSol),
-                                t * 0.10f,
-                                new Vector2(destS2.Width, destS2.Height) * 0.5f, escS2,
-                                SpriteEffects.None, 0f);
-                            Main.spriteBatch.Draw(destS2, pos, null,
-                                OrbitaLib.Tint(cSolOro, 0.40f * naceSol2 * fadeSol),
-                                -t * 0.07f + 0.4f,
-                                new Vector2(destS2.Width, destS2.Height) * 0.5f,
-                                escS2 * 0.6f, SpriteEffects.None, 0f);
-                        }
+                        // v6.180 — LA ESTRELLA LIMPIA DEL SOL: la cruz
+                        // raster murió — el flare del sol es puro luz (el
+                        // latido del bloom + el anillo que gira lento).
+                        LumenLib.Bloom(Main.spriteBatch, pos,
+                            (150f + 130f * naceSol2) * escSol2,
+                            cSol2, 0.55f * naceSol2 * fadeSol *
+                            (0.90f + 0.10f * MathF.Sin(t * 3.4f)), 2);
+                        OndaLib.Pulse(Main.spriteBatch, pos,
+                            MathHelper.Clamp(_edad / 40f, 0f, 1f),
+                            300f * escSol2 * naceSol2, cSolOro,
+                            0.38f * naceSol2 * fadeSol, Seed + 5);
 
                         // LA ONDA DE LA EXPLOSIÓN (el anillo que se expande
                         // con el estallido — la promesa del daño ya pagado).

@@ -951,7 +951,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     //      «la bruma que esta en el centro debe cubrir
                     //      el punto de nacimiento en el momento en el
                     //      que el haz es lanzado»): JUSTO al lanzarse,
-                    //      el punto donde el haz nace queda CUBIERTO —
+                    //      el punto dondel haz nace queda CUBIERTO —
                     //      el VELO grande (×0,75→×0,55 cerrándose sobre
                     //      la boca, 9 puffs) y EL CORAZÓN BLANCO encima
                     //      del punto exacto (×0,40→×0,28) — y en ~0,9 s
@@ -1051,7 +1051,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     //      EXHALA — nueve bocanadas NACEN en la boca del
                     //      haz, SUBEN desacelerando (hasta ~95 px, hacia
                     //      arriba ±43°) y CAEN de vuelta ACELERANDO al
-                    //      punto exacto donde el haz nace (el arco
+                    //      punto exacto dondel haz nace (el arco
                     //      sin(t·π): la gravedad mística de la fuente)
                     //      — la bruma se ENTREGA al nacimiento (el alfa
                     //      se aviva con la llegada, t³ — la firma de la

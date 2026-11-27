@@ -10,7 +10,7 @@ namespace AethonMod.Content.Weapons.Investigaciones
     //  FaroDelEclipse — v6.174 — EL RAYO CONCENTRADO ORIGINAL (la letra:
     //  «crea un arma de rayo concentrado original con las librerías/VFX/
     //  texturas del proyecto, lo más impresionante posible, con al menos
-    //  10 a 20 capas de VFX»). De la INVESTIGACIÓN (el Ciclope Proyectado:
+    //  10 a 20 capas de VFX»). De la INVESTIGACIÓN (el plano del haz:
     //  el haz que NACE del arma y sigue al cursor — la idea; la letra, el
     //  render y las 26 capas son de la casa: TajoLib + VFXCore).
     //

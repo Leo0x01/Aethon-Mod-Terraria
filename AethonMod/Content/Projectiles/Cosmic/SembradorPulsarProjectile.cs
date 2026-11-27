@@ -446,7 +446,7 @@ namespace AethonMod.Content.Projectiles.Cosmic
         }
 
         /// <summary>LOS DESTELLOS DEL BARRIDO (visual CLIENTE puro): releer los
-        /// enemigos y chispear donde el haz los está tocando — se VE el faro golpear.</summary>
+        /// enemigos y chispear dondel haz los está tocando — se VE el faro golpear.</summary>
         private void DrawBarridos(SpriteBatch batch, float R, float time, float alpha)
         {
             float axisAngle = _spinPhase + _magPhase;

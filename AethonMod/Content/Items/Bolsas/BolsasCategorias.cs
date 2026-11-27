@@ -960,12 +960,11 @@ namespace AethonMod.Content.Items.Bolsas
             // v6.174 — EL FARO DEL ECLIPSE (el rayo concentrado ORIGINAL:
             // 26 capas sobre TajoLib + VFXCore, el conducto sigue al cursor).
             l.Add((ModContent.ItemType<Weapons.Investigaciones.FaroDelEclipse>(), 1));
-            // v6.179 — EL VISOR DEL PROYECTADO, SOLO EL ARMA (la letra:
-            // «solo necesito el arma visor del proyectado cualquier otra
-            // cosa del mod puedes borrarlo»): el Cíclope, su Eco, sus
-            // drops y las diez mejoras que dolían MURIERON — queda el
-            // arma YA MÁXIMA (energía infinita 300) con SUS DOS FASES.
-            l.Add((ModContent.ItemType<Items.Investigaciones.VisorDelProyectado>(), 1));
+            // v6.180 — EL ARMA PROYECTADA MUERE (la letra: «ya puedes
+            // borrar el arma del plano del haz y todas sus
+            // referencias, obviamente conserva la tecnica»): la TÉCNICA
+            // del haz vive en HazProyectadoLib y el Faro la usa — el
+            // arma, sus proyectiles y su capa NO existen.
             // v6.86 — R5 — EL ALTAR DE OFRENDAS (el altar que consagra
             // la ofrenda por el Eterno).
             l.Add((ModContent.ItemType<Items.Altar.AltarOfrendasItem>(), 1));

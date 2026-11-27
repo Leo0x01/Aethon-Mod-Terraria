@@ -447,14 +447,7 @@ namespace AethonMod.Content.Systems
             // vanilla no llegó a usar) no viaja adentro — dentro solo cuenta
             // lo que el portador llame DENTRO.
             try
-            {
-                for (int i = 0; i < Main.maxPlayers; i++)
-                {
-                    Player pj = Main.player[i];
-                    if (pj != null && pj.active)
-                        pj.GetModPlayer<global::AethonMod.Content.Players.ShardPlayer>().InvocacionDevoradorPendiente = false;
-                }
-            }
+            { /* v6.180 — la marca de la aspiradora murió con ella: nada que limpiar */ }
             catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SubmundoGrimorio", exRegistro); }
             Transicion = true;
             _mundoPrincipal = Main.ActiveWorldFileData;

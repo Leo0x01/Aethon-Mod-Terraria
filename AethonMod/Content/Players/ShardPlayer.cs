@@ -1367,51 +1367,24 @@ namespace AethonMod.Content.Players
         }
 
         // ================================================================
-        //  v6.175 — LAS INVOCACIONES DEL PILAR: cuántas veces se ha
-        //  invocado a CADA jefe dentro del mundo interior (la letra del
-        //  Devorador: «en el momento en el que sea invocado por segunda
-        //  vez se hace una animación espacial… el grimorio del eterno lo
-        //  devora por completo»). Persiste igual que los kills.
         // ================================================================
-        public System.Collections.Generic.List<int> InvocacionesInteriorTipos = new System.Collections.Generic.List<int>();
-        public System.Collections.Generic.List<int> InvocacionesInteriorCuenta = new System.Collections.Generic.List<int>();
+        //  v6.180 — EL PEDACITO DEL DEVORAMUNDOS (la letra: «que ocurra
+        //  la primera vez que aparece el Devoramundos y que al igual que
+        //  los demas jefes su festin se reinicie con la pagina en
+        //  blanco»): la marca vive con el portador — la PRIMERA
+        //  aparición sirve el pedacito (UNA sección, la cola) y la
+        //  Página en Blanco la devuelve a la mesa. El contador de la
+        //  2ª invocación y su llamada pendiente MURIERON con la
+        //  aspiradora (la animación que nunca ocurría).
+        // ================================================================
+        public bool DevoramundosPedacito;
 
-        /// <summary>v6.179 — LA LLAMADA PENDIENTE del Devorador: la marca
-        /// que dejan los caminos que el PORTADOR invoca de verdad (el ítem
-        /// de invocación en la mano · el pilar del interior). SOLO la
-        /// cabeza de Devorador que nace CON esta marca cuenta UNA
-        /// invocación (la oleada que paría cabezas por su cuenta JAMÁS
-        /// contaba — era la contaminación del reloj: el usuario borraba el
-        /// festín, invocaba dos veces… y el «== 2» ya no llegaba NUNCA
-        /// porque las cabezas de la oleada corrían el contador antes).
-        /// Vive en la sesión (no se guarda): una marca que no nació de una
-        /// invocación de verdad muere con el mundo.</summary>
-        public bool InvocacionDevoradorPendiente;
-
-        /// <summary>La cuenta de invocaciones interior de ESTE jefe.</summary>
-        public int InvocacionesInteriorDe(int npcType)
-        {
-            int idx = InvocacionesInteriorTipos.IndexOf(npcType);
-            return idx >= 0 ? InvocacionesInteriorCuenta[idx] : 0;
-        }
-
-        /// <summary>UNA INVOCACIÓN MÁS (devuelve la cuenta nueva; 1 si es
-        /// la primera).</summary>
-        public int MarcarInvocacionInterior(int npcType)
-        {
-            try
-            {
-                int idx = InvocacionesInteriorTipos.IndexOf(npcType);
-                if (idx < 0)
-                {
-                    InvocacionesInteriorTipos.Add(npcType);
-                    InvocacionesInteriorCuenta.Add(1);
-                    return 1;
-                }
-                return ++InvocacionesInteriorCuenta[idx];
-            }
-            catch { return 1; }
-        }
+        /// <summary>v6.180 — LA PRIMERA VEZ CON EL CRONISTA (la letra:
+        /// «hay que dejar claro que el lore lo escribió el mismo
+        /// cronista y eso se hace la primera vez que el jugador habla
+        /// con el cronista»): la primera conversación abre con LA
+        /// AUTORÍA — una sola vez por portador.</summary>
+        public bool PrimeraVezCronista;
 
         /// <summary>v6.137 — UN KILL MÁS en la arena (devuelve la cuenta
         /// nueva; -1 si algo falla).</summary>
@@ -1824,8 +1797,8 @@ namespace AethonMod.Content.Players
                 tag["muertesInteriorCuenta"] = MuertesInteriorCuenta;
                 // v6.175 — LAS INVOCACIONES DEL PILAR (la segunda llamada
                 // del Devorador desata la ASPIRADORA del grimorio)
-                tag["invocInteriorTipos"] = InvocacionesInteriorTipos;
-                tag["invocInteriorCuenta"] = InvocacionesInteriorCuenta;
+                tag["devoramundosPedacito"] = DevoramundosPedacito;
+                tag["primeraVezCronista"] = PrimeraVezCronista;
                 // v6.50.115 — EL FESTÍN DEL GUARDIÁN (el easter egg de la
                 // Mazmorra: una vez por portador)
                 tag["guardianDevorado"] = GuardianMazmorraDevorado;
@@ -1898,8 +1871,8 @@ namespace AethonMod.Content.Players
                 MuertesInteriorCuenta = new System.Collections.Generic.List<int>(tag.GetList<int>("muertesInteriorCuenta"));
                 // v6.175 — LAS INVOCACIONES DEL PILAR (ausente = lista
                 // vacía: los guardados viejos estrenan su Devorador)
-                InvocacionesInteriorTipos = new System.Collections.Generic.List<int>(tag.GetList<int>("invocInteriorTipos"));
-                InvocacionesInteriorCuenta = new System.Collections.Generic.List<int>(tag.GetList<int>("invocInteriorCuenta"));
+                DevoramundosPedacito = tag.GetBool("devoramundosPedacito");
+                PrimeraVezCronista = tag.GetBool("primeraVezCronista");
                 // v6.50.115 — EL FESTÍN DEL GUARDIÁN (ausente = false: aún
                 // no ocurrió — el guardado viejo estrena el easter egg)
                 GuardianMazmorraDevorado = tag.GetBool("guardianDevorado");

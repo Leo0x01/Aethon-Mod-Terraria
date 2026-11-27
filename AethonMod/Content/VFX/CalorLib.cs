@@ -68,7 +68,7 @@ namespace AethonMod.Content.VFX
 
         /// <summary>LA CÁPSULA DEL CONDUCTO: el aire a lo largo de un haz.
         /// Ancho cónico (boca → punta) con el peso menguando hacia la
-        /// punta — el hervidero vive donde el haz es GORDO.</summary>
+        /// punta — el hervidero vive dondel haz es GORDO.</summary>
         public static void Haz(Vector2 desde, Vector2 hasta, float anchoBoca,
             float anchoPunta, float intensidad)
         {
@@ -576,7 +576,7 @@ namespace AethonMod.Content.VFX
                             * (Vector2.One - Vector2.One / zoom);
 
                         // ——— LOS HACES: la cápsula cónica — el paso ADAPTATIVO
-                        //      (denso donde el haz es gordo, ralo en la aguja:
+                        //      (denso dondel haz es gordo, ralo en la aguja:
                         //      el hervidero vive en la boca) ———
                         //      v6.85 — LA LEY DEL SOLAPE ×4: el glow de cada
                         //      paso cubre ahora ±2,6·radio (EL AIRE ALREDEDOR

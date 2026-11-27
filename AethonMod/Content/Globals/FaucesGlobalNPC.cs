@@ -94,14 +94,27 @@ namespace AethonMod.Content.Globals
         /// <summary>0 = normal · 1 = DEVORADO (congelado en 1 HP) · 2 = muerte real ya ejecutada · 3 = LA PRIMERA CENA (el festín del primer jefe).</summary>
         public byte DevorarEstado;
 
-        /// <summary>v6.176 — EL CONGELADO DE LA ASPIRADORA: el cine
-        /// espacial del Devorador congela al gusano SIN pasar por el
-        /// motor del festín (la letra: «en el momento en el que
-        /// empiezan a ser devorados ellos deben dejar de lanzar
-        /// proyectiles»): la aspiradora lo pone al capturar y lo quita
-        /// al terminar — o al morir el cine a medias (jamás un gusano
-        /// zombi: DescongelarAspiradora barre el mundo entero).</summary>
-        public bool CongeladoPorAspiradora;
+        // ================================================================
+        //  v6.180 — EL PEDACITO DEL DEVORAMUNDOS (los campos):
+        //  la aspiradora murió y su congelado muere con ella. El
+        //  pedacito tiene dos vidas: en LA CABEZA (el reloj que espera
+        //  a que la cadena nazca) y en LA COLA (la sección que se
+        //  están comiendo — la bruma del festín la sigue y al final
+        //  muere de verdad, con loot y todo).
+        // ================================================================
+        /// <summary>En LA CABEZA del Devoramundos: los ticks que faltan
+        /// para servir el pedacito (0 = no debe nada). Nace a 150 en el
+        /// OnSpawn de la PRIMERA aparición del portador.</summary>
+        public int PedacitoEspera;
+        /// <summary>En LA COLA comida: la devoración vive (el motor del
+        /// pedacito corre en su PreAI).</summary>
+        public bool PedacitoVivo;
+        /// <summary>En LA COLA comida: el reloj del cine (0→210).</summary>
+        public int PedacitoTick;
+        /// <summary>En LA CABEZA: quién es el portador del festín (para
+        /// hablarle al terminar el pedacito).</summary>
+        public int PedacitoPortador = -1;
+
         /// <summary>3 = sombra de la página (v6.50.72) · 4 = LA PRIMERA CENA de la .110.</summary>
         public byte DevorarEstilo;
         /// <summary>El reloj del festín (el motor lo alimenta en server; el cliente lo cuenta local).</summary>
@@ -529,24 +542,68 @@ namespace AethonMod.Content.Globals
             catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FaucesGlobalNPC", exRegistro); }
         }
 
-        /// <summary>v6.176 — EL DESCONGELADO: la aspiradora terminó (o
-        /// murió a medias — el cine interrumpido) — NINGÚN gusano queda
-        /// congelado para siempre. Barre el mundo entero: el flag es de
-        /// un solo cine a la vez.</summary>
-        public static void DescongelarAspiradora()
+        // ================================================================
+        //  v6.180 — EL PEDACITO: EL MOTOR (en el PreAI de la cabeza y
+        //  de la cola). La cabeza ESPERA a que la cadena nazca y sirve
+        //  el festín sobre LA COLA; la cola muere de verdad al final
+        //  del cine y el grimorio dice lo que piensa.
+        // ================================================================
+        private void ServirElPedacito(NPC cabeza)
         {
             try
             {
-                for (int i = 0; i < Main.maxNPCs; i++)
+                if (cabeza == null || !cabeza.active) return;
+                NPC cola = UltimaSeccionDelGusano(cabeza);
+                if (cola == null || !cola.active || cola.whoAmI == cabeza.whoAmI) cola = cabeza;
+                if (!cola.TryGetGlobalNPC<FaucesGlobalNPC>(out var gCola)) return;
+                gCola.PedacitoVivo = true;
+                gCola.PedacitoTick = 0;
+                gCola.PedacitoPortador = PedacitoPortador;
+                // LA ANIMACIÓN ANTERIOR: la bruma del festín de siempre
+                // (el tentáculo que sale del portador y traga la elipse
+                // del preso — estilo 3, La Sombra de la Página).
+                int owner = Math.Max(0, PedacitoPortador);
+                int idx = Projectile.NewProjectile(cola.GetSource_FromAI(),
+                    cola.Center, Vector2.Zero,
+                    ModContent.ProjectileType
+                        <global::AethonMod.Content.Projectiles.Sombras.FauceDevoradorProjectile>(),
+                    0, 0f, owner, cola.whoAmI, 3f);
+                if (idx >= 0)
                 {
-                    NPC n = Main.npc[i];
-                    if (n == null || !n.active) continue;
-                    if (n.TryGetGlobalNPC<FaucesGlobalNPC>(out var g) && g.CongeladoPorAspiradora)
-                    {
-                        g.CongeladoPorAspiradora = false;
-                        n.netUpdate = true;
-                    }
+                    Main.projectile[idx].timeLeft = 340;
+                    Main.projectile[idx].localAI[0] = owner;
                 }
+                // v6.177 — LA PURGA DE LA MESA: el preso calla mientras come
+                PurgarProyectilesDelJefe(cola, 700f);
+                Terraria.Audio.SoundEngine.PlaySound(
+                    SoundID.Item122.WithPitchOffset(-0.5f).WithVolumeScale(0.75f), cola.Center);
+                cola.netUpdate = true;
+            }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FaucesGlobalNPC", exRegistro); }
+        }
+
+        /// <summary>EL CIERRE del pedacito: la sección muere DE VERDAD
+        /// (loot, banderas — la muerte normal de una sección) y el
+        /// grimorio dice lo que piensa: «un pedacito es suficiente».</summary>
+        private void TerminarElPedacito(NPC cola)
+        {
+            try
+            {
+                PedacitoVivo = false;
+                PedacitoTick = 0;
+                cola.dontTakeDamage = false;
+                cola.netUpdate = true;
+                // LA PALABRA: lo que piensa del Devorador + el pedacito
+                Player portador = PedacitoPortador >= 0 && PedacitoPortador < Main.maxPlayers
+                    ? Main.player[PedacitoPortador] : null;
+                if (portador != null && portador.active)
+                    global::AethonMod.Content.Systems.EcoRed.HablarAlPortador(portador,
+                        "Mods.AethonMod.Devorador.Pedacito",
+                        new Color(196, 138, 255));
+                PedacitoPortador = -1;
+                // LA MUERTE REAL: la sección cae con SU muerte normal
+                cola.life = 0;
+                cola.checkDead();
             }
             catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FaucesGlobalNPC", exRegistro); }
         }
@@ -855,22 +912,29 @@ namespace AethonMod.Content.Globals
                 (_cenaActiva >= Main.maxNPCs || Main.npc[_cenaActiva] is not { active: true }))
                 _cenaActiva = -1;
 
-            // === v6.176 — EL CONGELADO DE LA ASPIRADORA (la letra:
-            //     «mientras los jefes estan siendo devorados por el
-            //     grimorio del eterno siguen lanzando proyectiles de
-            //     jefes, en el momento en el que empiezan a ser
-            //     devorado ellos deben dejar de lanzar proyectiles»):
-            //     la pieza en el cine espacial NI PIENSA — ni IA, ni
-            //     animación, ni UN solo proyectil: solo la posición que
-            //     el motor del cine dicta. Va PRIMERO: nada de
-            //     guardianes, cenas ni gatillos para un preso del
-            //     cine. ===
-            if (CongeladoPorAspiradora && npc.active)
+            // ============================================================
+            //  v6.180 — EL PEDACITO DEL DEVORAMUNDOS (la cabeza espera y
+            //  sirve; la cola se deja comer). La cabeza NO se congela:
+            //  el gusano PELEA mientras la bruma se lleva su cola — el
+            //  cine de la sección es el de siempre (FauceDevorador
+            //  sigue a su preso a donde corra).
+            // ============================================================
+            if (PedacitoVivo && npc.active)
             {
-                npc.velocity *= 0f;
+                // la sección comida: ni golpea ni recibe — la bruma manda
                 npc.damage = 0;
+                npc.dontTakeDamage = true;
                 if (npc.lifeRegen < 0) npc.lifeRegen = 0;
-                return false;
+                if (++PedacitoTick >= LargoFestin) TerminarElPedacito(npc);
+                return true;   // la IA sigue: el gusano huye con su herida
+            }
+            if (PedacitoEspera > 0 && npc.active)
+            {
+                if (--PedacitoEspera == 0)
+                {
+                    ServirElPedacito(npc);
+                    PedacitoEspera = 0;
+                }
             }
 
             // === v6.50.115 — EL GUARDIÁN DE LA MAZMORRA NO CRUZA (el
@@ -1091,36 +1155,35 @@ namespace AethonMod.Content.Globals
             try
             {
                 // ============================================================
-                //  v6.177 — EL RELOJ DEL DEVORAMUNDOS (la letra: «ten en
-                //  cuenta que la animacion de devorar al Devoramundos es
-                //  que el grimorio toma a todo el Devoramundos lo separa
-                //  por secciones y lo aspira como una aspiradora, esta
-                //  animacion se debe hacer solo la segunda vez que el
-                //  Devoramundos sea invocado» + «la aspiradora por algun
-                //  motivo solo parecer funcionar en el mundo interior»).
-                //  v6.179 — SOLO LA LLAMADA DEL PORTADOR (la letra: «no se
-                //  activa el festin con el Devoramundos, el grimorio no
-                //  activa la animacion de devorar y no lo hace pese a que
-                //  se invoca mas de 2 veces despues de borrar la lista del
-                //  festin»): LA AUTOPSIA. La v6.177 contaba TODAS las
-                //  cabezas que nacían (pilar · oleadas · comida de gusano:
-                //  TODO) — y las OLEADAS parían cabezas de Devorador por
-                //  su cuenta entre invocación e invocación: el reloj
-                //  corría SOLO y el «== 2» exacto ya nunca caía en una
-                //  invocación de verdad. LA CURA: la marca PENDIENTE —
-                //  solo cuentan las cabezas que nacen de UNA LLAMADA DEL
-                //  PORTADOR (el ítem de invocación en la mano · el pilar
-                //  del interior, dentro o fuera): ShardPlayer.
-                //  InvocacionDevoradorPendiente. La SEGUNDA invocación
-                //  EXACTA arranca el cine espacial (la vigilía del
-                //  AspiradoraDevorador espera a que la cadena se genere
-                //  por completo). La primera y la tercera en adelante:
-                //  pelea normal, muerte normal con botín — el grimorio
-                //  NO se come a este jefe por las malas (ver
-                //  EsGusanoInvocado: la devoración normal del gusano está
-                //  MUERTA en todas partes).
+                //  v6.180 — EL PEDACITO DEL DEVORAMUNDOS (la letra: «la
+                //  animacion con el Devoramundos nunca ocurre asi que es
+                //  mejor mantener la animacion anterior donde solo comia
+                //  una seccion, que ocurra la primera vez que aparece el
+                //  Devoramundos y que al igual que los demas jefes su
+                //  festin se reinicie con la pagina en blanco, y bueno
+                //  que se coma solo una seccion, luego diga su dialogo
+                //  de lo que piensa, y que añade que un pedacito es
+                //  suficiente»).
+                //
+                //  LA AUTOPSIA de la aspiradora: el reloj de la 2ª
+                //  invocación EXACTA («== 2») dependía de una marca que
+                //  nacía solo de la llamada del portador (ítem en la
+                //  mano · pilar) — y en la práctica JAMÁS caía. MUERE
+                //  entera (proyectil, congelado y contador incluidos).
+                //
+                //  EL PEDACITO (la animación ANTERIOR, la de siempre):
+                //  la PRIMERA vez que el Devoramundos APARECE (una vez
+                //  por portador — la Página en Blanco lo devuelve a la
+                //  mesa), el grimorio se come UNA SOLA SECCIÓN: LA
+                //  COLA (la regla de la casa v6.154: «el grimorio solo
+                //  come la ultima») con la bruma del festín de siempre
+                //  (FauceDevoradorProjectile), la sección muere de
+                //  verdad (loot normal) y el grimorio dice lo que
+                //  piensa — «un pedacito es suficiente». El resto del
+                //  gusano pelea normal: el festín clásico sigue
+                //  EXCLUYÉNDOLO (EsGusanoInvocado).
                 // ============================================================
-                if (npc.type == NPCID.EaterofWorldsHead || npc.type == NPCID.TheDestroyer)
+                if (npc.type == NPCID.EaterofWorldsHead)
                 {
                     if (Main.netMode == NetmodeID.MultiplayerClient) return;
                     Player portador = null;
@@ -1132,25 +1195,18 @@ namespace AethonMod.Content.Globals
                         float d = p.Center.DistanceSQ(npc.Center);
                         if (d < mejorD) { mejorD = d; portador = p; }
                     }
-                    if (portador != null)
+                    if (portador != null && npc.TryGetGlobalNPC<FaucesGlobalNPC>(out var gPedacito))
                     {
-                        var sp = portador.GetModPlayer<Players.ShardPlayer>();
-                        if (sp != null && sp.InvocacionDevoradorPendiente)
+                        var spPedacito = portador.GetModPlayer<Players.ShardPlayer>();
+                        if (spPedacito != null && !spPedacito.DevoramundosPedacito)
                         {
-                            // la marca se gasta con ESTA cabeza: nació de la llamada
-                            sp.InvocacionDevoradorPendiente = false;
-                            int veces = sp.MarcarInvocacionInterior(npc.type);
-                            if (veces == 2)   // SOLO la segunda: la letra manda
-                            {
-                                int p = Projectile.NewProjectile(npc.GetSource_FromAI(),
-                                    npc.Center, Vector2.Zero,
-                                    ModContent.ProjectileType
-                                        <global::AethonMod.Content.Projectiles.Sombras.AspiradoraDevoradorProjectile>(),
-                                    0, 0f, portador.whoAmI, npc.whoAmI, portador.whoAmI);
-                                if (p >= 0) Main.projectile[p].timeLeft = 700;
-                                Terraria.Audio.SoundEngine.PlaySound(
-                                    SoundID.Item122.WithPitchOffset(-0.6f).WithVolumeScale(0.7f), npc.Center);
-                            }
+                            // el festín se SIRVE una sola vez: la marca
+                            // viaja con el portador (la Página en Blanco
+                            // la borra con el olvido)
+                            spPedacito.DevoramundosPedacito = true;
+                            gPedacito.PedacitoEspera = 150;   // ~2,5 s: que la cadena nazca
+                            gPedacito.PedacitoPortador = portador.whoAmI;
+                            npc.netUpdate = true;
                         }
                     }
                     return;   // la cabeza del gusano no sigue por el guardián
@@ -1527,6 +1583,9 @@ namespace AethonMod.Content.Globals
         {
             if (DevorarEstado == 1 && FaseFestin >= 2) return false;
             if (DevorarEstado == ESTADO_PRIMERA_CENA && DevorarTick >= 260) return false;
+            // v6.180 — EL PEDACITO: la sección comida se RETIRA cuando
+            // la bruma ya la cubre (el mismo compás del festín clásico)
+            if (PedacitoVivo && PedacitoTick >= 60) return false;
             return true;
         }
 

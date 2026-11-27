@@ -137,9 +137,9 @@ def main() -> int:
         s = s.replace(viejo, "\tElCronista.DisplayName: El Cronista", 1)
         print("✔ es-ES: ElCronista.DisplayName revive (era un comentario)")
     # (B2) los CUATRO ítems (claves planas con punto — el estilo del EN)
-    ancla = ("\tProyeccionDelCiclope: {\n"
-             "\t\tDisplayName: Proyección del Cíclope\n"
-             "\t\tTooltip: El ojo del Cíclope se proyecta sobre ti: doce latidos de grito y el rayo magenta sale — penetración infinita\n"
+    ancla = ("\tProyeccionDelEl plano: {\n"
+             "\t\tDisplayName: Proyección del plano\n"
+             "\t\tTooltip: El ojo del plano se proyecta sobre ti: doce latidos de grito y el rayo magenta sale — penetración infinita\n"
              "\t}\n")
     adiciones = (
         "\n\t// v6.176 — LOS NOMBRES QUE VIVÍAN SOLO EN INGLÉS (la purga del EN):\n"
@@ -149,7 +149,7 @@ def main() -> int:
         "\tCoroDeLosProfundos.DisplayName: Coro de los Profundos\n"
         "\tPlumaDelEscribaSanto.DisplayName: Pluma del Escriba Santo\n")
     if "BolsaMaestra.DisplayName: Bolsa Maestra" not in s:
-        assert ancla in s, "ANCLA NO ENCONTRADA en es-ES (bloque ProyeccionDelCiclope)"
+        assert ancla in s, "ANCLA NO ENCONTRADA en es-ES (bloque ProyeccionDelel plano)"
         s = s.replace(ancla, ancla + adiciones, 1)
         print("✔ es-ES: los 4 nombres de ítems añadidos")
     F_ES.write_text(s, encoding="utf-8")

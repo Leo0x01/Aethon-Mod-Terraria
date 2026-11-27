@@ -11,7 +11,7 @@ fuera) · EL VIGÍA BORRADO por la página en blanco · LA BRUMA PEQUEÑA
 del paisaje (la cura de los 5 fps) · EL NOMBRE COSIDO bajo las ranuras
 del trío · EL FARO CON MUCHOS VFX (estela · campanada · choque de
 punta)), las muertas ausentes (LA TUMBA DE NIEBLA · el arma VIEJA del
-cíclope), hjson ×3, la paridad del en-US y los split de los gigantes
+el plano), hjson ×3, la paridad del en-US y los split de los gigantes
 vivos.
 """
 import importlib.util
@@ -87,7 +87,7 @@ firmas = [
     "FaroDelEclipseHaz",
     "RegistroSistema", "MotorDeCombate", "DispararVolea",
     "JefeInteriorVoleaProjectile", "ContarSombras",
-    "SakugaDelCielo", "CiclopeProyectado", "EcoProyectado",
+    "SakugaDelCielo", "el haz concentrado", "EcoProyectado",
     "FaroEntregado", "GeoTrio", "Hash01", "TrioDelEterno",
     "MarcarInvocacionInterior",     # el vigía (ahora BORRABLE por la página)
     "PaginaEnBlanco",
@@ -99,17 +99,17 @@ for f in firmas:
     print(f"  firma {f}: {'VIVE' if ok else 'AUSENTE (MAL)'}")
 
 # === LAS MUERTAS ===
-muertas = ["LineaDelCiclope", "LineaDelCielo",
-           "ProyeccionDelCiclope",   # el arma vieja sigue muerta
-           "ProyeccionCiclopeRayo",
-           "CiclopeEntregado"]
+muertas = ["LineaDelel plano", "LineaDelCielo",
+           "ProyeccionDelel plano",   # el arma vieja sigue muerta
+           "Proyeccionel planoRayo",
+           "el planoEntregado"]
 todas_muertas = True
 for m in muertas:
     ok = vive(m)
     todas_muertas = todas_muertas and (not ok)
     print(f"  muerta {m}: {'AUN VIVE (revisar)' if ok else 'muerta ✔'}")
-png_viejo = [k for k in bl if "LineaDelCielo" in k or "ProyeccionDelCiclope" in k
-             or "ProyeccionCiclopeRayo" in k]
+png_viejo = [k for k in bl if "LineaDelCielo" in k or "ProyeccionDelel plano" in k
+             or "Proyeccionel planoRayo" in k]
 print(f"  png muertos: {len(png_viejo)} (deben ser 0)")
 todas_muertas = todas_muertas and len(png_viejo) == 0
 
@@ -125,7 +125,7 @@ todas_vivas = todas_vivas and brumas_peq == 3
 # === LOS SPRITES DENTRO (los nuevos del rayo + lo que vivía) ===
 sprites = ["ProyeccionHaz.rawimg", "ProyeccionBorde.rawimg",
            "ProyeccionCuerpo.rawimg", "ProyeccionFlujo.rawimg",
-           "CiclopeProyectado.rawimg", "EcoProyectado.rawimg",
+           "el haz concentrado.rawimg", "EcoProyectado.rawimg",
            "FaroDelEclipse.rawimg",
            "VisorDelProyectado.rawimg", "RecuperacionProyectada.rawimg",
            "CartaQueNuncaLeDiste.rawimg", "CapturaDelVisto.rawimg",

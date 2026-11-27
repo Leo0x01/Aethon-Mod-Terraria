@@ -212,13 +212,6 @@ namespace AethonMod.Content.UI
 
                 var sp = yo.GetModPlayer<Players.ShardPlayer>();
                 int kills = sp != null ? sp.KillsInteriorDe(tipoJefe) : 0;
-                // v6.179 — LA MARCA DE LA LLAMADA (la letra del festín: solo
-                // las invocaciones DEL PORTADOR cuentan): el pilar ES la
-                // mano del portador dentro del interior — el Devorador
-                // elegido nace con su marca pendiente (el vigía de
-                // FaucesGlobalNPC la gasta al nacer la cabeza).
-                if (sp != null && (tipoJefe == NPCID.EaterofWorldsHead || tipoJefe == NPCID.TheDestroyer))
-                    sp.InvocacionDevoradorPendiente = true;
                 // v6.177 — EL NIVEL SIN TOPE (la letra: «ademas en el mundo
                 // interior los jefes no necesitan estar limitados a nivel
                 // 10, que este nivel sea infitino y cuanto mas nivels mas

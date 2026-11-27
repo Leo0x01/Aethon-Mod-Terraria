@@ -13,7 +13,6 @@ Items: {
 		Tooltip: Hold the use button — half a second of charge, then the beam follows the cursor up to 900 px
 	}
 
-
 	// v6.170 — THE THRESHOLD CLICKER DIED (la letra: «esta
 	// horrible, lo puedes borrar»): claves extirpadas.
 	// v6.168 — THE NEW WEAPON (the vertical lines)
@@ -35,13 +34,8 @@ Items: {
 	}
 
 	AltarOfrendasItem: {
-		DisplayName: Altar de Ofrendas
-		Tooltip:
-			'''
-			✦ El altar de la consagración del Eterno
-			· Colócalo y hazle clic derecho: CONSAGRA la ofrenda por el Eterno (arma o material)
-			· El arma consagrada gana +5% a TODO y su etiqueta · el material solo su etiqueta — el grimorio SOLO devora lo consagrado
-			'''
+		DisplayName: The Altar of the Eternal Consecration
+		Tooltip: The Altar of the Eternal Consecration
 	}
 
 	LibroAzul: {
@@ -2264,7 +2258,7 @@ Items: {
 	TrioLleno: The stand already holds three weapons — extract one at the altar.
 	TrioInsertada: Weapon seated in slot {0}.
 	TrioRequiereConsagrada: That weapon is not consecrated — consecrate it at the offering altar first to place it in the trio.
-	TrioSinConsagradas: You carry no consecrated weapons — consecrate a magic weapon at the altar and come back.
+	TrioSinConsagradas: No weapons available — only consecrated magic weapons.
 	TrioTodoDevuelto: "{0} weapons returned to your inventory."
 	TrioExtraida: Weapon returned to your inventory from slot {0}.
 	BandejaVacia: You carry nothing to consecrate.
@@ -2295,27 +2289,6 @@ Items: {
 			de los efectos: armas, altares y códices del Eterno.
 			'''
 	}
-
-	VisorDelProyectado: {
-		DisplayName: Visor of the Projected
-		Tooltip:
-			'''
-			Hold click to project your feelings as a beam of pure light
-			Press {0} to get projected for real
-			Grows stronger with every boss defeated and every foe that falls
-			"Dang, teach... we didn't even come close"
-			'''
-	}
-
-
-
-
-
-
-
-
-
-
 
 	BolsaAuras: {
 		// v6.104 → v6.109: THE AURAS BAG — the aura research material
@@ -2356,30 +2329,37 @@ Items: {
 
 	BolsaFormaEterna: {
 		DisplayName: Bolsa Forma Eterna
+		Tooltip: ""
 	}
 
 	BolsaMaestra: {
 		DisplayName: Bolsa Maestra
+		Tooltip: ""
 	}
 
 	CodiceHabilidades: {
 		DisplayName: Codice Habilidades
+		Tooltip: ""
 	}
 
 	MundoInteriorEternoItem: {
 		DisplayName: Mundo Interior Eterno Item
+		Tooltip: ""
 	}
 
 	ElOjoQueMira: {
 		DisplayName: El Ojo Que Mira
+		Tooltip: ""
 	}
 
 	CoroDeLosProfundos: {
 		DisplayName: Coro De Los Profundos
+		Tooltip: ""
 	}
 
 	PlumaDelEscribaSanto: {
 		DisplayName: Pluma Del Escriba Santo
+		Tooltip: ""
 	}
 
 	AlasPrismaBase.Estilo: The house's vector feathers: chained flapping, fall immunity and the prism's flight
@@ -2453,7 +2433,6 @@ Items: {
 		DisplayName: Runic Wings
 		Tooltip: "[c/FFD787:The house's gold→purple cycle: the living copy of the Smooth Valkyrie with the full runic pulse — fall immunity]"
 	}
-
 }
 
 NPCs: {
@@ -2748,13 +2727,28 @@ Cronista: {
 	ChatObjetos3: The other worlds also write. Worse, but they write.
 	ChatCierre1: When your story ends, I will close the book. And I will finally be able to blink.
 	ChatCierre2: …Do not look at me like that. We witnesses dream too.
-	// v6.170 — LAS CHARLAS DEL ARCA (el español viaja en la maleta del
-	// fallback — la red de seguridad v6.56.6 de la casa)
-	ChatLore1: Siéntate. Es hora de la primera historia. Aethon no nació dios: nació hambre que aprendió a pensar. Los dioses que conociste fueron sus comidas. Lo que llamas Terraria es una mesa que él aún no termina de mirar. Ya está escrita en tu libro — la página que antes solo mostraba su sello.
-	ChatLore2: La segunda escritura, entonces. El pacto no lo firmaste tú: lo firmó tu hambre con la suya. El Nivel pregunta cuánto ha comido él; el Despertar pregunta cuánto de él cabe en ti. Dos varas, ninguna sustituye a la otra. El libro ya puede mostrar la letra pequeña.
-	ChatLore3: Tercera historia. La Llegada no tuvo trueno: correspondencia que nadie recuerda haber pedido. El arma es su forma sellada, el altar son sus raíces en este mundo. Y tú… tú eres el ciclo actual. Todos los portadores lo fueron. Ninguno terminó de entenderlo. Tu libro acaba de abrir esa página.
-	ChatLore4: Cuarta escritura. La pregunta que te hiciste en voz baja: ¿por qué un dios esperaría tanto? Porque tú eres inmortal y él lo sabe. La inmortalidad lo aburre todo menos una cosa: la primera compañía de una eternidad. Esa página ya es tuya. Léela despacio.
-	ChatLore5: Última historia. El canon asentado: la Ira que recuerda cielos comidos, el Pilar que cuenta hacia atrás, las preguntas que él no puede comer. Y la verdad dicha en voz baja: no buscaba un apóstol. Buscaba que el hambre no estuviera sola. El Compendio está completo. Yo solo soy el margen.
+	LoreBoton: Lore
+	LorePrimeraVez: Before you ask anything: everything you will read in that book, I wrote it. Line by line, in the margin of a page torn from the Grimoire. Other bearers read it without knowing who held the pen — you do. I am the Chronicler: the one who writes in the margin. Ask me for the lore when you are ready to hear it.
+	LoreHabla1: “The guide you consult is not a book of information: it is a page of the Grimoire, torn from itself so you could read it without burning.” — The page wrote itself... and I worked centuries on its margin. Nobody asks who wrote the lines. You are nobody no more: you asked.
+	LoreHabla2: “Before names existed, appetite did. He is not a god — gods were meals —: he is hunger with a direction.” — Destruction leaves ruin; devouring leaves not even absence. I have seen it. I write this with the stillest hand I can afford.
+	LoreHabla3: “He does not hoard power like a dragon hoards gold: he metabolizes it. And Terraria is a defended dimension that rejected greater gods.” — And still it let him in... FOLDED, in the palm of a hand. Think about it the next time you carry him.
+	LoreHabla4: “Why would a devourer of universes fold himself into a single object? Not punishment, not prison: a hunting posture.” — Infinity compacted into patience. A book does not chase: it waits to be found. It only hunts the most powerful.
+	LoreHabla5: “He arrived the way smells arrive: first nobody saw anything, then it was in everything. The Mark reached all that breathes.” — Nothing that came after arrived clean. What is recorded is recorded. I keep the count; that is my entire trade.
+	LoreHabla6: “The Level asks: how much has he eaten? The Awakening asks: how much of Aethon fits in you? Two hungers, neither replaces the other.” — A bearer infinite in the first scale and mute in the second is a farmer with a beast. I charge in the second. I always charge in the second.
+	LoreHabla7: “Among everything that is, was and will be food there is ONE exception: the only thing he cannot devour. The bearer dies and returns. Always returns.” — Every death is a line I write and cross out the same day. Your entry is the only infinite draft of my career.
+	LoreHabla8: “The Level counts deaths; the doors count truths. Strength without Awakening is only well-fed violence.” — Bearers confuse the scales and pay dearly. Do not: you got this far on the right rod.
+	LoreHabla9: “The Arrival is unique per bearer: the grimoire shows up nearby, like correspondence nobody remembers requesting. The altar roots it to this reality.” — I have seen them all arrive. None arrived by chance, though all swear it. The envelope always knows its address.
+	LoreHabla10: “Door one hundred delivers the Wrath: a borrowed sentence. Door one hundred twenty, the Eternal Form: presence that wounds. Promise and verdict.” — The light of that last door killed every bearer before you. A burst of light, and then nothing left to write. With you... cross out, cross out, and the paragraph continues.
+	LoreHabla11: “Eleven eyes: the hunger's sensory system. The eleventh does not look at the world — it looks at the one reading.” — If you ever felt a light pressure on the back of your neck while consulting the guide... now you know what it was. Now you know how to look back.
+	LoreHabla12: “The player is no ordinary mortal: an immortal entity. And Aethon's boredom is saturation — a palate that has tasted everything.” — A bored god does not sadden: he dims. And waiting for the only thing without an end... that is the answer. I write it in a low voice.
+	LoreHabla13: “Ten visible tides: each a sentence of hunger. Beyond them, the Eleventh — not hunger: an examination. Only win or die.” — He has never designed a test he did not expect to see passed. I write this with the coldest ink I own.
+	LoreHabla14: “There are no shards: only Essence of the Eternal. The Mark is vapor; when something great dies, the vapor curdles into coin.” — Every drop is a piece of a universe that no longer exists. Not coin: inheritance. That is why it is the only currency I accept.
+	LoreHabla15: “The Wrath is a memory with its safety removed; the Pillar counts backwards; the Sealed are funerals that refuse to end.” — The canon leaves questions open on purpose: they are the only weapons He cannot eat. I sharpen them every night.
+	LoreHabla16: “I am not piece eighteen: I am the only merchant of Essence. I drank of it long, long, long ago... and since then I cannot die.” — It was charged to me, not granted. I do not blink, because blinking would miss an instant of history. I measure time in Awakenings, not days.
+	LoreHabla17: “Things from other worlds arrive inventoried: the stain of essence betrays them, like mud betrays the one who crossed the river.” — Two hungers in parallel: He only devours the most powerful; the bearer only grows. The whole design exists so that one day they meet at the same height.
+	LoreHabla18: “Neither He nor I wrote this story: it writes itself, line by line, death by death.” — Someday we will know which of the two was waiting for the other. Until then: do not close the book yet. Not yet.
+	LoreTemedor: That page is not yours yet: the margin opens at Awakening {0} — and yours has not arrived. Come back when you have paid more doors. I do not write for those who cannot read yet.
+	LoreCompleto: The archive is complete: every seal open, every line told. The rest is no longer in the margin — it is in you. Come back to buy Essence, bearer. Everything else... everything else is noise between pages.
 }
 
 Ira: {
@@ -2763,7 +2757,6 @@ Ira: {
 	AvisoOjos: The Wrath needs the full squad: {0} awakened eyes (you have {1}).
 	SombrasConcentradas: The grimoire concentrates {0} page shadows on the prey — the bite tightens ×{1}.
 	FaroEntregado: The Lighthouse of the Eclipse shines in your inventory — the Eternal hands it over for you to test it.
-	CiclopeEntregado: The Cyclops Projection opens its eye in your inventory — the video's weapon, delivered for you to test.
 }
 
 Llamado: {
@@ -4051,7 +4044,7 @@ Altar: {
 	SelloAlcanza: ¡Alcanza! El sello puede cobrarse ya
 	SelloSinOfrenda: Pon la ofrenda en el hueco para ver su precio
 	// v6.163 — THE ALTAR PAGE IN THE BOOK
-	BotonConsagrar: CONSECRATE THE OFFERING
+	BotonConsagrar: Consecrate
 	SelloCuestaLibro: Costs: {0} Essences of the Eternal
 	SelloLlevasLibro: You carry: {0}
 	EsenciasALaPuerta: Essences devoured — the door counts {1}/{2}
@@ -4161,7 +4154,6 @@ LibroEterno: {
 }
 
 Buffs: {
-
 	IraSerExteriorRecargaBuff: {
 		DisplayName: Recharge: Wrath of an Outer Being
 		Description: The Wrath recharges its 10-minute clock.
@@ -4259,11 +4251,181 @@ Buffs: {
 }
 
 Projectiles: {
-	RayoOpticoProyectado.DisplayName: Optical beam
-	RayoProyectado.DisplayName: Projected beam
 	AgujeroRunicoPuroProjectile.DisplayName: Pure Runic Black Hole
+	IraSelladoProjectile.DisplayName: Ira Sellado Projectile
+	AuraJuicio2Ancla.DisplayName: Aura Juicio2 Ancla
+	CoronaDePlumasProjectile.DisplayName: Corona De Plumas Projectile
+	DerrameDeTintaProjectile.DisplayName: Derrame De Tinta Projectile
+	AethonMenorOscuroPet.DisplayName: Aethon Menor Oscuro Pet
+	AethonMenorPet.DisplayName: Aethon Menor Pet
+	AlasAuroraHalo.DisplayName: Alas Aurora Halo
+	AnilloRunicoDorsalHalo.DisplayName: Anillo Runico Dorsal Halo
+	AnillosSolaresHalo.DisplayName: Anillos Solares Halo
+	AnillosSolRunicoHalo.DisplayName: Anillos Sol Runico Halo
+	AuraPortadorHalo.DisplayName: Aura Portador Halo
+	BrilloSolarHalo.DisplayName: Brillo Solar Halo
+	EscupidizoProjectile.DisplayName: Escupidizo Projectile
+	GrimorioMenorPet.DisplayName: Grimorio Menor Pet
+	MiniEstallidoPet.DisplayName: Mini Estallido Pet
+	SelloGenesisHalo.DisplayName: Sello Genesis Halo
+	VastagoDelEternoPet.DisplayName: Vastago Del Eterno Pet
+	AbrazoNebulosaProjectile.DisplayName: Abrazo Nebulosa Projectile
+	AnguilaSolarProjectile.DisplayName: Anguila Solar Projectile
+	AnilloEnfriamientoProjectile.DisplayName: Anillo Enfriamiento Projectile
+	ArcoSobretensionProjectile.DisplayName: Arco Sobretension Projectile
+	BoaEclipseProjectile.DisplayName: Boa Eclipse Projectile
+	BrumaAscendidoBlackHoleProjectile.DisplayName: Bruma Ascendido Black Hole Projectile
+	BrumaBlackHoleProjectile.DisplayName: Bruma Black Hole Projectile
+	BrumaNacimientoFX.DisplayName: Bruma Nacimiento F X
+	CaravanaEspectralProjectile.DisplayName: Caravana Espectral Projectile
+	CicloEstelarProjectile.DisplayName: Ciclo Estelar Projectile
+	CienpiesRunicoProjectile.DisplayName: Cienpies Runico Projectile
+	CintaAuroraProjectile.DisplayName: Cinta Aurora Projectile
+	ColapsoMagnetarProjectile.DisplayName: Colapso Magnetar Projectile
+	CometaErranteProjectile.DisplayName: Cometa Errante Projectile
+	CorazonColapsoProjectile.DisplayName: Corazon Colapso Projectile
+	CoroEspectralProjectile.DisplayName: Coro Espectral Projectile
+	CosmicAscendidoBlackHoleProjectile.DisplayName: Cosmic Ascendido Black Hole Projectile
+	CosmicBlackHoleProjectile.DisplayName: Cosmic Black Hole Projectile
+	CosmicShockwaveProjectile.DisplayName: Cosmic Shockwave Projectile
+	CriaEstelarMinion.DisplayName: Cria Estelar Minion
+	DanzaOrbesProjectile.DisplayName: Danza Orbes Projectile
+	DeadStarProjectile.DisplayName: Dead Star Projectile
+	DecretoEclipseProjectile.DisplayName: Decreto Eclipse Projectile
+	DesgarroCuanticoProjectile.DisplayName: Desgarro Cuantico Projectile
+	DignosFXProjectile.DisplayName: Dignos F X Projectile
+	EclipsePrimordialProjectile.DisplayName: Eclipse Primordial Projectile
+	EmbestidaNovaProjectile.DisplayName: Embestida Nova Projectile
+	EminenciaAtrozProjectile.DisplayName: Eminencia Atroz Projectile
+	EnjambrePrismaticoProjectile.DisplayName: Enjambre Prismatico Projectile
+	FarolGuardianProjectile.DisplayName: Farol Guardian Projectile
+	FiloHorizonteProjectile.DisplayName: Filo Horizonte Projectile
+	FisuraDesgarroProjectile.DisplayName: Fisura Desgarro Projectile
+	FlageloEstelarProjectile.DisplayName: Flagelo Estelar Projectile
+	FolioErranteProjectile.DisplayName: Folio Errante Projectile
+	FragmentoSupernovaMinion.DisplayName: Fragmento Supernova Minion
+	GargantaVacioProjectile.DisplayName: Garganta Vacio Projectile
+	GuardiaNovaProjectile.DisplayName: Guardia Nova Projectile
+	HeridaElectricaProjectile.DisplayName: Herida Electrica Projectile
+	LagrimaSolarProjectile.DisplayName: Lagrima Solar Projectile
+	LanzaAlbaProjectile.DisplayName: Lanza Alba Projectile
+	LenguaTintaProjectile.DisplayName: Lengua Tinta Projectile
+	LenteAbismoProjectile.DisplayName: Lente Abismo Projectile
+	LeviatanEspectralProjectile.DisplayName: Leviatan Espectral Projectile
+	LivingPulsarMinion.DisplayName: Living Pulsar Minion
+	LluviaMeteorosProjectile.DisplayName: Lluvia Meteoros Projectile
+	MagnetarProjectile.DisplayName: Magnetar Projectile
+	ManadaAstralProjectile.DisplayName: Manada Astral Projectile
+	MareaChicaProjectile.DisplayName: Marea Chica Projectile
+	MareaGravitatoriaProjectile.DisplayName: Marea Gravitatoria Projectile
+	MeteoroProjectile.DisplayName: Meteoro Projectile
+	MetronomoPulsarHalo.DisplayName: Metronomo Pulsar Halo
+	NebulaJellyfishMinion.DisplayName: Nebula Jellyfish Minion
+	NebulaLightning.DisplayName: Nebula Lightning
+	NeutronStarProjectile.DisplayName: Neutron Star Projectile
+	NovaEncadenadaProjectile.DisplayName: Nova Encadenada Projectile
+	NovaParryProjectile.DisplayName: Nova Parry Projectile
+	OcasoBurstProjectile.DisplayName: Ocaso Burst Projectile
+	OcasoShardProjectile.DisplayName: Ocaso Shard Projectile
+	OjoTextoProjectile.DisplayName: Ojo Texto Projectile
+	OlvidoAscendidoBlackHoleProjectile.DisplayName: Olvido Ascendido Black Hole Projectile
+	OlvidoBlackHoleProjectile.DisplayName: Olvido Black Hole Projectile
+	OuroborosAstralProjectile.DisplayName: Ouroboros Astral Projectile
+	PenduloJuicioProjectile.DisplayName: Pendulo Juicio Projectile
+	PliegueEspacioProjectile.DisplayName: Pliegue Espacio Projectile
+	PlumaPrimordialProjectile.DisplayName: Pluma Primordial Projectile
+	PortalDimensionalProjectile.DisplayName: Portal Dimensional Projectile
+	PulsarProjectile.DisplayName: Pulsar Projectile
+	PulsoEcoProjectile.DisplayName: Pulso Eco Projectile
+	PulsoPulsarProjectile.DisplayName: Pulso Pulsar Projectile
+	RafagaNovaProjectile.DisplayName: Rafaga Nova Projectile
+	RafagaSolarProjectile.DisplayName: Rafaga Solar Projectile
+	RayoConvergenteProjectile.DisplayName: Rayo Convergente Projectile
+	RayoGammaProjectile.DisplayName: Rayo Gamma Projectile
+	RayoPrimordialProjectile.DisplayName: Rayo Primordial Projectile
+	RealityTearProjectile.DisplayName: Reality Tear Projectile
+	RedSupergiantProjectile.DisplayName: Red Supergiant Projectile
+	RelojArenaProjectile.DisplayName: Reloj Arena Projectile
+	RencorPrimordialProjectile.DisplayName: Rencor Primordial Projectile
+	RuneSunProjectile.DisplayName: Rune Sun Projectile
+	RunicLightning.DisplayName: Runic Lightning
+	SelloErranteProjectile.DisplayName: Sello Errante Projectile
+	SembradorPulsarProjectile.DisplayName: Sembrador Pulsar Projectile
+	SierpeEstelarProjectile.DisplayName: Sierpe Estelar Projectile
+	SinfoniaPrimordialProjectile.DisplayName: Sinfonia Primordial Projectile
+	SolVivoProjectile.DisplayName: Sol Vivo Projectile
+	StellarCometMinion.DisplayName: Stellar Comet Minion
+	SunProjectile.DisplayName: Sun Projectile
+	SupremoAuroraBlackHoleProjectile.DisplayName: Supremo Aurora Black Hole Projectile
+	SupremoBlackHoleProjectile.DisplayName: Supremo Black Hole Projectile
+	TajoAstralProjectile.DisplayName: Tajo Astral Projectile
+	TajoGuadanaProjectile.DisplayName: Tajo Guadana Projectile
+	TelarEstrellaProjectile.DisplayName: Telar Estrella Projectile
+	TentaculoCosmicoProjectile.DisplayName: Tentaculo Cosmico Projectile
+	TentaculoEquinoccioProjectile.DisplayName: Tentaculo Equinoccio Projectile
+	TormentaNebularProjectile.DisplayName: Tormenta Nebular Projectile
+	TruenoPerlinProjectile.DisplayName: Trueno Perlin Projectile
+	UmbralAscendidoBlackHoleProjectile.DisplayName: Umbral Ascendido Black Hole Projectile
+	UmbralBlackHoleProjectile.DisplayName: Umbral Black Hole Projectile
+	UmbralRotoProjectile.DisplayName: Umbral Roto Projectile
+	VelaSolarProjectile.DisplayName: Vela Solar Projectile
+	VenaTruenoProjectile.DisplayName: Vena Trueno Projectile
+	VerboDetonacionProjectile.DisplayName: Verbo Detonacion Projectile
+	VerboPrimordialProjectile.DisplayName: Verbo Primordial Projectile
+	VersoVivoProjectile.DisplayName: Verso Vivo Projectile
+	ViboraGenesiacaProjectile.DisplayName: Vibora Genesiaca Projectile
+	VozCuasarProjectile.DisplayName: Voz Cuasar Projectile
+	WhiteDwarfProjectile.DisplayName: White Dwarf Projectile
+	DagaEternaMinion.DisplayName: Daga Eterna Minion
+	DevoracionEterna.DisplayName: Devoracion Eterna
+	IraSerExteriorCeremoniaProjectile.DisplayName: Ira Ser Exterior Ceremonia Projectile
+	LaUltimaPalabraProjectile.DisplayName: La Ultima Palabra Projectile
+	RayoConcentradoDosProjectile.DisplayName: Rayo Concentrado Dos Projectile
+	RayosPruebaProjectile.DisplayName: Rayos Prueba Projectile
+	PalabraCortadaProjectile.DisplayName: Palabra Cortada Projectile
+	PortalTrioProjectile.DisplayName: Portal Trio Projectile
+	TrioRescoldoProjectile.DisplayName: Trio Rescoldo Projectile
+	FaroDelEclipseHaz.DisplayName: Faro Del Eclipse Haz
+	AtaqueFusionProjectile.DisplayName: Ataque Fusion Projectile
+	AtaqueJefeProjectile.DisplayName: Ataque Jefe Projectile
+	JefeInteriorVoleaProjectile.DisplayName: Jefe Interior Volea Projectile
+	JefeMiradaCieloProj.DisplayName: Jefe Mirada Cielo Proj
+	JefeMiradaProj.DisplayName: Jefe Mirada Proj
+	JefePruebaCProj.DisplayName: Jefe Prueba C Proj
+	JefeRC2Proj.DisplayName: Jefe R C2 Proj
+	JefeRenglonesProj.DisplayName: Jefe Renglones Proj
+	JefeVeredictoProj.DisplayName: Jefe Veredicto Proj
+	LlegadaBrumaProjectile.DisplayName: Llegada Bruma Projectile
+	GrimorioNerviosoFlotante.DisplayName: Grimorio Nervioso Flotante
+	SombraPaginaCaza.DisplayName: Sombra Pagina Caza
+	SombraPaginaEterno.DisplayName: Sombra Pagina Eterno
+	OjoEternoMinion.DisplayName: Ojo Eterno Minion
+	AtaqueOleadaProjectile.DisplayName: Ataque Oleada Projectile
+	PrimerTrazoFajo.DisplayName: Primer Trazo Fajo
+	PrimerTrazoHeld.DisplayName: Primer Trazo Held
+	SakugaDelCielo.DisplayName: Sakuga Del Cielo
+	BocadoDelSueloProjectile.DisplayName: Bocado Del Suelo Projectile
+	CaidaDevoradaProjectile.DisplayName: Caida Devorada Projectile
+	FauceDevoradorProjectile.DisplayName: Fauce Devorador Projectile
+	GrietaDeTintaProjectile.DisplayName: Grieta De Tinta Projectile
+	ManchaDeTinta.DisplayName: Mancha De Tinta
+	PrimeraCenaProjectile.DisplayName: Primera Cena Projectile
+	SombraPaginaProjectile.DisplayName: Sombra Pagina Projectile
+	TresCasasProjectile.DisplayName: Tres Casas Projectile
+	PhoenixNovaProjectile.DisplayName: Phoenix Nova Projectile
+	PlasmaStormProjectile.DisplayName: Plasma Storm Projectile
+	QuantumSplitProjectile.DisplayName: Quantum Split Projectile
+	SupernovaProjectile.DisplayName: Supernova Projectile
+	JuicioDosSolesProj.DisplayName: Juicio Dos Soles Proj
+	RenglonCargaProj.DisplayName: Renglon Carga Proj
+	RenglonLineaProj.DisplayName: Renglon Linea Proj
+	TajoDelVacioProj.DisplayName: Tajo Del Vacio Proj
+	MiradaCargaProj.DisplayName: Mirada Carga Proj
+	MiradaRayoProj.DisplayName: Mirada Rayo Proj
+	LaMiradaProyectil.DisplayName: La Mirada Proyectil
+	LaMiradaRayo.DisplayName: La Mirada Rayo
+	ArcaneBolt.DisplayName: Arcane Bolt
 }
-
 
 Registro: {
 	Fallo: Something failed in {0}! Details are in the log (tModLoader-Logs).
@@ -4272,29 +4434,15 @@ Registro: {
 	Resumen: "{0} logged failures ({1} distinct) — check tModLoader-Logs."
 }
 
-Devorador.Asco: '''"This is disgusting. I will never devour this hideous thing again... I'd rather eat King Slime than this filth."'''
-PilarInterior.YaDespierto: The seal is already awake — the grimoire waits.
+Devorador.Pedacito: '''"Bleh. This is disgusting. I won't devour this hideous thing whole... I'd rather eat King Slime than this filth. A little piece is enough."'''
+
+PilarInterior: {
+	YaDespierto: The seal is already awake — the grimoire waits.
+	IraSellado1: ✦ FIVE SHADOWS — THE WRATH OF AN OUTER BEING opens its eye and hunts you. Run, bearer: slowness kills too.
+	IraSellado2: ✦ TEN SHADOWS — THE SECOND EYE wakes. You no longer run from it: you run between two.
+}
 
 Mapa: {
 	Altar: The Consecration Altar
 	Pilar: The Pillar of the Eternal
 }
-
-Proyectado: {
-	SinTecla: (sin tecla)
-	SinVisor: No visor, no projection
-	Grito: AAAAH I PROJECT MYSELF!
-	Etapa: Stage: {0} (base {1})
-	Siguiente: Next projection: {0} (base {1})
-	EnergiaInfinita: Projected energy: infinite (the weapon ships at max capacity)
-	Opcionales: Optional bosses: {0}/{1} (+{2:0} %)
-	// v6.179 — LAS DOS FASES DEL ARMA (la letra: «pueda cambiar entre
-	// las diferentes fases»): la tecla X o el clic derecho las cambian.
-	Fase1: the continuous beam
-	Fase2: the projection
-	FaseViva: Phase {0} · {1}
-	FaseCambio: → {0}
-	FaseCambioTip: Right click or {0} key: change phase
-}
-
-Keybinds.RayoProyectado.DisplayName: Change the visor phase

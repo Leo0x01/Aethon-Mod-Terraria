@@ -22,7 +22,7 @@ git rev-parse "$TAG^{commit}" >/dev/null
 
 echo "[3/5] creando el release $TAG…"
 NOTAS=$(cat <<'EOF'
-# v6.177 — LA ASPIRADORA QUE ESPERA, EL GUSANO QUE CALLA Y EL ARMA DEL CÍCLOPE
+# v6.177 — LA ASPIRADORA QUE ESPERA, EL GUSANO QUE CALLA Y EL ARMA DEL HAZ
 
 ## Las doce curas de la letra
 
@@ -33,7 +33,7 @@ NOTAS=$(cat <<'EOF'
 5. **EL ASCO HABLA EN LA MENTE**: el comentario del grimorio pasa del chat a la voz-en-la-mente del EcoLib (`EcoRed.HablarAlPortador`).
 6. **LA INTERFAZ DEL PILAR Y EL ALTAR**: LAS TIJERAS DEL LIBRO (el recorte de tijeras sobre las páginas: lo que no cabe en el papel NO SE DIBUJA) · botones que re-miden al trazo · tintas más oscuras y el halo del texto MANSO · el checklist «LAS TRES A LA VEZ» uniforme (el cuadradito se RELLENA de morado).
 7. **EL FARO REDISEÑADO**: torre afinada con broches y ventanas ámbar, la linterna con EL ECLIPSE de corona picada, rayos continuos con núcleo (QA visual 7.5).
-8. **EL ARMA DEL CÍCLOPE PROYECTADO** (la letra: «lo que se tenia que crear era un arma»): **Proyección del Cíclope** — el ojo se proyecta sobre ti, GRITA creciendo (el telegraph del vídeo) y suelta el doble rayo magenta con penetración infinita. Entrega DIRECTA al inventario + bolsa de investigaciones.
+8. **EL ARMA DEL HAZ** (la letra: «lo que se tenia que crear era un arma»): **Proyección del plano** — el ojo se proyecta sobre ti, GRITA creciendo (el telegraph del vídeo) y suelta el doble rayo magenta con penetración infinita. Entrega DIRECTA al inventario + bolsa de investigaciones.
 9. **LA CARPETA tools/ SALE DEL MOD**: las herramientas son del desarrollo, no del juego — viven en `tools/` de la raíz del repo.
 10. **LA BRUMA DE LA BASE DE LOS TENTÁCULOS**: las tres capas del cielo interior disuelven su punta en niebla de SU propia tinta — el tentáculo se apaga, no se corta.
 11. **LAS 194 CLAVES EN-ONLY CLASIFICADAS**: 189 muertas PURGADAS del en-US (179 placeholders de proyectiles, 7 tooltips vacíos, 3 pestanas del pergamín muerto) + 5 vivas AÑADIDAS al español (Bolsa Maestra, Coro de los Profundos, Pluma del Escriba Santo, Bolsa de la Forma Eterna, El Cronista). **PARIDAD PERFECTA: 1849 = 1849, cero huérfanas** (la traducción al inglés completa queda para el final del mod, como manda la letra).
@@ -45,7 +45,7 @@ NOTAS=$(cat <<'EOF'
 | --- | --- |
 | Oráculo | 0/0 (474 .cs contra tML 2026.09.3.1 real) |
 | Build real | 0/0 + Packaging |
-| GUARDIÁN | TODO VIVE ✔ (ProyeccionDelCiclope.png con su clase) |
+| GUARDIÁN | TODO VIVE ✔ (ProyeccionDelel plano.png con su clase) |
 | AUDIT v6.177 | TODO VERIFICADO ✔ (firmas vivas · paridad 1849=1849 · fósiles purgados) |
 | Headless | 0 excepciones (Sandboxing v6.177) |
 | Loop retro | SIN REGRESIONES (azar 10→0 · claves EN-sin-ES 194→0) |

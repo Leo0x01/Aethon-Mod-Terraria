@@ -920,7 +920,7 @@ namespace AethonMod.Content.Systems
                 //     las mismas brumas del lugar de nacimiento»): la
                 //     ceremonia YA NO nace a los pies del jugador para
                 //     «subir» flotando 20 ticks hasta su altura — nace
-                //     DIRECTAMENTE donde el haz nacerá (el libro si está
+                //     DIRECTAMENTE dondel haz nacerá (el libro si está
                 //     fuera cazando · −100 px sobre el dueño si está en
                 //     casa). LA FUGA que esto mata: durante la subida vieja
                 //     el ancla VIAJABA, los puestos del círculo viajaban

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-cirugia_v6176_entrega.py — v6.176 — EL ARMA DEL CÍCLOPE, ENTREGADA (la
-letra: «si creaste algo de esto Cíclope Proyectado, debes darselo al
+cirugia_v6176_entrega.py — v6.176 — EL ARMA DEL HAZ, ENTREGADA (la
+letra: «si creaste algo de esto el plano del haz, debes darselo al
 jugador directamente, ademas lo que se tenia que crear era un arma»).
 
 CUATRO piezas:
   1. LA LOCALIZACIÓN: el ítem (DisplayName+Tooltip) y el aviso de
-     entrega (Ira.CiclopeEntregado) en es-ES (la fuente única) y su
+     entrega (Ira.el planoEntregado) en es-ES (la fuente única) y su
      espejo en en-US (la paridad R7 — las claves nacen en ambos).
   2. LA ENTREGA DIRECTA: TestingPlayer.OnEnterWorld — el mismo patrón
      del Faro (una por jugador, siempre que no la lleve).
@@ -38,11 +38,11 @@ N1 = """Items: {
 		Tooltip: Mantén apretado el botón de uso — medio segundo de carga y el conducto sigue al cursor hasta 900 px
 	}
 
-	// v6.176 — EL ARMA DEL CÍCLOPE PROYECTADO (la letra: «lo que se
+	// v6.176 — EL ARMA DEL HAZ (la letra: «lo que se
 	// tenia que crear era un arma» — la proyección del ojo del vídeo).
-	ProyeccionDelCiclope: {
-		DisplayName: Proyección del Cíclope
-		Tooltip: El ojo del Cíclope se proyecta sobre ti: doce latidos de grito y el rayo magenta sale — penetración infinita
+	ProyeccionDelEl plano: {
+		DisplayName: Proyección del plano
+		Tooltip: El ojo del plano se proyecta sobre ti: doce latidos de grito y el rayo magenta sale — penetración infinita
 	}
 """
 
@@ -51,7 +51,7 @@ V2 = """	FaroEntregado: El Faro del Eclipse brilla en tu inventario — el Etern
 }"""
 
 N2 = """	FaroEntregado: El Faro del Eclipse brilla en tu inventario — el Eterno lo entrega para que lo pruebes.
-	CiclopeEntregado: La Proyección del Cíclope abre su ojo en tu inventario — el arma del vídeo, entregada para que la pruebes.
+	el planoEntregado: La Proyección del plano abre su ojo en tu inventario — el arma del vídeo, entregada para que la pruebes.
 }"""
 
 # ---------- (1c) en-US: el ítem (paridad R7) ----------
@@ -68,9 +68,9 @@ N3 = """	FaroDelEclipse: {
 
 	// v6.176 — THE CYCLOPS' WEAPON (the letter: what had to be built
 	// was a weapon — the eye projection of the video).
-	ProyeccionDelCiclope: {
-		DisplayName: Cyclops Projection
-		Tooltip: The Cyclops' eye projects over you: twelve beats of screaming, then the magenta ray fires — infinite pierce
+	ProyeccionDelEl plano: {
+		DisplayName: the beam weapon
+		Tooltip: The eye projects over you: twelve beats of screaming, then the magenta ray fires — infinite pierce
 	}
 """
 
@@ -78,7 +78,7 @@ N3 = """	FaroDelEclipse: {
 V4 = """	FaroEntregado: The Lighthouse of the Eclipse shines in your inventory — the Eternal hands it over for you to test it."""
 
 N4 = """	FaroEntregado: The Lighthouse of the Eclipse shines in your inventory — the Eternal hands it over for you to test it.
-	CiclopeEntregado: The Cyclops Projection opens its eye in your inventory — the video's weapon, delivered for you to test."""
+	el planoEntregado: The the beam weapon opens its eye in your inventory — the video's weapon, delivered for you to test."""
 
 # ---------- (2) TestingPlayer: la entrega directa ----------
 V5 = """            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TestingPlayer", exRegistro); }
@@ -88,29 +88,29 @@ V5 = """            catch (System.Exception exRegistro) { global::AethonMod.Cont
 N5 = """            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TestingPlayer", exRegistro); }
 
             // ==============================================================
-            //  v6.176 — EL ARMA DEL CÍCLOPE PROYECTADO, DIRECTO A LA MANO
-            //  (la letra: «si creaste algo de esto Cíclope Proyectado,
+            //  v6.176 — EL ARMA DEL HAZ, DIRECTO A LA MANO
+            //  (la letra: «si creaste algo de esto el plano del haz,
             //  debes darselo al jugador directamente, ademas lo que se
-            //  tenia que crear era un arma»): la Proyección del Cíclope
+            //  tenia que crear era un arma»): la Proyección del plano
             //  nace en el inventario del portador al entrar al mundo —
             //  SIEMPRE que no la lleve (una por jugador).
             // ==============================================================
             try
             {
-                int tipoCiclope = ModContent.ItemType
-                    <global::AethonMod.Content.Weapons.Investigaciones.ProyeccionDelCiclope>();
-                bool llevaCiclope = false;
+                int tipoel plano = ModContent.ItemType
+                    <global::AethonMod.Content.Weapons.Investigaciones.ProyeccionDelel plano>();
+                bool llevael plano = false;
                 for (int k = 0; k < 58; k++)
                 {
                     Item it = Player.inventory[k];
-                    if (it != null && !it.IsAir && it.type == tipoCiclope) { llevaCiclope = true; break; }
+                    if (it != null && !it.IsAir && it.type == tipoel plano) { llevael plano = true; break; }
                 }
-                if (!llevaCiclope)
+                if (!llevael plano)
                 {
-                    Player.QuickSpawnItem(Player.GetSource_FromThis(), tipoCiclope, 1);
+                    Player.QuickSpawnItem(Player.GetSource_FromThis(), tipoel plano, 1);
                     if (Player.whoAmI == Main.myPlayer && !Main.dedServ)
                         Main.NewText(Terraria.Localization.Language.GetTextValue(
-                                "Mods.AethonMod.Ira.CiclopeEntregado"),
+                                "Mods.AethonMod.Ira.el planoEntregado"),
                             new Microsoft.Xna.Framework.Color(255, 140, 220));
                 }
             }
@@ -119,16 +119,16 @@ N5 = """            catch (System.Exception exRegistro) { global::AethonMod.Cont
             // v6.50.10 — ARMADURA: PlayerLoader.OnEnterWorld NO envuelve el"""
 
 # ---------- (3) la bolsa (R8) ----------
-V6 = """            // v6.175 — EL ECO PROYECTADO (la llamada del Cíclope Proyectado
-            // — la recreación del vídeo «Me Proyecte» de Chopilas).
+V6 = """            // v6.175 — EL ECO PROYECTADO (la llamada del el plano del haz
+            // — la recreación dla técnica del haz concentrado).
             l.Add((ModContent.ItemType<Items.NPCs.EcoProyectado>(), 3));"""
 
-N6 = """            // v6.175 — EL ECO PROYECTADO (la llamada del Cíclope Proyectado
-            // — la recreación del vídeo «Me Proyecte» de Chopilas).
+N6 = """            // v6.175 — EL ECO PROYECTADO (la llamada del el plano del haz
+            // — la recreación dla técnica del haz concentrado).
             l.Add((ModContent.ItemType<Items.NPCs.EcoProyectado>(), 3));
-            // v6.176 — EL ARMA DEL CÍCLOPE (la letra: «lo que se tenia
+            // v6.176 — EL ARMA DEL HAZ (la letra: «lo que se tenia
             // que crear era un arma» — la proyección del ojo).
-            l.Add((ModContent.ItemType<Weapons.Investigaciones.ProyeccionDelCiclope>(), 1));"""
+            l.Add((ModContent.ItemType<Weapons.Investigaciones.ProyeccionDelel plano>(), 1));"""
 
 
 def main() -> int:

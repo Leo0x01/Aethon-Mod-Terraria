@@ -51,8 +51,10 @@ namespace AethonMod.Content.Systems
 
         private static void Decir(string linea)
         {
+            // v6.180 — R19/R20: NINGÚN catch mudo (el loop lo caza)
             try { Terraria.ModLoader.Logging.PublicLogger.Error("[DiagnosticoPersistencia] " + linea); }
-            catch { }
+            catch (System.Exception exRegistro)
+            { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DiagnosticoPersistencia", exRegistro); }
         }
 
         private static void ProbarElTrio()
@@ -94,7 +96,10 @@ namespace AethonMod.Content.Systems
             string ruta = Path.Combine(Main.SavePath, "DiagnosticoTrio.tag");
             TagIO.ToFile(tagTrio, ruta, true);
             var tagLeido = TagIO.FromFile(ruta, true);
-            try { File.Delete(ruta); } catch { }
+            // v6.180 — R19/R20: el borrado del disco de prueba tampoco es mudo
+            try { File.Delete(ruta); }
+            catch (System.Exception exBorrado)
+            { global::AethonMod.Content.Systems.RegistroSistema.Fallo("DiagnosticoPersistencia", exBorrado); }
 
             var renacido = new Item();
             renacido.SetDefaults(tipoTrio);

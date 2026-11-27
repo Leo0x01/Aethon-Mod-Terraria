@@ -13,67 +13,69 @@ using AethonMod.Content.VFX;
 
 namespace AethonMod.Content.NPCs
 {
-    /// <summary>
-    /// AethonSellado — v6.144 — EL DIOS SELLADO (el grimorio mismo).
-    ///
-    /// LA LETRA DEL USUARIO: «Crea un nuevo jefe que sea Aethon
-    /// (Sellado) solo aparece en el mundo interior a travez del pilar,
-    /// este jefe sera el mismo grimorio y con animaciones propias,
-    /// tendras que animar como vuela, como se desplaza de un lugar a
-    /// otro, ya sabes como lo hace, el grimorio mira a donde va a ir y
-    /// luego va, tambien tendras que animar como se teletransporta, y
-    /// el grimorio lo hace cubriendose de bruma, ya sabes como en la
-    /// llegada, tendras que animar una coreografia donde usara a sus
-    /// minions, y todos los ataques de los que dispone el grimorio pero
-    /// estos ataques en el jefe seran individuales y seran lanzado con
-    /// ayuda de sus propios minions los cuales si tendran una barra de
-    /// vida, pero cuando uno sea destruido a los 30 segundos
-    /// reaparacen, las animaciones estan creadas solo mira como
-    /// animaste al grimorio y sus minions».
-    ///
-    ///  · EL CUERPO: el sprite del Nervioso (GrimorioHambrientoNervioso
-    ///    — la misma fuente de arte del Eterno) a ESCALA GIGANTE, con
-    ///    el vaivén y el cabeceo del GrimorioFlotante (bob + tilt).
-    ///  · EL VUELO (mira a dónde va y luego va): dos tiempos — PRIMERO
-    ///    el libro SE ORIENTA (la rotación gira hacia el rumbo elegido,
-    ///    los ojos miran), DESPUÉS acelera. El rumbo se elige alrededor
-    ///    de la presa (la distancia de respeto del jefe).
-    ///  · EL TELETRANSPORTE (cubiéndose de bruma): la llegada del
-    ///    interior — el libro EXHALA una nube de SombrasLib.Bruma que
-    ///    lo CUBRE entero, desaparece dentro, y REAPARECE envuelto en
-    ///    otra nube a 320-560 px de la presa.
-    ///  · LOS MINIONS CON BARRA (Ojos Sellados): tres NPCs-ojo (la
-    ///    textura del escuadrón OjoEterno con la animación
-    ///    Abierto/Medio/Cerrado) que orbitan al libro — CADA UNO con su
-    ///    barra de vida; destruidos, REVIVEN a los 30 s (el sello los
-    ///    re-escribe).
-    ///  · LOS ATAQUES DEL ARSENAL (individuales, por los ojos): cada
-    ///    ataque es UN SOLO acto disparado por UN ojo (el libro solo
-    ///    dirige): la púa sagraria, el coro de cristal, el virote del
-    ///    vacío, la flecha estelar, el tajo portador, el estallido
-    ///    radiante — el repertorio de AtaqueJefeProjectile.
-    ///  · LA COREOGRAFÍA: fases por el reloj — convocatoria de ojos →
-    ///    persecución serena con ataques sueltos → la danza (teleports
-    ///    encadenados entre ataque y ataque) → la furia (los tres ojos
-    ///    a la vez, cada 2 s).
-    /// </summary>
+    // ======================================================================
+    //  AETHONSELLADO — v6.180 — EL DIOS SELLADO PEQUEÑO (la letra, sesión 33:
+    //  «en el mundo interior en la invocacion de Aethon (Sellado) este es
+    //  muy grande y lento asi que borralo completo, y crea uno nuevo que
+    //  sea mas pequeño que sea del tamaño del grimorio normal, asegurate
+    //  de animar correctamente su ojo y sus once ojos […] no toques nada
+    //  de los sprite creado, solo anima a este jefe con la misma esencia
+    //  que esta animado el grimorio del eterno y el grimorio menor
+    //  ademas que sus once ojos esten rodeandolos bien animados con su
+    //  parpadeo iris y demas y que esten a nivel maximo, y que saque 1
+    //  sombra de la pagina para iniciar la batalla, a medida que
+    //  trasncurre la pelea y pierda vida el grimorio en su modo jefe
+    //  sacara mas sombra de la pagina hasta 10, al llegar a 5 sombra de
+    //  la pagina entra en fase 2 y hace el ataque de Ira de un ser
+    //  exterior persiguiendo lentamente al jugador, al llegar a fase 3
+    //  con 10 sombras de la pagina, lanzara un segundo ira del ser
+    //  exterior persiguiendo al jugador, ademas debes preparar una
+    //  coreografia para rellenar el resto de la pelea»).
+    //
+    //  EL CUERPO: el sprite del GRIMORIO NORMAL (GrimorioHambriento —
+    //  el del arma, 36×49) a escala del arma: el dios es un LIBRO de
+    //  biblioteca — pequeño, rápido y vivo. Su ojo ES el del arma: el
+    //  iris que MIRA y el iris rojo de la furia, con el párpado que
+    //  parpadea (la esencia del Grimorio del Eterno y del Menor: el
+    //  compás de siempre, el vaivén, el cabeceo).
+    //
+    //  LA CORONA DE LOS ONCE OJOS: once ojos LO RODEAN (una órbita
+    //  viva, cada uno con SU fase de parpadeo, su iris clavado en el
+    //  jugador y su giro) — los sprites del escuadrón (OjoEterno), a
+    //  NIVEL MÁXIMO: la corona gira, respira y ACECHA.
+    //
+    //  LA BATALLA (las sombras mandan):
+    //   · NACE → suelta LA PRIMERA SOMBRA DE LA PÁGINA (la letra: «que
+    //     saque 1 sombra de la pagina para iniciar la batalla»).
+    //   · Cada 5 % de vida perdida +1 sombra, HASTA 10 (1+⌊furia×10⌋).
+    //   · 5 SOMBRAS (furia 40 %) → FASE 2: LA IRA DE UN SER EXTERIOR —
+    //     un ojo colosal que la persigue LENTAMENTE al jugador.
+    //   · 10 SOMBRAS (furia 90 %) → FASE 3: LA SEGUNDA IRA.
+    //   · LA COREOGRAFÍA (el resto de la pelea): TRES actos que se
+    //     turnan — EL VUELO DE DOS TIEMPOS (el libro mira a dónde va y
+    //     luego va, escupiendo la pareja dorada/violeta), EL CORO DE
+    //     LOS ONCE OJOS (los ojos se hinchan uno a uno y disparan el
+    //     arsenal del Recuerdo) y EL TELETRANSPORTE EN BRUMA (el libro
+    //     se exhala, desaparece y reaparece en otro flanco).
+    // ======================================================================
     public class AethonSellado : ModNPC
     {
-        // ═══ LOS ESTADOS DEL DIOS ═══
-        private const byte EST_NACER = 0;      // la materialización con bruma
-        private const byte EST_VOLAR = 1;      // el desplazamiento de dos tiempos
-        private const byte EST_TELEPORT = 2;   // cubrirse de bruma y reaparecer
-        private const byte EST_MUERTE = 3;     // la última luz
+        // ═══ LOS ESTADOS ═══
+        private const byte EST_NACER = 0;    // la materialización en bruma
+        private const byte EST_PELEA = 1;   // la batalla de las sombras
+        private const byte EST_MUERTE = 2;  // la última página
 
-        // ═══ LOS MINIONS: LOS DIECISIETE OJOS SELLADOS ═══
-        // v6.145 — LA LETRA: «el jefe AETHON (SELLADO) esta mal
-        // implementando, debe tener 17 minions» — la corte completa
-        // del dios sellado: diecisiete ojos, la órbita mayor.
-        private const int OJOS_MAX = 17;
-        private const int REVIVIR_T = 1800;     // 30 segundos (la letra)
+        // ═══ LA CORONA ═══
+        private const int OJOS = 11;        // los once ojos (la letra)
+        // v6.180 — NIVEL MÁXIMO (la letra: «que esten a nivel maximo»):
+        // la corona del dios es la del ESCUADRÓN COMPLETO — ojos de
+        // nivel 4 (los del tope del Eterno), hinchados y vivos.
+        private const float NIVEL_OJOS = 4f;
 
-        // ═══ LOS ATAQUES DEL ARSENAL (individuales — el libro dirige,
-        //     los ojos disparan) ═══
+        // ═══ LA ESCALA DEL CUERPO (el tamaño del grimorio NORMAL) ═══
+        private const float ESCALA = 1.30f;   // 36×49 → ~47×64 px
+
+        // ═══ EL ARSENAL DEL CORO (el repertorio del Recuerdo) ═══
         private static readonly int[] ARSENAL = new int[]
         {
             Projectiles.Jefes.AtaqueJefeProjectile.EstiloPuaSagrario,
@@ -85,19 +87,30 @@ namespace AethonMod.Content.NPCs
         };
 
         // ═══ EL ESTADO (ai) ═══
-        private byte Estado => (byte)(NPC.ai[0] % 4);
+        private byte Estado => (byte)(NPC.ai[0] % 3);
         private float T => NPC.ai[1];
-        private float Furia => MathHelper.Clamp(1f - (float)NPC.life / NPC.lifeMax, 0f, 1f);
+        private float Furia => NPC.lifeMax <= 0 ? 0f
+            : MathHelper.Clamp(1f - (float)NPC.life / NPC.lifeMax, 0f, 1f);
+        private int Fase => SombrasMeta >= 10 ? 3 : SombrasMeta >= 5 ? 2 : 1;
 
-        // el rumbo elegido (el libro MIRA primero, va después)
-        private Vector2 _rumboElegido;
+        /// <summary>Las sombras que la furia EXIGE (1 al nacer → 10 al
+        /// 90 % de furia — la letra: «hasta 10»).</summary>
+        private int SombrasMeta => Math.Min(10, 1 + (int)(Furia * 10f));
+
+        // ═══ LA COREOGRAFÍA (campos vivos — viajan en la instancia) ═══
+        private Vector2 _rumboElegido;        // el vuelo de dos tiempos
         private float _rumboTiempo;
-        private int _cooldownAtaque;
-        private int _cooldownTeleport;
-        private readonly int[] _revivirEn = new int[OJOS_MAX];
-        // v6.145 — LAS GENERACIONES de los ojos (cuántas veces renació
-        // cada uno — el poder crece con cada resurrección)
-        private readonly int[] _generaciones = new int[OJOS_MAX];
+        private int _cooldownPar;             // la pareja dorada/violeta
+        private int _cooldownOjo;             // el coro de los once
+        private int _cooldownTp;              // el teletransporte en bruma
+        private byte _acto = 1;               // 0 vuelo · 1 coro · 2 bruma
+        private int _actoTick;
+        private int _ojoHablante;             // el ojo que dispara ahora
+        private int _sombrasVivas;            // el rebaño de la página
+        private int _tickRebaño;
+        private bool _iraUno;                  // ¿ya lanzó la primera Ira?
+        private bool _iraDos;                 // ¿y la segunda?
+        private int _ojoParpadeo;             // el compás del propio ojo
 
         public override void SetStaticDefaults()
         {
@@ -106,18 +119,19 @@ namespace AethonMod.Content.NPCs
 
         public override void SetDefaults()
         {
-            NPC.width = 140;
-            NPC.height = 180;
-            NPC.lifeMax = 900_000;
-            NPC.damage = 120;
-            NPC.defense = 60;
+            // EL DIOS PEQUEÑO: el cuerpo del grimorio normal — un libro.
+            NPC.width = 44;
+            NPC.height = 58;
+            NPC.lifeMax = 70_000;
+            NPC.damage = 95;
+            NPC.defense = 42;
             NPC.knockBackResist = 0f;
             NPC.boss = true;
             NPC.noGravity = true;
             NPC.noTileCollide = true;
             NPC.aiStyle = -1;
-            NPC.npcSlots = 15f;
-            NPC.value = Item.buyPrice(platinum: 2);
+            NPC.npcSlots = 12f;
+            NPC.value = Item.buyPrice(platinum: 1);
             NPC.HitSound = SoundID.NPCHit1;
             NPC.DeathSound = SoundID.NPCDeath1;
             if (!Main.dedServ)
@@ -128,7 +142,7 @@ namespace AethonMod.Content.NPCs
         public override void SetBestiary(BestiaryDatabase database, BestiaryEntry entry)
         {
             entry.Info.AddRange(new IBestiaryInfoElement[] {
-                new FlavorTextBestiaryInfoElement("Mods.AethonMod.NPCs.AethonSellado.Bestiario"),
+                new FlavorTextBestiaryInfoElement("Mods.AethonMod.NPCs.AethonSellado.Bestario"),
             });
         }
 
@@ -156,7 +170,7 @@ namespace AethonMod.Content.NPCs
                 }
             }
             int idx = NPC.NewNPC(player.GetSource_FromThis(),
-                (int)player.Center.X, (int)player.Center.Y - 420,
+                (int)player.Center.X, (int)player.Center.Y - 300,
                 ModContent.NPCType<AethonSellado>(), 0, 0f, 0f, 0f, player.whoAmI);
             if (idx >= 0 && idx < Main.maxNPCs)
             {
@@ -171,623 +185,727 @@ namespace AethonMod.Content.NPCs
         // ════════════════════════════════════════════════════════════
         public override void AI()
         {
-            NPC.ai[1]++;
-            NPC.TargetClosest(true);
-            Player presa = Main.player[NPC.target];
-            if (presa == null || !presa.active || presa.dead)
+            try
             {
-                // sin presa: el sello se cierra y el libro se disuelve
-                if (Estado != EST_MUERTE) { NPC.ai[0] = EST_MUERTE; NPC.ai[1] = 0; }
-                return;
-            }
+                NPC.ai[1]++;
+                if (Estado == EST_MUERTE) { Muerte(); return; }
+                NPC.TargetClosest(true);
+                Player presa = Main.player[NPC.target];
+                if (presa == null || !presa.active || presa.dead)
+                {
+                    // sin presa: el sello se cierra y el libro se disuelve
+                    NPC.ai[0] = EST_MUERTE; NPC.ai[1] = 0;
+                    return;
+                }
 
-            switch (Estado)
-            {
-                case EST_NACER: AINacer(presa); break;
-                case EST_VOLAR: AIVolar(presa); break;
-                case EST_TELEPORT: AITeleport(presa); break;
-                case EST_MUERTE: AIMuerte(presa); break;
-            }
+                if (Estado == EST_NACER) { Nacer(presa); return; }
 
-            // LOS OJOS SELLADOS: mantener la órbita (y el reloj de la
-            // resurrección — 30 s la letra)
-            MantenerOjos(presa);
+                // ════════════════════════════════════════════════════
+                //  EST_PELEA — LA BATALLA DE LAS SOMBRAS
+                // ═══════════════════════════════════════════════════
+                Pelear(presa);
+            }
+            catch (System.Exception exRegistro)
+            { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonSellado", exRegistro); }
         }
 
-        // ── EL NACIMIENTO: la llegada del interior — bruma que lo cubre ──
-        private void AINacer(Player presa)
+        // ── EL NACIMIENTO: la bruma exhala al libro y la PRIMERA sombra ──
+        private void Nacer(Player presa)
         {
-            if (T == 1f)
-                Sonar(SoundID.Item122.WithPitchOffset(-0.5f).WithVolumeScale(1f), NPC.Center);
-            // la bruma de la llegada: CUBRE el libro entero mientras
-            // la materialización vive (30 ticks)
-            if (Main.netMode != NetmodeID.Server && T < 30f && T % 2f == 0f)
-                for (int i = 0; i < 3; i++)
-                {
-                    Vector2 deriva = new Vector2(
-                        Main.rand.NextFloat(-1.2f, 1.2f),
-                        Main.rand.NextFloat(-1.6f, -0.2f));
+            NPC.velocity *= 0.90f;
+            NPC.dontTakeDamage = T < 40f;
+            if (T == 1f && !Main.dedServ)
+            {
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122.WithPitchOffset(-0.55f), NPC.Center);
+                for (int k = 0; k < 26; k++)
                     SombrasLib.Bruma(NPC.Center + new Vector2(
-                        Main.rand.NextFloat(-80, 80), Main.rand.NextFloat(-100, 100)),
-                        60f + 40f * (float)Main.rand.NextDouble(), 0.7f,
-                        Main.GlobalTimeWrappedHourly, NPC.whoAmI * 97 + i, deriva);
+                        Main.rand.NextFloat(-60f, 60f), Main.rand.NextFloat(-70f, 40f)),
+                        42f, 0.75f, Main.GlobalTimeWrappedHourly, k);
+            }
+            if (T == 70f)
+            {
+                // LA PRIMERA SOMBRA (la letra: «que saque 1 sombra de la
+                // pagina para iniciar la batalla»)
+                SoltarSombra(presa);
+                if (Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122.WithPitchOffset(-0.30f), NPC.Center);
+                    NPC.netUpdate = true;
                 }
-
-            // el descenso sereno hasta la altura de vuelo
-            Vector2 destino = new Vector2(presa.Center.X + presa.direction * 320f,
-                presa.Center.Y - 300f);
-            NPC.velocity = Vector2.Lerp(NPC.velocity,
-                (destino - NPC.Center) * 0.03f, 0.08f);
-            NPC.rotation = MathHelper.Lerp(NPC.rotation, 0f, 0.06f);
-
-            if (T >= 45f) { NPC.ai[0] = EST_VOLAR; NPC.ai[1] = 0; ElegirRumbo(presa); }
-        }
-
-        // ── EL VUELO DE DOS TIEMPOS: mira a dónde va, luego va ──
-        private void AIVolar(Player presa)
-        {
-            // v6.145 — EL VUELO DEL CAZADOR (la letra: «la animacion
-            // debe ser tomada del grimorio del eterno cuando sale a
-            // cazar» — el patrón EXACTO del GrimorioNerviosoFlotante):
-            // aceleración suave hacia el destino + freno 0.88 + el
-            // balanceo seno del paseo — el libro SERENO, mirando a
-            // dónde va (la rotación gira primero, el cuerpo sigue).
-            _rumboTiempo++;
-            float giro = MathHelper.WrapAngle(_rumboElegido.ToRotation() - NPC.rotation);
-            NPC.rotation += MathHelper.Clamp(giro, -0.05f, 0.05f);
-
-            // EL DESTINO + EL VAIVÉN (el +10/-14 seno del flotante)
-            Vector2 destino = _destino + new Vector2(
-                MathF.Sin(Main.GlobalTimeWrappedHourly * 0.07f) * 10f,
-                MathF.Sin(Main.GlobalTimeWrappedHourly * 0.11f) * 14f);
-
-            // LA FÍSICA DEL LIBRO: velocity += (destino-Center)*0.009;
-            // velocity *= 0.88 (la firma del espíritu) — con el TOPE
-            // SERENO de la caza (10..20 según la distancia, la Furia
-            // lo sube — el dios no pasea cuando arde)
-            NPC.velocity += (destino - NPC.Center) * 0.009f;
-            NPC.velocity *= 0.88f;
-            float tope = MathHelper.Clamp(
-                Vector2.Distance(destino, NPC.Center) * 0.01f, 10f, 20f + 12f * Furia);
-            float velCaza = NPC.velocity.Length();
-            if (velCaza > tope) NPC.velocity *= tope / velCaza;
-
-            // ¿LLEGÓ? (cerca del destino elegido) → nuevo rumbo o teleport
-            if (Vector2.Distance(NPC.Center, _destino) < 90f || _rumboTiempo > 210f)
-            {
-                _cooldownTeleport--;
-                if (_cooldownTeleport <= 0 && Main.rand.NextBool(2))
-                { NPC.ai[0] = EST_TELEPORT; NPC.ai[1] = 0; _cooldownTeleport = 260; return; }
-                ElegirRumbo(presa);
-            }
-
-            // EL ARSENAL (individual — cada ataque UN ojo lo dispara)
-            _cooldownAtaque -= 1 + (int)(Furia * 1.5f);
-            if (_cooldownAtaque <= 0)
-            {
-                DispararArsenal(presa);
-                _cooldownAtaque = Main.rand.Next(110, 170) - (int)(Furia * 55f);
+                NPC.ai[0] = EST_PELEA; NPC.ai[1] = 0;
+                NPC.dontTakeDamage = false;
             }
         }
 
-        private Vector2 _destino;
-        private void ElegirRumbo(Player presa)
+        // ── LA PELEA: los tres actos + el rebaño + las fases ──
+        private void Pelear(Player presa)
         {
-            float ang = Main.rand.NextFloat(MathHelper.TwoPi);
-            _destino = presa.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.55f)
-                * Main.rand.NextFloat(300f, 460f);
-            _rumboElegido = (_destino - NPC.Center).SafeNormalize(Vector2.UnitX);
-            _rumboTiempo = 0f;
-        }
+            float rapidez = 7.4f + Fase * 1.4f;   // el libro PEQUEÑO vuela RÁPIDO
 
-        // ── EL TELETRANSPORTE: cubrirse de bruma, ir, descubrirse ──
-        private void AITeleport(Player presa)
-        {
-            if (T < 24f)
+            // ── EL REBAÑO DE SOMBRAS (la furia manda) ──
+            if (++_tickRebaño >= 60)
             {
-                // LA CUBIERTA: el libro se ENVUELVE en bruma (la llegada
-                // del interior — «ya sabes como en la llegada»)
-                if (Main.netMode != NetmodeID.Server && T % 2f == 0f)
-                    for (int i = 0; i < 4; i++)
+                _tickRebaño = 0;
+                ContarRebaño();
+                if (_sombrasVivas < SombrasMeta && Main.netMode != NetmodeID.MultiplayerClient)
+                {
+                    SoltarSombra(presa);
+                    ContarRebaño();
+                }
+            }
+
+            // ── LAS FASES (5 sombras → la Ira · 10 → la segunda) ──
+            if (Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                if (!_iraUno && SombrasMeta >= 5)
+                {
+                    _iraUno = true;
+                    LanzarLaIra(presa, 0);
+                }
+                if (!_iraDos && SombrasMeta >= 10)
+                {
+                    _iraDos = true;
+                    LanzarLaIra(presa, 1);
+                }
+            }
+
+            // ── LOS TRES ACTOS (la coreografía) ──
+            if (++_actoTick > (Fase >= 2 ? 300 : 380)) { _actoTick = 0; _acto = (byte)((_acto + 1) % 3); }
+
+            switch (_acto)
+            {
+                // ══ ACTO 1 — EL VUELO DE DOS TIEMPOS (mira a dónde va
+                //     y LUEGO va — la esencia del grimorio volador) ══
+                case 0:
+                {
+                    _rumboTiempo--;
+                    if (_rumboTiempo <= 0)
                     {
-                        Vector2 deriva = new Vector2(
-                            Main.rand.NextFloat(-1.5f, 1.5f),
-                            Main.rand.NextFloat(-2f, 0.2f));
-                        SombrasLib.Bruma(NPC.Center + new Vector2(
-                            Main.rand.NextFloat(-90, 90), Main.rand.NextFloat(-110, 110)),
-                            55f + 45f * (float)Main.rand.NextDouble(), 0.75f,
-                            Main.GlobalTimeWrappedHourly, NPC.whoAmI * 61 + i, deriva);
+                        // PRIMERO MIRA: elige un flanco nuevo de la presa
+                        float ang = Main.rand.NextFloat(MathHelper.TwoPi);
+                        _rumboElegido = presa.Center + ang.ToRotationVector2() * Main.rand.NextFloat(210f, 330f);
+                        _rumboTiempo = 50 + Main.rand.Next(30);
                     }
-                NPC.velocity *= 0.90f;
-                NPC.Opacity = MathHelper.Clamp(1f - T / 22f, 0f, 1f);
-                if (T == 2f) Sonar(SoundID.Item122.WithPitchOffset(-0.3f), NPC.Center);
-            }
-            else if (T < 28f)
-            {
-                // EL TRASLADO (invisible): el punto nuevo alrededor de la presa
-                float ang = Main.rand.NextFloat(MathHelper.TwoPi);
-                Vector2 destino = presa.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.55f)
-                    * Main.rand.NextFloat(340f, 560f);
-                if (T == 25f) NPC.Center = destino;
-                NPC.velocity = Vector2.Zero;
-            }
-            else
-            {
-                // EL DESCUBRIRSE: otra nube lo recibe (la misma firma)
-                NPC.Opacity = MathHelper.Clamp((T - 28f) / 18f, 0f, 1f);
-                if (Main.netMode != NetmodeID.Server && T < 48f && T % 2f == 0f)
-                    for (int i = 0; i < 3; i++)
-                        SombrasLib.Bruma(NPC.Center + new Vector2(
-                            Main.rand.NextFloat(-80, 80), Main.rand.NextFloat(-100, 100)),
-                            55f, 0.6f, Main.GlobalTimeWrappedHourly, NPC.whoAmI * 43 + i,
-                            new Vector2(0f, -1.2f));
-                if (T >= 48f)
+                    // DESPUÉS VA (con el vaivén del flotante)
+                    Vector2 dir = _rumboElegido - NPC.Center;
+                    if (dir.LengthSquared() > 40f * 40f)
+                        NPC.velocity = Vector2.Lerp(NPC.velocity, dir.SafeNormalize(Vector2.UnitX) * rapidez, 0.08f);
+                    else
+                        NPC.velocity *= 0.92f;
+                    // el ESCUPIR del libro: la pareja dorada/violeta ×3
+                    if (--_cooldownPar <= 0 && Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        _cooldownPar = Fase >= 2 ? 46 : 66;
+                        DispararLaPareja(presa);
+                    }
+                    break;
+                }
+
+                // ══ ACTO 2 — EL CORO DE LOS ONCE OJOS (el libro FRENA,
+                //     un ojo se HINCHA y dispara el arsenal del Recuerdo) ══
+                case 1:
                 {
-                    NPC.ai[0] = EST_VOLAR; NPC.ai[1] = 0;
-                    ElegirRumbo(presa);
-                    if (Main.netMode != NetmodeID.Server) OndaLib.Kick(8f, 20);
+                    NPC.velocity *= 0.90f;
+                    if (--_cooldownOjo <= 0 && Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        _cooldownOjo = Fase >= 2 ? 42 : 60;
+                        // en fase 2+ el coro canta a TRES voces
+                        int voces = Fase >= 3 ? 3 : Fase >= 2 ? 2 : 1;
+                        for (int v = 0; v < voces; v++)
+                            DispararUnOjo(presa);
+                    }
+                    break;
+                }
+
+                // ══ ACTO 3 — EL TELETRANSPORTE EN BRUMA (el libro se
+                //     exhala y reaparece en otro flanco) ══
+                default:
+                {
+                    if (--_cooldownTp <= 0 && Main.netMode != NetmodeID.MultiplayerClient)
+                    {
+                        _cooldownTp = 90;
+                        TeletransporteEnBruma(presa);
+                    }
+                    // mientras se reúne: deriva lenta hacia la presa
+                    Vector2 acecho = presa.Center - NPC.Center;
+                    if (acecho.LengthSquared() > 260f * 260f)
+                        NPC.velocity = Vector2.Lerp(NPC.velocity,
+                            acecho.SafeNormalize(Vector2.UnitX) * (rapidez * 0.5f), 0.05f);
+                    else NPC.velocity *= 0.94f;
+                    break;
                 }
             }
+
+            // EL CABECEO Y LA MIRA (la esencia del grimorio): el libro
+            // se inclina hacia donde va y su ojo SIGUE a la presa.
+            NPC.rotation = NPC.velocity.X * 0.010f;
+            NPC.netUpdate = _actoTick % 30 == 0;
         }
 
-        // ── LA MUERTE: la explosión de luz (la firma del dios) ──
-        private void AIMuerte(Player presa)
+        // ── LA PAREJA DORADA/VIOLETA ×3 (el básico del grimorio) ──
+        private void DispararLaPareja(Player presa)
         {
-            NPC.velocity *= 0.92f;
-            NPC.dontTakeDamage = true;
-            if (T == 1f)
+            try
             {
-                Sonar(SoundID.Item74, NPC.Center);
-                if (Main.netMode != NetmodeID.Server)
+                Vector2 rumbo = (presa.Center - NPC.Center).SafeNormalize(Vector2.UnitX);
+                int dano = (int)(NPC.damage * 0.40f);
+                for (int k = -1; k <= 1; k++)
                 {
-                    Projectile.NewProjectile(NPC.GetSource_FromThis(), NPC.Center, Vector2.Zero,
-                        ModContent.ProjectileType<Projectiles.Jefes.AtaqueJefeProjectile>(),
-                        0, 0f, NPC.target,
-                        Projectiles.Jefes.AtaqueJefeProjectile.EstiloMuerteFinal);
-                    OndaLib.Kick(16f, 34);
+                    Vector2 vel = rumbo.RotatedBy(0.26f * k) * 12.5f;
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center,
+                        vel.RotatedBy(-0.26f), 931, dano, 2f, NPC.target, -1f, 0.64f, 9201f);
+                    Projectile.NewProjectile(NPC.GetSource_FromAI(), NPC.Center,
+                        vel.RotatedBy(0.26f), 931, dano, 2f, NPC.target, -1f, 0.28f, 9202f);
+                }
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122.WithPitchOffset(0.12f), NPC.Center);
+            }
+            catch (System.Exception exRegistro)
+            { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonSellado", exRegistro); }
+        }
+
+        // ── EL CORO: un ojo de la corona dispara el arsenal ──
+        private void DispararUnOjo(Player presa)
+        {
+            try
+            {
+                _ojoHablante = (_ojoHablante + 1) % OJOS;
+                Vector2 cuna = PosicionDelOjo(_ojoHablante, Main.GlobalTimeWrappedHourly);
+                Vector2 rumbo = (presa.Center - cuna).SafeNormalize(Vector2.UnitX);
+                int estilo = ARSENAL[Main.rand.Next(ARSENAL.Length)];
+                float vel = estilo == Projectiles.Jefes.AtaqueJefeProjectile.EstiloEstallidoRadiante
+                    ? 0f : 9.5f;
+                Projectile.NewProjectile(NPC.GetSource_FromAI(), cuna, rumbo * vel,
+                    ModContent.ProjectileType<Projectiles.Jefes.AtaqueJefeProjectile>(),
+                    (int)(NPC.damage * 0.50f), 2f, NPC.target, estilo,
+                    NPC.whoAmI * 1.7f, NPC.whoAmI);
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122.WithPitchOffset(0.30f), cuna);
+            }
+            catch (System.Exception exRegistro)
+            { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonSellado", exRegistro); }
+        }
+
+        // ── EL TELETRANSPORTE EN BRUMA (la llegada del interior) ──
+        private void TeletransporteEnBruma(Player presa)
+        {
+            try
+            {
+                if (!Main.dedServ)
+                {
+                    // el libro SE EXHALA donde estaba…
+                    for (int k = 0; k < 18; k++)
+                        SombrasLib.Bruma(NPC.Center + new Vector2(
+                            Main.rand.NextFloat(-30f, 30f), Main.rand.NextFloat(-40f, 30f)),
+                            36f, 0.8f, Main.GlobalTimeWrappedHourly, k * 3);
+                }
+                float ang = Main.rand.NextFloat(MathHelper.TwoPi);
+                Vector2 destino = presa.Center + ang.ToRotationVector2() * Main.rand.NextFloat(320f, 480f);
+                destino.X = MathHelper.Clamp(destino.X, 160f, (Main.maxTilesX - 10) * 16f);
+                destino.Y = MathHelper.Clamp(destino.Y, 160f, (Main.maxTilesY - 10) * 16f);
+                NPC.Center = destino;
+                NPC.velocity = Vector2.Zero;
+                NPC.netUpdate = true;
+                if (!Main.dedServ)
+                {
+                    // …y REAPARECE envuelto en otra nube
+                    for (int k = 0; k < 18; k++)
+                        SombrasLib.Bruma(NPC.Center + new Vector2(
+                            Main.rand.NextFloat(-30f, 30f), Main.rand.NextFloat(-40f, 30f)),
+                            36f, 0.8f, Main.GlobalTimeWrappedHourly + 0.5f, k * 5);
+                }
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122.WithPitchOffset(-0.42f), NPC.Center);
+            }
+            catch (System.Exception exRegistro)
+            { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonSellado", exRegistro); }
+        }
+
+        // ── LAS SOMBRAS DE LA PÁGINA (el rebaño hostil) ──
+        private void SoltarSombra(Player presa)
+        {
+            try
+            {
+                int idxS = Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                    NPC.Center, Vector2.Zero,
+                    ModContent.ProjectileType
+                        <global::AethonMod.Content.Projectiles.Sombras.SombraPaginaProjectile>(),
+                    (int)(NPC.damage * 0.55f), 3f, NPC.target, presa.whoAmI + 1);
+                if (idxS >= 0)
+                {
+                    // el dios manda: la sombra persigue a SU presa
+                    Main.projectile[idxS].friendly = false;
+                    Main.projectile[idxS].hostile = true;
                 }
             }
-            if (T >= 60f) NPC.active = false;
+            catch (System.Exception exRegistro)
+            { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonSellado", exRegistro); }
+        }
+
+        private void ContarRebaño()
+        {
+            try
+            {
+                int tipo = ModContent.ProjectileType
+                    <global::AethonMod.Content.Projectiles.Sombras.SombraPaginaProjectile>();
+                int vivas = 0;
+                for (int i = 0; i < Main.maxProjectiles; i++)
+                {
+                    Projectile p = Main.projectile[i];
+                    if (p != null && p.active && p.type == tipo && p.hostile)
+                        vivas++;
+                }
+                _sombrasVivas = vivas;
+            }
+            catch (System.Exception exRegistro)
+            { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonSellado", exRegistro); }
+        }
+
+        // ── LAS IRAS DE UN SER EXTERIOR (las fases 2 y 3) ──
+        private void LanzarLaIra(Player presa, int numero)
+        {
+            try
+            {
+                int idx = Projectile.NewProjectile(NPC.GetSource_FromAI(),
+                    NPC.Center, Vector2.Zero,
+                    ModContent.ProjectileType<IraSelladoProjectile>(),
+                    (int)(NPC.damage * 0.85f), 0f, presa.whoAmI,
+                    NPC.whoAmI, numero);
+                if (idx >= 0) Main.projectile[idx].timeLeft = 900;
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122.WithPitchOffset(-0.7f), NPC.Center);
+                Main.NewText(Language.GetTextValue(
+                    "Mods.AethonMod.PilarInterior.IraSellado" + (numero + 1)),
+                    new Color(226, 96, 88));
+            }
+            catch (System.Exception exRegistro)
+            { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonSellado", exRegistro); }
+        }
+
+        // ── LA MUERTE (la última página: los ojos se cierran y el
+        //    libro se disuelve en bruma) ──
+        private void Muerte()
+        {
+            NPC.velocity *= 0.90f;
+            NPC.dontTakeDamage = true;
+            NPC.damage = 0;
+            if (!Main.dedServ && T % 6f == 0f)
+                SombrasLib.Bruma(NPC.Center + new Vector2(
+                    Main.rand.NextFloat(-40f, 40f), Main.rand.NextFloat(-50f, 30f)),
+                    34f, 0.9f - T / 90f, Main.GlobalTimeWrappedHourly, (int)T);
+            if (T == 8f && !Main.dedServ)
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122.WithPitchOffset(-0.8f), NPC.Center);
+            if (T >= 74f)
+            {
+                // LA IRA SE APAGA CON SU DIOS (nada queda persiguiendo)
+                int tipoIra = ModContent.ProjectileType<IraSelladoProjectile>();
+                for (int i = 0; i < Main.maxProjectiles; i++)
+                {
+                    Projectile p = Main.projectile[i];
+                    if (p != null && p.active && p.type == tipoIra) p.Kill();
+                }
+                NPC.life = 0;
+                NPC.checkDead();
+            }
         }
 
         public override bool CheckDead()
         {
-            // la última luz (jamas el crujido vanilla)
-            if (Estado != EST_MUERTE)
+            // el EST_MUERTE es el CINE: la vida cae a 0 solo al final
+            if (Estado != EST_MUERTE && NPC.life <= 0)
             {
                 NPC.life = 1;
-                NPC.ai[0] = EST_MUERTE; NPC.ai[1] = 0;
+                NPC.ai[0] = EST_MUERTE;
+                NPC.ai[1] = 0;
                 NPC.netUpdate = true;
-                return false;
+                return false;   // SU muerte original NUNCA arranca: primero el cine
             }
-            return true;
-        }
-
-        // ════════════════════════════════════════════════════════════
-        //  LOS TRES OJOS SELLADOS (minions CON barra, reviven 30 s)
-        // ════════════════════════════════════════════════════════════
-        private void MantenerOjos(Player presa)
-        {
-            int tipoOjo = ModContent.NPCType<AethonSelladoOjo>();
-            int vivos = 0;
-            int[] idxOjos = new int[OJOS_MAX];
-            for (int i = 0; i < Main.maxNPCs && vivos < OJOS_MAX; i++)
-            {
-                NPC n = Main.npc[i];
-                if (n != null && n.active && n.type == tipoOjo &&
-                    (n.ai[3] == NPC.whoAmI))
-                    idxOjos[vivos++] = i;
-            }
-
-            // v6.145 — APUNTA LAS GENERACIONES de los ojos vivos (para
-            // que el renacido sea MÁS PODEROSO que el que murió)
-            for (int i = 0; i < vivos; i++)
-                _generaciones[i] = (int)(Main.npc[idxOjos[i]].ai[1] / 10000f);
-
-            // los muertos esperan su reloj (30 s) — el sello RE-ESCRIBE
-            for (int i = vivos; i < OJOS_MAX; i++)
-            {
-                if (Estado == EST_MUERTE) break;     // el dios muerto no llama
-                _revivirEn[i]--;
-                if (_revivirEn[i] <= 0 && Main.netMode != NetmodeID.MultiplayerClient)
-                {
-                    float ang = Main.rand.NextFloat(MathHelper.TwoPi);
-                    Vector2 pos = NPC.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang)) * 140f;
-                    int idx = NPC.NewNPC(NPC.GetSource_FromAI(), (int)pos.X, (int)pos.Y,
-                        tipoOjo, 0, NPC.whoAmI, i, Main.rand.NextFloat(MathHelper.TwoPi), NPC.target);
-                    if (idx >= 0 && idx < Main.maxNPCs)
-                    {
-                        NPC ojo = Main.npc[idx];
-                        // v6.145 — LA GENERACIÓN SUBE: cada ojo renace
-                        // MÁS PODEROSO (+1 gen → +35% vida, +20% daño —
-                        // la escala la aplica el ojo en su primera AI)
-                        int gen = 1 + (_generaciones != null && i < _generaciones.Length
-                            ? _generaciones[i] : 0);
-                        ojo.ai[1] = gen * 10000f;
-                        ojo.netUpdate = true;
-                    }
-                    _revivirEn[i] = REVIVIR_T;
-                    if (Main.netMode != NetmodeID.Server)
-                    {
-                        Sonar(SoundID.Item122.WithPitchOffset(0.4f), pos);
-                        for (int k = 0; k < 3; k++)
-                            SombrasLib.Bruma(pos, 40f, 0.6f,
-                                Main.GlobalTimeWrappedHourly, idx * 7 + k);
-                    }
-                }
-            }
-
-            // la ÓRBITA — LA CORONA DE LOS DIECISIETE: dos anillos
-            // (11 afuera + 6 adentro girando CONTRARIO — el reloj del
-            // sello), con el vaivén del libro
-            float t = Main.GlobalTimeWrappedHourly;
-            for (int i = 0; i < vivos; i++)
-            {
-                NPC ojo = Main.npc[idxOjos[i]];
-                bool anilloExt = i < 11;
-                float ang = t * (anilloExt ? 0.75f : -1.1f) +
-                    i * (MathHelper.TwoPi / (anilloExt ? 11f : 6f));
-                float radio = anilloExt ? 190f : 100f;
-                Vector2 destino = NPC.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.72f)
-                    * radio + new Vector2(0f, MathF.Sin(t * 1.3f + i) * 6f);
-                ojo.Center = Vector2.Lerp(ojo.Center, destino, 0.14f);
-                ojo.velocity = Vector2.Zero;
-            }
-        }
-
-        // ════════════════════════════════════════════════════════════
-        //  EL ARSENAL (cada ataque lo dispara UN ojo — el libro dirige)
-        //  v6.156 — SUS PROPIOS ATAQUOS A MAYOR ESCALA (la letra:
-        //  «el jefe Aethon sellado que es el grimorio mismo con sus
-        //  propios ataques pero a mayor escala»): el arsenal se AMPLÍA
-        //  con LOS ATAQUES DEL GRIMORIO MISMO — la PAREJA DORADA/
-        //  VIOLETA del disparo básico (los discos día/noche del
-        //  Equinoccio, ×3 en abanico y con daño de jefe) y LA SOMBRAS
-        //  DE LA PÁGINA (los tentáculos negros del arma —
-        //  SombraPaginaProjectile con la marca del festín). El
-        //  repertorio viejo (púa, coro, virote, flecha, tajo,
-        //  estallido) QUEDA — el dios tiene TODO su arsenal.
-        // ════════════════════════════════════════════════════════════
-        private void DispararArsenal(Player presa)
-        {
-            if (Main.netMode == NetmodeID.MultiplayerClient) return;
-
-            // el ojo que dispara (uno vivo; si no, el libro mismo)
-            Vector2 cuna = NPC.Center;
-            int tipoOjo = ModContent.NPCType<AethonSelladoOjo>();
-            for (int i = 0; i < Main.maxNPCs; i++)
-            {
-                NPC n = Main.npc[i];
-                if (n != null && n.active && n.type == tipoOjo && n.ai[3] == NPC.whoAmI)
-                { cuna = n.Center; break; }
-            }
-
-            Vector2 rumbo = (presa.Center - cuna).SafeNormalize(Vector2.UnitX);
-
-            // ============================================================
-            //  v6.156 — LA MONEDA DEL ARSENAL AMPLIADO: mitad del tiempo
-            //  LOS ATAQUES DEL GRIMORIO (la pareja de discos ×3 en
-            //  abanico / la sombra de la página), mitad el repertorio
-            //  de siempre (el arsenal de AtaqueJefeProjectile).
-            // ============================================================
-            bool ataqueDelLibro = Main.rand.NextBool(2);
-            if (ataqueDelLibro)
-            {
-                int dado = Main.rand.Next(3);
-                if (dado < 2)
-                {
-                    // LA PAREJA DORADA/VIOLETA A MAYOR ESCALA: el disparo
-                    // básico del grimorio (los discos día/noche 931 con
-                    // LAS MARCAS DEL FX — el patrón de LanzarPareja del
-                    // arma) pero EN TRIPLICA: tres parejas en abanico
-                    // (−0.35, 0, +0.35 rad) — el dios escupe SU básico
-                    // por la boca ancha.
-                    int dano = (int)(NPC.damage * 0.42f);
-                    for (int k = -1; k <= 1; k++)
-                    {
-                        Vector2 velLibro = rumbo.RotatedBy(0.30f * k) * 13f;
-                        Projectile.NewProjectile(NPC.GetSource_FromAI(), cuna,
-                            velLibro.RotatedBy(-0.30f), 931, dano, 2f, NPC.target,
-                            -1f, 0.64f, 9201f);   // EL DORADO (día)
-                        Projectile.NewProjectile(NPC.GetSource_FromAI(), cuna,
-                            velLibro.RotatedBy(0.30f), 931, dano, 2f, NPC.target,
-                            -1f, 0.28f, 9202f);   // EL VIOLETA (noche)
-                    }
-                    Sonar(SoundID.Item122.WithPitchOffset(0.10f), cuna);
-                }
-                else
-                {
-                    // LA SOMBRA DE LA PÁGINA DEL DIOS: el tentáculo negro
-                    // del arma (SombraPaginaProjectile) con la marca del
-                    // festín — el dios SUelta su propio tentáculo a por
-                    // la presa (muerde 2,5% por golpe: el arma a escala).
-                    int idxS = Projectile.NewProjectile(NPC.GetSource_FromAI(),
-                        cuna, Vector2.Zero,
-                        ModContent.ProjectileType
-                            <global::AethonMod.Content.Projectiles.Sombras.SombraPaginaProjectile>(),
-                        (int)(NPC.damage * 0.60f), 3f, NPC.target,
-                        presa.whoAmI + 1);
-                    if (idxS >= 0)
-                    {
-                        // el jefe manda: la sombra persigue a SU presa
-                        Main.projectile[idxS].friendly = false;
-                        Main.projectile[idxS].hostile = true;
-                    }
-                    Sonar(SoundID.Item122.WithPitchOffset(-0.30f), cuna);
-                }
-                return;
-            }
-
-            int estilo = ARSENAL[Main.rand.Next(ARSENAL.Length)];
-            float vel = estilo == Projectiles.Jefes.AtaqueJefeProjectile.EstiloEstallidoRadiante
-                ? 0f : 10f;
-            Projectile.NewProjectile(NPC.GetSource_FromAI(), cuna, rumbo * vel,
-                ModContent.ProjectileType<Projectiles.Jefes.AtaqueJefeProjectile>(),
-                (int)(NPC.damage * 0.55f), 2f, NPC.target, estilo,
-                NPC.whoAmI * 1.7f, NPC.whoAmI);
-            Sonar(SoundID.Item122.WithPitchOffset(0.25f), cuna);
-        }
-        private const int ARSELADO_LEN = 6;
-
-        private static void Sonar(Terraria.Audio.SoundStyle estilo, Vector2 pos)
-        {
-            try { Terraria.Audio.SoundEngine.PlaySound(estilo, pos); }
-            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonSellado", exRegistro); }
-        }
-
-        // ════════════════════════════════════════════════════════════
-        //  EL DIBUJO DEL DIOS (el sprite del Nervioso GIGANTE + ojos)
-        // ════════════════════════════════════════════════════════════
-        //  EL DIBUJO DEL DIOS — v6.156: EL CUERPO ES EL LIBRO V3 DEL
-        //  USUARIO (la letra: «tambien te dare el del grimorio para que
-        //  lo uses como el jefe Aethon sellado que es el grimorio mismo
-        //  con sus propios ataques pero a mayor escala, ademas debes
-        //  darle una animacion rapido, como los minions en la pantalla
-        //  de titulo y en el pilar»): LAS TRES TEXTURAS DEL SPRITE
-        //  LIBRO V3 (LibroV3_Abierto / LibroV3_Medio / LibroV3_Cerrado
-        //  — el arte del usuario decodificado PIXEL A PIXEL, 706×967)
-        //  dibujadas a escala de dios (×0.42: el cuerpo del jefe mide
-        //  ~296×406 px de pantalla) con EL PARPADEO RÁPIDO de los
-        //  minions del título y del pilar: el ciclo ABIERTO → MEDIO →
-        //  CERRADO → MEDIO que late cada ~2 segundos y se aprieta en
-        //  la furia (a media vida late al doble — el dios nervioso de
-        //  verdad).
-        // ════════════════════════════════════════════════════════════
-        public override bool PreDraw(SpriteBatch sb, Vector2 screenPos, Color drawColor)
-        {
-            if (Main.netMode == NetmodeID.Server) return false;
-
-            try
-            {
-                // LAS TRES CARAS DEL LIBRO V3 (el arte del usuario):
-                // la tira del dios — abierto, medio, cerrado.
-                var texAbiertoAsset = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/NPCs/LibroV3_Abierto",
-                    ReLogic.Content.AssetRequestMode.ImmediateLoad);
-                var texMedioAsset = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/NPCs/LibroV3_Medio",
-                    ReLogic.Content.AssetRequestMode.ImmediateLoad);
-                var texCerradoAsset = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/NPCs/LibroV3_Cerrado",
-                    ReLogic.Content.AssetRequestMode.ImmediateLoad);
-                Texture2D texAbierto = texAbiertoAsset.Value;
-                Texture2D texMedio = texMedioAsset.Value;
-                Texture2D texCerrado = texCerradoAsset.Value;
-
-                Vector2 pos = NPC.Center - screenPos;
-                float t = Main.GlobalTimeWrappedHourly + NPC.whoAmI * 0.37f;
-
-                // el vaivén del flotante (la firma)
-                float bob = MathF.Sin(t * 1.35f) * 8f;
-                float tilt = NPC.rotation * 0.35f + 0.07f * MathF.Sin(t * 0.9f);
-                Vector2 destino = pos + new Vector2(0f, bob);
-
-                // EL HALO del dios sellado
-                var glow = VFXCore.SoftGlow;
-                sb.Draw(glow, destino, null,
-                    new Color(118, 74, 190) * (0.30f * NPC.Opacity), 0f,
-                    glow.Size() * 0.5f, 5.5f, SpriteEffects.None, 0f);
-
-                // ============================================================
-                //  EL PARPADEO RÁPIDO DE LOS MINIONS (la referencia de la
-                //  letra: la pantalla de título y el pilar): el ciclo
-                //  ABIERTO → MEDIO → CERRADO → MEDIO → ABIERTO… con el
-                //  compás de la casa — un latido cada T_PARPADEO
-                //  segundos, y el párpado baja y sube EN FRENA (las
-                //  fases del cierre duran un cuarto del ciclo: RÁPIDO
-                //  de verdad). La furia aprieta el compás: a media vida
-                //  el dios parpidea AL DOBLE (nervioso como el libro
-                //  hambriento).
-                // ============================================================
-                float compas = Furia > 0.5f ? 0.85f : 1.70f;   // furia = al doble
-                float faseParp = (t % compas) / compas;          // 0..1
-                Texture2D tex;
-                // EL CIERRE EN FRENA: abierto (0-0.55), medio (0.55-0.70),
-                // cerrado (0.70-0.80), medio (0.80-0.95), abierto (0.95-1).
-                if (faseParp < 0.55f || faseParp >= 0.95f) tex = texAbierto;
-                else if (faseParp < 0.80f) tex = (faseParp < 0.70f) ? texMedio : texCerrado;
-                else tex = texMedio;
-
-                // EL LIBRO V3 GIGANTE (706×967 → ×0.42 ≈ 296×406 px: EL
-                // GRIMORIO MISMO, el arte del usuario a escala de dios)
-                float escala = 0.42f;
-                sb.Draw(tex, destino, null,
-                    Color.White * NPC.Opacity, tilt,
-                    tex.Size() * 0.5f, escala,
-                    SpriteEffects.None, 0f);
-
-                // LOS OJOS SELLADOS sobre la portada: los sellos vivos
-                // del libro (cada uno con su NPC-ojo orbitando — el
-                // dibujo del NPC-ojo manda; estos son los sellos de la
-                // PORTADA, apagados, el contrato) — SIGUEN el compás
-                // del parpadeo del cuerpo (cerrado = sellos dormidos).
-                float alfaSello = (tex == texCerrado) ? 0.12f
-                    : (tex == texMedio) ? 0.24f : 0.35f;
-                var ojoTexAsset = ModContent.Request<Texture2D>(
-                    "AethonMod/Content/Projectiles/OjoEterno_Abierto",
-                    ReLogic.Content.AssetRequestMode.ImmediateLoad);
-                var ojoTex = ojoTexAsset.Value;
-                for (int i = 0; i < OJOS_MAX; i++)
-                {
-                    Vector2 off = new Vector2(
-                        (i - 1) * 26f, -18f + (i == 1 ? -12f : 0f));
-                    sb.Draw(ojoTex, destino + off, null,
-                        new Color(150, 110, 210) * (alfaSello * NPC.Opacity), 0f,
-                        ojoTex.Size() * 0.5f, 0.55f, SpriteEffects.None, 0f);
-                }
-            }
-            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonSellado", exRegistro); }
-            return false;
-        }
-    }
-
-    // ==================================================================
-    //  AethonSelladoOjo — EL OJO SELLADO (el minion con barra de vida).
-    //  La textura del escuadrón (OjoEterno) con SU animación (Abierto →
-    //  Medio → Cerrado — el parpadeo del minion), orbita al libro y
-    //  revive a los 30 s cuando el sello lo re-escribe.
-    // ==================================================================
-    public class AethonSelladoOjo : ModNPC
-    {
-        public override string Texture => "AethonMod/Content/Projectiles/OjoEterno_Abierto";
-
-        private int Amo => (int)NPC.ai[0];
-        private float Angulo => NPC.ai[2];
-        // v6.145 — LA GENERACIÓN (la letra: «cada ojo debe ser mas
-        // poderoso cada vez que se regeneren»): cada resurrección
-        // sube la generación del ojo (+35% vida, +20% daño — el sello
-        // LO ESCRIBE MÁS FUERTE). La generación vive en ai[1] (alta) —
-        // el T del ojo se lleva a localAI.
-        private int Generacion => (int)(NPC.ai[1] / 10000f);
-        private float T => NPC.localAI[0];
-
-        public override void SetStaticDefaults()
-        {
-            Main.npcFrameCount[Type] = 1;
-        }
-
-        public override void SetDefaults()
-        {
-            NPC.width = 44;
-            NPC.height = 44;
-            NPC.lifeMax = 25_000;
-            NPC.damage = 70;
-            NPC.defense = 30;
-            NPC.knockBackResist = 0.15f;
-            NPC.noGravity = true;
-            NPC.noTileCollide = true;
-            NPC.aiStyle = -1;
-            NPC.npcSlots = 1f;
-            NPC.HitSound = SoundID.NPCHit1;
-            NPC.DeathSound = SoundID.NPCDeath6;
-        }
-
-        private bool _primeraAI = true;
-
-        public override void AI()
-        {
-            NPC.localAI[0]++;
-            NPC.TargetClosest();
-
-            // v6.145 — LA ESCALA DE LA GENERACIÓN (la letra: «cada ojo
-            // debe ser mas poderoso cada vez que se regeneren»): al
-            // nacer (o renacer), el ojo toma SU generación y crece —
-            // +35% vida y +20% daño por generación. El sello aprende.
-            if (_primeraAI)
-            {
-                _primeraAI = false;
-                int gen = Math.Max(0, Generacion);
-                if (gen > 0)
-                {
-                    float mul = 1f + 0.35f * gen;
-                    NPC.lifeMax = (int)(25_000 * mul);
-                    NPC.life = NPC.lifeMax;
-                    NPC.damage = (int)(70 * (1f + 0.20f * gen));
-                }
-            }
-
-            // EL AMO murió: el sello se disuelve
-            NPC amo = Amo >= 0 && Amo < Main.maxNPCs ? Main.npc[Amo] : null;
-            if (amo == null || !amo.active ||
-                amo.type != ModContent.NPCType<AethonSellado>())
-            {
-                NPC.life = 0;
-                NPC.HitEffect(0, 10);
-                NPC.active = false;
-                return;
-            }
-
-            // la órbita la lleva el amo (MantenerOjos); el ojo solo
-            // respira (el bob del minion) y MIRA a su presa
-            NPC.Center += new Vector2(0f, MathF.Sin(Main.GlobalTimeWrappedHourly * 2.2f
-                + Angulo) * 0.5f);
-            NPC.velocity = Vector2.Zero;
-        }
-
-        public override bool PreDraw(SpriteBatch sb, Vector2 screenPos, Color drawColor)
-        {
-            if (Main.netMode == NetmodeID.Server) return false;
-            try
-            {
-                // LA ANIMACIÓN DEL MINION (la letra: «las animaciones
-                // están creadas solo mira como animaste al grimorio y
-                // sus minions»): el parpadeo del escuadrón — Abierto la
-                // mayor parte del ciclo, Medio un instante, Cerrado el
-                // descanso — el mismo mapa del pilar.
-                float t = Main.GlobalTimeWrappedHourly + Angulo * 3.1f;
-                float fase = (t * 0.55f) % 1f;
-                string estado = fase < 0.55f ? "Abierto"
-                    : fase < 0.68f ? "Medio" : "Cerrado";
-                var texAsset = ModContent.Request<Texture2D>(
-                    $"AethonMod/Content/Projectiles/OjoEterno_{estado}",
-                    ReLogic.Content.AssetRequestMode.ImmediateLoad);
-                var tex = texAsset.Value;
-
-                // MIRA a su presa (el iris sigue al objetivo)
-                Player presa = Main.player[NPC.target];
-                Vector2 mirada = presa != null && presa.active
-                    ? (presa.Center - NPC.Center).SafeNormalize(Vector2.UnitX)
-                    : Vector2.UnitX;
-                float rot = mirada.ToRotation();
-
-                var glow = VFXCore.SoftGlow;
-                Vector2 pos = NPC.Center - screenPos;
-                sb.Draw(glow, pos, null,
-                    new Color(150, 90, 220) * 0.4f, 0f,
-                    glow.Size() * 0.5f, 1.4f, SpriteEffects.None, 0f);
-                // v6.145 — EL TAMAÑO DEL PODER: cada generación lo
-                // agranda (+12% por gen — el sello lo escribe más fuerte)
-                float escGen = 0.85f * (1f + 0.12f * Math.Max(0, Generacion));
-                sb.Draw(tex, pos, null, Color.White, rot,
-                    tex.Size() * 0.5f, escGen, SpriteEffects.None, 0f);
-            }
-            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonSellado", exRegistro); }
-            return false;
-        }
-
-        public override void HitEffect(NPC.HitInfo hit)
-        {
-            if (Main.netMode != NetmodeID.Server && NPC.life <= 0)
-                for (int i = 0; i < 4; i++)
-                    SombrasLib.Bruma(NPC.Center, 34f, 0.55f,
-                        Main.GlobalTimeWrappedHourly, NPC.whoAmI * 11 + i);
+            if (Estado == EST_MUERTE) return base.CheckDead();
+            return base.CheckDead();
         }
 
         public override bool CheckActive() => false;   // el sello lo sostiene
-        public override void BossHeadRotation(ref float rotation)
-            => rotation = NPC.rotation;
+
+        // ════════════════════════════════════════════════════════════
+        //  LA GEOMETRÍA DE LA CORONA (los once ojos alrededor)
+        // ════════════════════════════════════════════════════════════
+        /// <summary>La posición del ojo `i` de la corona (órbita viva:
+        /// el anillo gira, respira y cada ojo tiene su vaivén).</summary>
+        private Vector2 PosicionDelOjo(int i, float t)
+        {
+            float ang = t * 0.85f + i * (MathHelper.TwoPi / OJOS);
+            float radio = 92f + 7f * MathF.Sin(t * 1.6f + i * 1.3f);
+            return NPC.Center + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.78f) * radio
+                + new Vector2(0f, MathF.Sin(t * 1.2f + i) * 5f);
+        }
+
+        // ════════════════════════════════════════════════════════════
+        //  EL DIBUJO DEL DIOS (el grimorio normal + su ojo + la corona)
+        // ════════════════════════════════════════════════════════════
+        public override bool PreDraw(SpriteBatch sb, Vector2 screenPos, Color drawColor)
+        {
+            if (Main.netMode == NetmodeID.Server) return false;
+            try
+            {
+                float t = Main.GlobalTimeWrappedHourly;
+                Vector2 pos = NPC.Center - screenPos;
+                Player presa = Main.player[NPC.target];
+
+                // ══ EL HALO DEL SELLO ══
+                var glow = VFXCore.SoftGlow;
+                if (glow != null)
+                    sb.Draw(glow, pos, null,
+                        new Color(118, 74, 190) * (0.28f * NPC.Opacity), 0f,
+                        glow.Size() * 0.5f, 2.4f * ESCALA, SpriteEffects.None, 0f);
+
+                // ══ EL CUERPO: EL GRIMORIO NORMAL (el sprite del arma) ══
+                // el vaivén del flotante (la firma del grimorio) + el
+                // cabeceo hacia donde va
+                float bob = MathF.Sin(t * 1.35f + NPC.whoAmI * 0.4f) * 5.5f;
+                float tilt = NPC.rotation * 0.6f + 0.05f * MathF.Sin(t * 0.9f);
+                Texture2D cuerpo = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Weapons/GrimorioHambriento",
+                    ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
+                Vector2 destino = pos + new Vector2(0f, bob);
+
+                // LA RESPIRACIÓN (el libro vivo — la esencia del Menor)
+                float escVivo = ESCALA * (1f + 0.035f * MathF.Sin(t * 2.1f));
+                sb.Draw(cuerpo, destino, null,
+                    Color.White * NPC.Opacity, tilt,
+                    cuerpo.Size() * 0.5f, escVivo, SpriteEffects.None, 0f);
+
+                // ══ SU OJO (el del arma: el iris que MIRA + el párpado
+                //    que parpadea + el iris rojo de la furia) ══
+                // LA CASA DEL OJO en el sprite (OJO = 19.09, 22.45 de 36×49)
+                Vector2 casaOjo = destino + new Vector2((19.09f - 18f), (22.45f - 24.5f)) * escVivo;
+                // LA MIRADA: el iris se desplaza hacia la presa
+                Vector2 mira = Vector2.Zero;
+                if (presa != null && presa.active)
+                {
+                    mira = presa.Center - screenPos - casaOjo;
+                    if (mira.LengthSquared() > 1f) mira = Vector2.Normalize(mira) * 3.4f * escVivo;
+                }
+                // EL PARPADEO (el compás del Menor: late cada ~2 s)
+                float alpha = 1f;
+                _ojoParpadeo = (_ojoParpadeo + 1) % 130;
+                if (_ojoParpadeo > 118) alpha = Math.Abs(_ojoParpadeo - 124) / 6f;
+
+                Texture2D iris = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Weapons/GrimorioHambriento_Iris",
+                    ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
+                sb.Draw(iris, casaOjo + mira, null,
+                    Color.White * (0.92f * alpha * NPC.Opacity), 0f,
+                    iris.Size() * 0.5f, escVivo, SpriteEffects.None, 0f);
+                // EL IRIS ROJO (la furia lo enciende — la marca del dios)
+                if (Furia > 0.35f)
+                    sb.Draw(ModContent.Request<Texture2D>(
+                        "AethonMod/Content/Weapons/GrimorioHambriento_IrisRojo",
+                        ReLogic.Content.AssetRequestMode.ImmediateLoad).Value,
+                        casaOjo + mira, null,
+                        Color.White * (MathHelper.Clamp((Furia - 0.35f) * 1.4f, 0f, 0.85f) * alpha * NPC.Opacity),
+                        0f, iris.Size() * 0.5f, escVivo, SpriteEffects.None, 0f);
+                // EL PÁRPADO (medio/cerrado en el parpadeo — la casa)
+                if (alpha < 0.99f)
+                {
+                    Texture2D tapa = ModContent.Request<Texture2D>(
+                        alpha < 0.45f ? "AethonMod/Content/Weapons/GrimorioHambriento_Cerrado"
+                                      : "AethonMod/Content/Weapons/GrimorioHambriento_Medio",
+                        ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
+                    sb.Draw(tapa, destino, null,
+                        Color.White * NPC.Opacity, tilt,
+                        tapa.Size() * 0.5f, escVivo, SpriteEffects.None, 0f);
+                }
+
+                // ══ LA CORONA DE LOS ONCE OJOS (la letra: «rodeandolos
+                //    bien animados con su parpadeo iris y demas») ══
+                // cada ojo con SU fase de parpadeo, SU iris clavado en
+                // la presa y el vaivén de la órbita — a NIVEL MÁXIMO.
+                Texture2D ojoA = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Projectiles/OjoEterno_Abierto",
+                    ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
+                Texture2D ojoM = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Projectiles/OjoEterno_Medio",
+                    ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
+                Texture2D ojoC = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Projectiles/OjoEterno_Cerrado",
+                    ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
+                for (int i = 0; i < OJOS; i++)
+                {
+                    Vector2 po = PosicionDelOjo(i, t) - screenPos;
+                    // EL OJO HABLANTE SE HINCHA (el telegraph del coro)
+                    bool habla = Estado == EST_PELEA && i == _ojoHablante && _acto == 1;
+                    float escOjo = (habla ? 1.35f : 1f) * (0.55f + NIVEL_OJOS * 0.05f)
+                        * (1f + 0.06f * MathF.Sin(t * 3.1f + i * 2.2f));
+
+                    // SU PARPADEO (cada ojo a su compás — la corona respira)
+                    int fase = ((int)(t * 60f) + i * 37) % 170;
+                    Texture2D texOjo = ojoA;
+                    if (fase > 156) texOjo = ojoC;
+                    else if (fase > 146) texOjo = ojoM;
+
+                    // EL RESPLANDOR del ojo (más vivo si habla)
+                    if (glow != null)
+                        sb.Draw(glow, po, null,
+                            (habla ? new Color(255, 120, 100) : new Color(150, 84, 235))
+                                * ((habla ? 0.42f : 0.26f) * NPC.Opacity), 0f,
+                            glow.Size() * 0.5f, escOjo * 1.5f, SpriteEffects.None, 0f);
+                    sb.Draw(texOjo, po, null,
+                        Color.White * NPC.Opacity, 0f,
+                        texOjo.Size() * 0.5f, escOjo, SpriteEffects.None, 0f);
+
+                    // EL IRIS DE LA CORONA: clavado en la presa
+                    if (texOjo == ojoA && presa != null && presa.active)
+                    {
+                        Vector2 hacia = presa.Center - screenPos - po;
+                        if (hacia.LengthSquared() > 1f)
+                        {
+                            hacia = Vector2.Normalize(hacia) * 4.5f * escOjo;
+                            if (glow != null)
+                                sb.Draw(glow, po + hacia, null,
+                                    (habla ? new Color(255, 150, 120) : new Color(255, 200, 90))
+                                        * (0.80f * NPC.Opacity), 0f,
+                                    glow.Size() * 0.5f, escOjo * 0.42f, SpriteEffects.None, 0f);
+                        }
+                    }
+                }
+            }
+            catch (System.Exception exRegistro)
+            { global::AethonMod.Content.Systems.RegistroSistema.Fallo("AethonSellado", exRegistro); }
+            return false;   // el dibujo es TODO nuestro
+        }
     }
 
-    // ==================================================================
-    //  LA BARRA DEL JEFE (la propia — el dios sellado tiene la suya)
-    // ==================================================================
+    // ======================================================================
+    //  IRASELLADOPROJECTILE — v6.180 — LA IRA DE UN SER EXTERIOR (la
+    //  letra: «al llegar a 5 sombra de la pagina entra en fase 2 y hace
+    //  el ataque de Ira de un ser exterior persiguiendo lentamente al
+    //  jugador» + el segundo en la fase 3).
+    //
+    //  EL CINE: (1) LA CEREMONIA (~2,5 s): el ojo COLOSAL nace sobre el
+    //  dios — se hincha, los once ojos de su corona convergen hacia él
+    //  y el círculo se cierra mientras el cielo tiembla. (2) LA
+    //  PERSIGUIÓN LENTA (~10 s): el ojo se suelta y PERSIGUE al jugador
+    //  DESPACIO (velocidad de sonámbulo — se esquiva, pero no se
+    //  abandona), escupiendo EL HAZ de su pupila: un rayo colosal que
+    //  gira hacia el jugador con una lentitud de sentencia. (3) LA
+    //  DISOLUCIÓN: el ser se cansa del mundo y se va.
+    //
+    //  ai[0] = whoAmI del dios que la lanzó · ai[1] = número (0/1) ·
+    //  ai[2] = edad · localAI[0] = el ángulo del haz.
+    // ======================================================================
+    public class IraSelladoProjectile : ModProjectile
+    {
+        public override string Texture => "AethonMod/Content/Effects/Procedural/SoftGlow";
+
+        private const int T_CEREMONIA = 150;
+        private const int T_PERSECUCION = 600;
+
+        /// <summary>El ojo del ser exterior (radio en px).</summary>
+        private const float RADIO = 54f;
+        /// <summary>La velocidad de la persecución LENTA (la letra).</summary>
+        private const float LENTITUD = 2.3f;
+        /// <summary>El largo del haz.</summary>
+        private const float LARGO_HAZ = 860f;
+
+        private NPC Dios => Projectile.ai[0] >= 0 && Projectile.ai[0] < Main.npc.Length
+            ? Main.npc[(int)Projectile.ai[0]] : null;
+
+        private float Edad => Projectile.ai[2];
+
+        public override void SetStaticDefaults() { }
+
+        public override void SetDefaults()
+        {
+            Projectile.width = (int)(RADIO * 2f);
+            Projectile.height = (int)(RADIO * 2f);
+            Projectile.tileCollide = false;
+            Projectile.friendly = false;
+            Projectile.hostile = true;
+            Projectile.penetrate = -1;
+            Projectile.timeLeft = T_CEREMONIA + T_PERSECUCION + 40;
+            Projectile.netImportant = true;
+            Projectile.Opacity = 0f;
+        }
+
+        public override void AI()
+        {
+            try
+            {
+                Projectile.ai[2]++;
+                float t = Edad;
+                Player presa = Main.player[Projectile.owner < Main.maxPlayers
+                    ? Projectile.owner : 0];
+                if (presa == null || !presa.active || presa.dead) { Projectile.Kill(); return; }
+
+                // ══ LA CEREMONIA: nace sobre el dios y SE HINCHA ══
+                if (t < T_CEREMONIA)
+                {
+                    NPC dios = Dios;
+                    if (dios != null && dios.active)
+                        Projectile.Center = Vector2.Lerp(Projectile.Center,
+                            dios.Center + new Vector2(0f, -90f), 0.22f);
+                    else Projectile.velocity *= 0.9f;
+                    Projectile.Opacity = Math.Min(1f, t / 50f);
+                    if (t % 30f == 0f && !Main.dedServ)
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122.WithPitchOffset(-0.6f), Projectile.Center);
+                    return;
+                }
+
+                // ══ LA PERSECUCIÓN LENTA ══
+                Projectile.Opacity = 1f;
+                if (t == T_CEREMONIA && !Main.dedServ)
+                    Terraria.Audio.SoundEngine.PlaySound(
+                        SoundID.Item122.WithPitchOffset(-0.9f).WithVolumeScale(0.9f), Projectile.Center);
+
+                // EL OJO PERSIGUE DESPACIO (se esquiva, no se abandona)
+                Vector2 hacia = presa.Center - Projectile.Center;
+                float dist = hacia.Length();
+                if (dist > 26f)
+                    Projectile.velocity = Vector2.Lerp(Projectile.velocity,
+                        hacia.SafeNormalize(Vector2.UnitY) * LENTITUD, 0.018f);
+                else Projectile.velocity *= 0.94f;
+
+                // EL HAZ gira hacia la presa CON LENTITUD DE SENTENCIA
+                float angActual = Projectile.localAI[0] == 0f
+                    ? (presa.Center - Projectile.Center).ToRotation() : Projectile.localAI[0];
+                float angMeta = (presa.Center - Projectile.Center).ToRotation();
+                float delta = MathHelper.WrapAngle(angMeta - angActual);
+                float giroMax = 0.016f;   // radianes por tick — LENTO
+                angActual += MathHelper.Clamp(delta, -giroMax, giroMax);
+                Projectile.localAI[0] = angActual;
+
+                // EL DAÑO DEL HAZ (la línea bajo la pupila)
+                if (Main.netMode != NetmodeID.MultiplayerClient && t > T_CEREMONIA + 30f)
+                {
+                    Vector2 dir = angActual.ToRotationVector2();
+                    Vector2 rel = presa.Center - Projectile.Center;
+                    float proyeccion = Vector2.Dot(rel, dir);
+                    if (proyeccion > RADIO * 0.6f && proyeccion < LARGO_HAZ)
+                    {
+                        Vector2 punto = Projectile.Center + dir * proyeccion;
+                        if (presa.Center.DistanceSQ(punto) < 30f * 30f)
+                            presa.Hurt(Terraria.DataStructures.PlayerDeathReason.ByProjectile(
+                                presa.whoAmI, Projectile.whoAmI),
+                                (int)(Projectile.damage * 0.35f), 0, false, false, -1, false);
+                    }
+                }
+
+                // LAS CHISPAS DEL HAZ (la firma de la casa — deterministas)
+                if (!Main.dedServ && Main.rand.NextBool(3))
+                {
+                    Vector2 dir = angActual.ToRotationVector2();
+                    Vector2 chispa = Projectile.Center + dir * Main.rand.NextFloat(80f, LARGO_HAZ);
+                    var d = Dust.NewDustPerfect(chispa, DustID.Shadowflame,
+                        new Vector2(0f, -0.8f), 130, new Color(150, 60, 210), 0.9f);
+                    d.noGravity = true;
+                }
+
+                // ══ LA DISOLUCIÓN (el ser se cansa del mundo) ══
+                if (t > T_CEREMONIA + T_PERSECUCION) Projectile.Kill();
+            }
+            catch (System.Exception exRegistro)
+            { global::AethonMod.Content.Systems.RegistroSistema.Fallo("IraSellado", exRegistro); }
+        }
+
+        public override bool PreDraw(ref Color lightColor)
+        {
+            if (Main.netMode == NetmodeID.Server) return false;
+            try
+            {
+                float t = Edad;
+                Vector2 pos = Projectile.Center - Main.screenPosition;
+                float nacer = Math.Min(1f, t / 50f);
+                float hinchazon = t < T_CEREMONIA
+                    ? MathHelper.Lerp(0.35f, 1f, t / T_CEREMONIA)
+                    : 1f;
+
+                Texture2D ojoA = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Projectiles/OjoEterno_Abierto",
+                    ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
+                Texture2D ojoM = ModContent.Request<Texture2D>(
+                    "AethonMod/Content/Projectiles/OjoEterno_Medio",
+                    ReLogic.Content.AssetRequestMode.ImmediateLoad).Value;
+                var glow = VFXCore.SoftGlow;
+
+                // ══ EL HAZ (después de la ceremonia) ══
+                if (t >= T_CEREMONIA)
+                {
+                    float vivo = Math.Min(1f, (t - T_CEREMONIA) / 30f);
+                    float morir = Math.Min(1f, (T_CEREMONIA + T_PERSECUCION - t) / 40f);
+                    float alfaH = vivo * morir * Projectile.Opacity;
+                    Vector2 dir = Projectile.localAI[0].ToRotationVector2();
+                    float largo = LARGO_HAZ;
+                    // EL CUERPO DEL HAZ: tres fundas (la ancha, la media y el núcleo)
+                    for (int capa = 0; capa < 3; capa++)
+                    {
+                        float ancho = capa == 0 ? 46f : capa == 1 ? 26f : 12f;
+                        Color c = capa == 0 ? new Color(120, 46, 190)
+                            : capa == 1 ? new Color(190, 96, 235)
+                            : new Color(255, 240, 250);
+                        if (glow != null)
+                        {
+                            // EL CONDUCTO: el glow estirado a lo largo del haz
+                            Vector2 a = pos + dir * (RADIO * 0.6f);
+                            Vector2 b = pos + dir * largo;
+                            float ang = Projectile.localAI[0];
+                            Vector2 centro = (a + b) * 0.5f;
+                            float largoPx = Vector2.Distance(a, b);
+                            Main.spriteBatch.Draw(glow, centro, null, c * (0.30f * alfaH),
+                                ang, glow.Size() * 0.5f,
+                                new Vector2(largoPx / glow.Width, ancho / glow.Height),
+                                SpriteEffects.None, 0f);
+                        }
+                    }
+                    // LA BOCA DEL HAZ (la estrella que muerde el aire)
+                    VFXCore.CerrarLoteSiAbierto();
+                    Vector2 boca = pos + dir * (RADIO * 0.6f + 26f);
+                    VFXCore.Quad(boca, new Color(255, 240, 250) * (0.75f * alfaH),
+                        new Vector2(34f, 34f), Projectile.localAI[0] + Main.GlobalTimeWrappedHourly);
+                    VFXCore.FlushAdditive();
+                    VFXCore.ReabrirLoteVanilla();
+                }
+
+                // ══ EL OJO COLOSAL ══
+                float escOjo = (RADIO * 2f * hinchazon) / ojoA.Width;
+                // EL HALO (la presencia del ser exterior)
+                if (glow != null)
+                    Main.spriteBatch.Draw(glow, pos, null,
+                        new Color(150, 60, 210) * (0.34f * nacer * Projectile.Opacity), 0f,
+                        glow.Size() * 0.5f, hinchazon * 3.6f, SpriteEffects.None, 0f);
+                // EL PARPADEO LENTO DEL SER (casi humano — más aterrador)
+                int fase = (int)t % 240;
+                Texture2D texOjo = fase > 228 ? ojoM : ojoA;
+                Main.spriteBatch.Draw(texOjo, pos, null,
+                    Color.White * (nacer * Projectile.Opacity), 0f,
+                    texOjo.Size() * 0.5f, escOjo, SpriteEffects.None, 0f);
+
+                // ══ LOS ONCE OJOS CONVERGENTES (la ceremonia: la corona
+                //    del dios se reza hacia el coloso) ══
+                if (t < T_CEREMONIA + 40f)
+                {
+                    float converge = MathHelper.Clamp(t / T_CEREMONIA, 0f, 1f);
+                    float radio = MathHelper.Lerp(230f, 78f, converge);
+                    for (int i = 0; i < 11; i++)
+                    {
+                        float ang = Main.GlobalTimeWrappedHourly * 1.4f + i * (MathHelper.TwoPi / 11f);
+                        Vector2 pc = pos + new Vector2(MathF.Cos(ang), MathF.Sin(ang) * 0.8f) * radio;
+                        Main.spriteBatch.Draw(ojoA, pc, null,
+                            Color.White * (0.65f * nacer * (1f - converge * 0.35f)), 0f,
+                            ojoA.Size() * 0.5f, 0.55f, SpriteEffects.None, 0f);
+                    }
+                }
+            }
+            catch (System.Exception exRegistro)
+            { global::AethonMod.Content.Systems.RegistroSistema.Fallo("IraSellado", exRegistro); }
+            return false;
+        }
+    }
+
+    // ======================================================================
+    //  LA BARRA DEL DIOS SELLADO (la de siempre — el dios cambió de
+    //  tamaño, no de barra)
+    // ======================================================================
     public class BarraAethonSellado : ModBossBar
     {
         public override bool? ModifyInfo(ref BigProgressBarInfo info,
             ref float life, ref float lifeMax, ref float scale, ref float dps)
         {
-            // el NPC enfocado por el juego ES el dios sellado → null
-            // (la lógica básica pinta su vida); si no, NO dibujar
             if (info.npcIndexToAimAt < 0 || info.npcIndexToAimAt >= Main.maxNPCs)
                 return false;
             NPC n = Main.npc[info.npcIndexToAimAt];

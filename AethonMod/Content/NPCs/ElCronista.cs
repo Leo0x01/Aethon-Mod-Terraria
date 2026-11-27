@@ -236,34 +236,25 @@ namespace AethonMod.Content.NPCs
                 if (despertar >= 120)
                     return Language.GetTextValue("Mods.AethonMod.Cronista.ChatUltimaPuerta");
 
-                // ============================================================
-                //  v6.170 — EL NARRADOR DE LAS HISTORIAS (la letra: «cuenta
-                //  con cada cierto despertar una parte del lore, y es
-                //  quien desbloquea finalmente esa parte del lore en el
-                //  libro de informacion»): al ALCANZAR un despertar de
-                //  historia (4/24/44/64/84 — las mismas puertas del
-                //  Compendio), SU siguiente charla NARRA ESA ARCA y
-                //  marca el sello — el libro la abre DESDE ENTONCES.
-                //  La charla de la historia tiene PRIORIDAD: es la historia
-                //  que esperó TODO ese camino para contarse.
-                // ============================================================
                 try
                 {
-                    var spYo = Main.LocalPlayer.GetModPlayer
+                    // v6.180 — LA PRIMERA VEZ DEL CRONISTA (la letra: «hay
+                    // que dejar claro que el lore lo escribió el mismo
+                    // cronista y eso se hace la primera vez que el
+                    // jugador habla con el cronista»): la PRIMERA
+                    // conversación de ESTE portador abre con LA AUTORÍA —
+                    // todo el Compendio que leerá en el libro lo escribió
+                    // ÉL, línea a línea, en el margen. Después de esa
+                    // primera vez, la rotación de siempre. (La narración
+                    // automática de las puertas 4/24/44/64/84 MURIÓ: el
+                    // lore ahora se desbloquea SOLO hablándole — su botón
+                    // LORE.)
+                    var spPrimera = Main.LocalPlayer.GetModPlayer
                         <global::AethonMod.Content.Players.ShardPlayer>();
-                    if (spYo != null)
+                    if (spPrimera != null && !spPrimera.PrimeraVezCronista)
                     {
-                        int[] puertasHistoria = { 4, 24, 44, 64, 84 };
-                        for (int a = puertasHistoria.Length - 1; a >= 0; a--)
-                        {
-                            if (despertar >= puertasHistoria[a] &&
-                                (spYo.LoreDesbloqueado & (1 << a)) == 0)
-                            {
-                                spYo.LoreDesbloqueado |= (1 << a);
-                                return Language.GetTextValue(
-                                    "Mods.AethonMod.Cronista.ChatLore" + (a + 1));
-                            }
-                        }
+                        spPrimera.PrimeraVezCronista = true;
+                        return Language.GetTextValue("Mods.AethonMod.Cronista.LorePrimeraVez");
                     }
                 }
                 catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ElCronista", exRegistro); }
@@ -374,15 +365,95 @@ namespace AethonMod.Content.NPCs
             }
         }
 
+        // ================================================================
+        //  v6.180 — EL BOTÓN LORE (la letra: «el cronista tendra un boton
+        //  de lore en su cuadro de dialogo que servira para hablar con
+        //  el» + «para desbloquearlos todos se deba hablar con el
+        //  cronista cumpliendo el nivel de despertar requerido»): el
+        //  SEGUNDO botón del cuadro es EL LORE — cada charla cuenta un
+        //  PEDACITO de la sección sellada siguiente + SU propio
+        //  pensamiento, y la abre en el libro PARA SIEMPRE. Sin el
+        //  nivel de despertar exigido no hay historia: solo su
+        //  pensamiento y la puerta que falta.
+        // ================================================================
+
+        /// <summary>LOS UMBRALES DEL COMPENDIO (la escalera que ÉL
+        /// escribió: una puerta por sección, del 4 al 110). El índice
+        /// 0 es EL COMPENDIO DEL ETERNO — el único que NO está
+        /// sellado (la letra: «esto es lo unico que no estara
+        /// bloqueado por el Despertar ni por el cronista»).</summary>
+        public static readonly int[] UmbralesLore =
+        {
+            0,      // [0] El Compendio del Eterno — LIBRE
+            4,      // [1] La Página Única
+            8,      // [2] El Hambre sin Principio
+            12,     // [3] El Devorador de Finales
+            16,     // [4] El Autosellado: el Hambre Hecha Paciencia
+            20,     // [5] La Llegada y la Marca
+            26,     // [6] El Sistema del Pacto
+            32,     // [7] El Portador: Lo Único Indevorable
+            38,     // [8] Las Dos Escalas: el Nivel y el Despertar
+            44,     // [9] El Ciclo del Portador
+            52,     // [10] Los Umbrales: la Ira y la Forma
+            60,     // [11] Los Once Ojos
+            68,     // [12] La Respuesta
+            76,     // [13] Las Oleadas de Hambre
+            84,     // [14] La Esencia del Eterno
+            90,     // [15] El Canon Asentado
+            96,     // [16] El Cronista: el que Escribe en el Margen
+            102,    // [17] La Conciencia de Otros Mundos
+            110,    // [18] El Borrador Infinito
+        };
+
         public override void SetChatButtons(ref string button, ref string button2)
         {
             button = Language.GetTextValue("LegacyInterface.28");   // "Tienda"
+            // v6.180 — EL BOTÓN LORE: el segundo botón cuenta y ABRE el
+            // Compendio sellado.
+            button2 = Language.GetTextValue("Mods.AethonMod.Cronista.LoreBoton");
         }
 
         public override void OnChatButtonClicked(bool firstButton, ref string shopName)
         {
             if (firstButton)
+            {
                 shopName = "Cronista";
+                return;
+            }
+            // EL BOTÓN LORE: la charla del pedacito + el pensamiento —
+            // y la sección se ABRE en el libro.
+            try
+            {
+                Player yo = Main.LocalPlayer;
+                if (yo == null || !yo.active) return;
+                var sp = yo.GetModPlayer<global::AethonMod.Content.Players.ShardPlayer>();
+                if (sp == null) return;
+                int despertar = global::AethonMod.Content.Systems.DespertarGrimorio.NivelDe(yo);
+                for (int i = 1; i < UmbralesLore.Length; i++)
+                {
+                    if ((sp.LoreDesbloqueado & (1 << (i - 1))) != 0) continue;   // ya abierta
+                    if (despertar >= UmbralesLore[i])
+                    {
+                        // LA SECCIÓN SE ABRE — la charla cuenta SU pedacito
+                        // + el pensamiento del que la escribió
+                        sp.LoreDesbloqueado |= 1 << (i - 1);
+                        Terraria.Audio.SoundEngine.PlaySound(SoundID.Item24, NPC.Center);
+                        Main.npcChatText = Language.GetTextValue(
+                            "Mods.AethonMod.Cronista.LoreHabla" + i);
+                    }
+                    else
+                    {
+                        // EL DESPERTAR NO ALCANZA: su pensamiento dice la
+                        // puerta exacta que falta
+                        Main.npcChatText = Language.GetTextValue(
+                            "Mods.AethonMod.Cronista.LoreTemedor", UmbralesLore[i]);
+                    }
+                    return;
+                }
+                // TODO contado: el cierre del archivo
+                Main.npcChatText = Language.GetTextValue("Mods.AethonMod.Cronista.LoreCompleto");
+            }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("ElCronista", exRegistro); }
         }
 
         // ================================================================

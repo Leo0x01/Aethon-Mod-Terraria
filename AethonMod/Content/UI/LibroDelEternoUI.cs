@@ -702,34 +702,41 @@ namespace AethonMod.Content.UI
                         // 0/5/12/20/30/38/45/55/65/75/85/95/110). El
                         // Compendio viejo queda debajo como EL ARCHIVO DE
                         // LA CASA.
-                        new[] { "SecLore", "LoreEpigrafe0", "LoreIntro" },
-                        new[] { "CodexPrologoTit", "CodexPrologoP0", "CodexPrologoP1", "CodexPrologoP2", "CodexPrologoP3" },
-                        new[] { "CodexITit", "CodexIP0", "CodexIP1", "CodexIP2", "CodexIP3" },
-                        new[] { "CodexIITit", "CodexIIP0", "CodexIIP1", "CodexIIP2", "CodexIIP3" },
-                        new[] { "CodexIIITit", "CodexIIIP0", "CodexIIIP1", "CodexIIIP2", "CodexIIIP3" },
-                        new[] { "CodexIVTit", "CodexIVP0", "CodexIVP1", "CodexIVP2", "CodexIVP3", "CodexIVP4" },
-                        new[] { "CodexVTit", "CodexVP0", "CodexVP1", "CodexVP2", "CodexVP3" },
-                        new[] { "CodexVITit", "CodexVIP0", "CodexVIP1", "CodexVIP2", "CodexVIP3" },
-                        new[] { "CodexVIITit", "CodexVIIP0", "CodexVIIP1", "CodexVIIP2", "CodexVIIP3", "CodexVIIP4", "CodexVIIP5", "CodexVIIP6", "CodexVIIP7", "CodexVIIP8", "CodexVIIP9", "CodexVIIP10", "CodexVIIP11", "CodexVIIP12" },
-                        new[] { "CodexVIIITit", "CodexVIIIP0", "CodexVIIIP1", "CodexVIIIP2", "CodexVIIIP3" },
-                        new[] { "CodexIXTit", "CodexIXP0", "CodexIXP1", "CodexIXP2", "CodexIXP3" },
-                        new[] { "CodexXTit", "CodexXP0", "CodexXP1", "CodexXP2", "CodexXP3", "CodexXP4", "CodexXP5" },
-                        new[] { "CodexXITit", "CodexXIP0", "CodexXIP1", "CodexXIP2", "CodexXIP3" },
-                        new[] { "CodexEpilogoTit", "CodexEpilogoP0", "CodexEpilogoP1", "CodexEpilogoP2", "CodexEpilogoP3" },
-                        // EL ARCHIVO VIEJO DE LA CASA (el Compendio de
-                        // siempre, bajo el Codex nuevo).
+                        // v6.180 — EL COMPENDIO ENTRELAZADO (la letra:
+                        // la lista EXACTA del usuario, en SU orden): el
+                        // Codex y el archivo viejo de la casa TEJIDOS en
+                        // UNA sola obra — cada tres capítulos del Codex
+                        // vive una historia del archivo (la posición 4 ·
+                        // 7 · 10 · 13 · 16). TODO sellado por el
+                        // Despertar Y las palabras del Cronista — menos
+                        // EL COMPENDIO DEL ETERNO ([0], la intro: la
+                        // única libre).
+                        new[] { "SecLore", "LoreEpigrafe0", "LoreIntro" },                          // [0] LIBRE
+                        new[] { "CodexPrologoTit", "CodexPrologoP0", "CodexPrologoP1", "CodexPrologoP2", "CodexPrologoP3" },   // [1] La Página Única
+                        new[] { "CodexITit", "CodexIP0", "CodexIP1", "CodexIP2", "CodexIP3" },       // [2] El Hambre sin Principio
                         new[] { "LoreSecI", "LoreEpigrafe1", "LoreI_Loquedevora",
-                                "LoreI_LaCuarentenadeTer", "LoreI_ElSellado" },
+                                "LoreI_LaCuarentenadeTer", "LoreI_ElSellado" },                     // [3] El Devorador de Finales
+                        new[] { "CodexIITit", "CodexIIP0", "CodexIIP1", "CodexIIP2", "CodexIIP3" },  // [4] El Autosellado
+                        new[] { "CodexIIITit", "CodexIIIP0", "CodexIIIP1", "CodexIIIP2", "CodexIIIP3" }, // [5] La Llegada y la Marca
                         new[] { "LoreSecII", "LoreEpigrafe2", "LoreII_ElNivel",
-                                "LoreII_ElDespertar", "LoreII_Doshambresdistinta" },
+                                "LoreII_ElDespertar", "LoreII_Doshambresdistinta" },                // [6] El Sistema del Pacto
+                        new[] { "CodexIVTit", "CodexIVP0", "CodexIVP1", "CodexIVP2", "CodexIVP3", "CodexIVP4" },  // [7] El Portador
+                        new[] { "CodexVTit", "CodexVP0", "CodexVP1", "CodexVP2", "CodexVP3" },       // [8] Las Dos Escalas
                         new[] { "LoreSecIII", "LoreEpigrafe3", "LoreIII_LaLlegada",
-                                "LoreIII_ElGrimoriodelEter", "LoreIII_ElAltar" },
+                                "LoreIII_ElGrimoriodelEter", "LoreIII_ElAltar" },                    // [9] El Ciclo del Portador
+                        new[] { "CodexVITit", "CodexVIP0", "CodexVIP1", "CodexVIP2", "CodexVIP3" },   // [10] Los Umbrales
+                        new[] { "CodexVIITit", "CodexVIIP0", "CodexVIIP1", "CodexVIIP2", "CodexVIIP3", "CodexVIIP4", "CodexVIIP5", "CodexVIIP6", "CodexVIIP7", "CodexVIIP8", "CodexVIIP9", "CodexVIIP10", "CodexVIIP11", "CodexVIIP12" }, // [11] Los Once Ojos
                         new[] { "LoreSecIV", "LoreIV_Laimposibilidaddel",
-                                "LoreIV_Laentidadinmortal", "LoreIV_Elaburrimientoyla" },
+                                "LoreIV_Laentidadinmortal", "LoreIV_Elaburrimientoyla" },            // [12] La Respuesta
+                        new[] { "CodexVIIITit", "CodexVIIIP0", "CodexVIIIP1", "CodexVIIIP2", "CodexVIIIP3" },  // [13] Las Oleadas de Hambre
+                        new[] { "CodexIXTit", "CodexIXP0", "CodexIXP1", "CodexIXP2", "CodexIXP3" },   // [14] La Esencia del Eterno
                         new[] { "LoreSecV", "LoreV_LaIra",
                                 "LoreV_ElPilar", "LoreV_ElSellado",
                                 "LoreV_Loscompaneros", "LoreV_Lassombras",
-                                "LoreV_Larespuestafinal" },
+                                "LoreV_Larespuestafinal" },                                           // [15] El Canon Asentado
+                        new[] { "CodexXTit", "CodexXP0", "CodexXP1", "CodexXP2", "CodexXP3", "CodexXP4", "CodexXP5" }, // [16] El Cronista
+                        new[] { "CodexXITit", "CodexXIP0", "CodexXIP1", "CodexXIP2", "CodexXIP3" },   // [17] La Conciencia de Otros Mundos
+                        new[] { "CodexEpilogoTit", "CodexEpilogoP0", "CodexEpilogoP1", "CodexEpilogoP2", "CodexEpilogoP3" }, // [18] El Borrador Infinito
                     },
                 };
 
@@ -941,24 +948,7 @@ namespace AethonMod.Content.UI
         /// Los umbrales por índice de sección del lore (II+): el canon
         /// SE GANA con el despertar.</summary>
         private static readonly int[] UmbralLore =
-        {
-            // v6.161 — LAS 19 ENTRADAS EXACTAS (la autopsia: la v6.160
-            // dejó 20 entradas para 19 secciones y el 110 huérfano caía
-            // sobre LoreI — EL ARCHIVO VIEJO DE LA CASA, que debe estar
-            // SIEMPRE abierto, quedaba sellado al despertar 110). La
-            // escalera NUEVA, pedacito a pedacito como pide la letra:
-            // [0] SecLore: SIEMPRE · [1] Prólogo: SIEMPRE · capítulos
-            // I..XI: 2/12/22/32/42/52/62/72/82/92/102 (una puerta de
-            // despertar por capítulo, del 2 al 102) · [13] Epílogo:
-            // 118 (al borde del NivelMax — el borrador infinito se lee
-            // al final del camino) · [14..18] el archivo viejo:
-            // v6.170 — TAMBIÉN SE GANA (la letra: «todo el lore del
-            // mod debe estar sellado hasta llegar a cierto nivel de
-            // despertar»): 4/24/44/64/84 — el Compendio de la casa
-            // abre sus cinco historias a lo largo del camino.
-            0, 0, 2, 12, 22, 32, 42, 52, 62, 72, 82, 92, 102, 118,
-            4, 24, 44, 64, 84,
-        };
+            global::AethonMod.Content.NPCs.ElCronista.UmbralesLore;
 
         /// <summary>El Despertar del portador local (para el lore).</summary>
         private static int DespertarLocal()
@@ -1013,14 +1003,19 @@ namespace AethonMod.Content.UI
                 string titulo = T(sec[0]);
                 int idxSec = System.Array.IndexOf(secciones, sec);
                 bool seccionAbierta = true;
-                if (!esIzq && idxSec >= 2)
+                // v6.180 — TODO EL COMPENDIO ESTÁ SELLADO (la letra:
+                // «todo el lore debe estar oculto detras del Despertar y
+                // El Cronista […] esto es lo unico que no estara
+                // bloqueado» — solo [0], la intro, queda LIBRE): cada
+                // sección 1..18 pide SU puerta de Despertar Y SU bit
+                // del Cronista (el botón LORE de su cuadro lo abre).
+                if (!esIzq && idxSec >= 1)
                 {
                     int umbral = idxSec < UmbralLore.Length ? UmbralLore[idxSec] : 0;
                     seccionAbierta = despertarAhora >= umbral;
-                    // v6.171 — LAS HISTORIAS (14..18) además piden SU bit
-                    if (seccionAbierta && idxSec >= 14 && idxSec <= 18)
+                    if (seccionAbierta)
                     {
-                        int bitHistoria = 1 << (idxSec - 14);
+                        int bitHistoria = 1 << (idxSec - 1);
                         seccionAbierta = (selloCronista & bitHistoria) != 0;
                     }
                 }
@@ -1057,18 +1052,13 @@ namespace AethonMod.Content.UI
                         cy = LineaLibro(sb, T(sec[1]), xizq, cy, maxAncho,
                             Tinta, recorte, pagina);
                     int umbralSello = idxSec < UmbralLore.Length ? UmbralLore[idxSec] : 0;
-                    // v6.171 — EL SELLO DE LAS HISTORIAS DICE LA
-                    // VERDAD (la letra: «yo lo llamaria historias o
-                    // escrituras o algo asi»): el Cronista narra y el
-                    // libro abre — el resto solo cuenta la puerta de
-                    // despertar de siempre.
-                    bool esHistoria = idxSec >= 14 && idxSec <= 18;
+                    // v6.180 — EL SELLO DICE LAS DOS LLAVES (la puerta
+                    // de Despertar Y las palabras del Cronista — el
+                    // autor que las cuenta en su cuadro):
                     bool despertarYa = despertarAhora >= umbralSello;
-                    string sello = esHistoria
-                        ? (despertarYa
-                            ? "· · · ✦ el Cronista aún no contó esta historia — búscalo ✦ · · ·"
-                            : "· · · ✦ sellada hasta el Despertar " + umbralSello + " — y las palabras del Cronista ✦ · · ·")
-                        : "· · · ✦ sellado · se revela al Despertar " + umbralSello + " ✦ · · ·";
+                    string sello = despertarYa
+                        ? "· · · ✦ el Cronista aún no contó esta parte — búscalo y pídele el lore ✦ · · ·"
+                        : "· · · ✦ sellada hasta el Despertar " + umbralSello + " — y las palabras del Cronista ✦ · · ·";
                     cy = LineaLibro(sb, sello, xizq, cy, maxAncho,
                         new Color(120, 104, 82), recorte, pagina);
                 }
@@ -1253,7 +1243,7 @@ namespace AethonMod.Content.UI
         private static bool Cabe(float cy, float alto, Rectangle rec) => cy + alto <= rec.Bottom;
 
         /// <summary>El título de sección cosido (centrado, con sus filetes).</summary>
-        private static void Titulo(SpriteBatch sb, string t, Rectangle pag, float cy, out float cyOut, float esc = 1.1f)
+        private static void Titulo(SpriteBatch sb, string t, Rectangle pag, float cy, out float cyOut, float esc = 0.95f)
         {
             var fuente = FontAssets.MouseText.Value;
             t = t ?? "";
@@ -1282,7 +1272,14 @@ namespace AethonMod.Content.UI
             // desbordan»): escala base 1.05 (antes 0.88) y el texto se
             // mide CON margen de halo (el contorno vive FUERA del área
             // medida) — nada desborda jamás y el botón se lee.
-            float esc = LibroLineas.EscalaQueCabe(t ?? "", 1.2f, 202f);
+            // v6.180 — EL BOTÓN VUELVE A SU SITIO (la letra: «todos los
+            // textos en la ventana del atlar son demasiado grandes» +
+            // «haz que el textos en los botonoes sea mas pequeño para
+            // que quepa completo en el boton»): base 1.2→0.95 y el PISO
+            // de la v6.179 (1.0, que FORZABA el texto fuera del botón)
+            // muere — el texto se ENCOGE hasta caber COMPLETO (piso
+            // 0.62) y la elipsis solo toca lo imposible.
+            float esc = LibroLineas.EscalaQueCabe(t ?? "", 0.95f, 202f);
             Rectangle b = new Rectangle((int)(pag.X + pag.Width / 2f - 113f), (int)cy, 226, 46);
             bool vivo = Cabe(cy, 46f, rec);
             geo = vivo ? b : Rectangle.Empty;
@@ -1295,13 +1292,16 @@ namespace AethonMod.Content.UI
             esc = LibroLineas.EscalaQueCabe(t ?? "", esc, 202f);
             // v6.178 — LA GARANTÍA ABSOLUTA (misma letra, misma cura):
             //     el piso de legibilidad + la elipsis — NADA desborda.
+            // v6.180 — EL TEXTO COMPLETO PRIMERO (la letra: «que quepa
+            // completo en el boton»): el piso baja 1.0→0.62 — el texto
+            // entero cabe ANTES de que la elipsis lo toque.
             string txtB = t ?? "";
-            while (esc < 1.0f && txtB.Length > 4)
+            while (esc < 0.62f && txtB.Length > 4)
             {
                 txtB = txtB.Substring(0, Math.Max(4, txtB.Length - 2)) + "…";
-                esc = LibroLineas.EscalaQueCabe(txtB, 1.2f, 202f);
+                esc = LibroLineas.EscalaQueCabe(txtB, 0.95f, 202f);
             }
-            esc = Math.Max(esc, 1.0f);
+            esc = Math.Max(esc, 0.62f);
             LibroLineas.Texto(sb, txtB, new Vector2(b.Center.X, b.Center.Y),
                 apagado ? TintaApagado : Tinta, esc, 0.5f, 0.5f);
             if (hov && clicNuevo) alClic?.Invoke();
@@ -1336,10 +1336,21 @@ namespace AethonMod.Content.UI
             LibroMarco.Marco(sb, slot, hoverSlot ? TintaVioleta : TintaVioleta * 0.45f);
             if (hayArma)
             {
-                Texture2D tex = TextureAssets.Item[arma.type].Value;
-                float esc = Math.Min(44f / tex.Width, 44f / tex.Height);
-                sb.Draw(tex, slot.Center.ToVector2(), null, Color.White, 0f,
-                    tex.Size() * 0.5f, esc, SpriteEffects.None, 0f);
+                // v6.180 — EL ICONO CARGADO DE VERDAD (la causa raíz de los
+                // slots en blanco, cazada en el decompile: las texturas de
+                // los ítems VANILLA son LAZY — TextureAssets.Item[tipo]
+                // SIN Main.GetItemDrawFrame devuelve un PLACEHOLDER 1×1
+                // TRANSPARENTE: el icono se "dibuja"... y no se ve NADA.
+                // El inventario llama a LoadItem (via GetItemDrawFrame) y
+                // por eso los ítems vivos SÍ se ven — y los restaurados
+                // del trío (que solo viven en las ranuras) NUNCA se
+                // dibujaban. AHORA TODO icono pasa por el camino del
+                // inventario: la textura SE CARGA y el frame animado se
+                // respeta.)
+                Main.GetItemDrawFrame(arma.type, out Texture2D tex, out Rectangle frame);
+                float esc = Math.Min(44f / frame.Width, 44f / frame.Height);
+                sb.Draw(tex, slot.Center.ToVector2(), frame, Color.White, 0f,
+                    frame.Size() * 0.5f, esc, SpriteEffects.None, 0f);
                 if (arma.stack > 1)
                     LibroLineas.Texto(sb, arma.stack.ToString(),
                         new Vector2(slot.Right - 6f, slot.Bottom - 8f), Tinta, 1.0f, 1f, 0.85f);
@@ -1355,10 +1366,10 @@ namespace AethonMod.Content.UI
                 else AltarOfrendasUI.ClicEnSlot();                           // dejar / retirar / devorar
             }
             cy += 58f;
-            cy = Linea(At("EtiquetaArma"), cy, 1.1f, Tinta);
-            cy = Linea(At("FiltroArma"), cy, 1.0f, TintaApagado);
+            cy = Linea(At("EtiquetaArma"), cy, 0.95f, Tinta);
+            cy = Linea(At("FiltroArma"), cy, 0.85f, TintaApagado);
             if (AltarOfrendasUI.OfrendaPrestada && Cabe(cy, 44f, rec))
-                cy = Linea(At("OfrendaPrestada"), cy, 1.0f, TintaOro);
+                cy = Linea(At("OfrendaPrestada"), cy, 0.85f, TintaOro);
 
             // ── EL SELLO (el precio A LA VISTA + consagrar) ──
             cy += 6f;
@@ -1369,21 +1380,21 @@ namespace AethonMod.Content.UI
                 {
                     cy = Linea(Language.GetTextValue(A + "DevoraLinea", arma.stack,
                         global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas,
-                        global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta), cy, 1.05f, Tinta);
+                        global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta), cy, 0.92f, Tinta);
                 }
                 else
                 {
                     int coste = global::AethonMod.Content.Globals.CorruptoGlobalItem.CosteCorrupcion(arma);
                     int llevadas = global::AethonMod.Content.Globals.CorruptoGlobalItem
                         .EsenciasEnLaBolsa(Main.LocalPlayer);
-                    cy = Linea(Language.GetTextValue(A + "SelloCuesta", coste), cy, 1.05f, Tinta);
-                    cy = Linea(Language.GetTextValue(A + "SelloLlevas", llevadas), cy, 1.05f, TintaApagado);
+                    cy = Linea(Language.GetTextValue(A + "SelloCuesta", coste), cy, 0.92f, Tinta);
+                    cy = Linea(Language.GetTextValue(A + "SelloLlevas", llevadas), cy, 0.92f, TintaApagado);
                     if (llevadas < coste)
-                        cy = Linea(Language.GetTextValue(A + "SelloFalta", coste - llevadas), cy, 1.05f, TintaRojo);
+                        cy = Linea(Language.GetTextValue(A + "SelloFalta", coste - llevadas), cy, 0.92f, TintaRojo);
                 }
             }
             else
-                cy = Linea(At("SelloSinOfrenda"), cy, 1.05f, TintaApagado);
+                cy = Linea(At("SelloSinOfrenda"), cy, 0.92f, TintaApagado);
             float cyBoton = cy + 4f;
             cy = Boton(sb, pag, rec, cyBoton, At("BotonConsagrar"), TintaVioleta, out GeoConsagrar, clicNuevo,
                 () => AltarOfrendasUI.ClicEnConsagrar(), apagado: !hayArma);
@@ -1395,36 +1406,42 @@ namespace AethonMod.Content.UI
                 // no el botón de abajo — la ventana nace justo bajo el hueco
                 ancla = new Rectangle(GeoSlot.X, GeoSlot.Bottom + 2, GeoSlot.Width, 1);
 
-            // ── GANA + CÓMO CONSEGUIR ESENCIAS ──
+            // ── EL MUNDO INTERIOR (v6.180 — SUBE DE PUESTO: la letra:
+            //     «no veo el boton de ir al mundo interior y el altar
+            //     dice que ya esta activo» — la sección vivía AL FINAL
+            //     de la página y los textos grandes de la v6.179 la
+            //     EMPUJARON fuera del papel: el botón ni se dibujaba.
+            //     Ahora vive JUSTO DESPUÉS del botón Consagrar, donde
+            //     SIEMPRE cabe — y el botón, una vez viva la puerta,
+            //     jamás vuelve a desaparecer) ──
+            cy += 6f;
+            Titulo(sb, At("MundoTitulo"), pag, cy, out cy);
+            if (global::AethonMod.Content.Systems.SubmundoGrimorio.PuertaAbierta)
+                cy = Boton(sb, pag, rec, cy, At("MundoPuerta"), TintaOro, out GeoPuerta, clicNuevo,
+                    () => AltarOfrendasUI.ClicEnPuerta());
+            else
+                cy = Linea(Language.GetTextValue(A + "MundoProgreso",
+                    global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas,
+                    global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta), cy, 0.92f, Tinta);
+
+            // ── GANA + CÓMO CONSEGUIR ESENCIAS (el tutorial del final:
+            //     si el papel se acaba, estas secciones son las que
+            //     ceden — la puerta NUNCA) ──
             cy += 4f;
             if (Cabe(cy, 120f, rec))
             {
                 Titulo(sb, At("GanaTitulo"), pag, cy, out cy);
                 cy = Linea(Language.GetTextValue(A + "GanaEsencias",
-                    global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta), cy, 1.05f, Tinta);
-                cy = Linea(At("GanaConsagrada"), cy, 1.05f, Tinta);
+                    global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta), cy, 0.92f, Tinta);
+                cy = Linea(At("GanaConsagrada"), cy, 0.92f, Tinta);
                 cy += 4f;
             }
             if (Cabe(cy, 120f, rec))
             {
                 Titulo(sb, At("ComoTitulo"), pag, cy, out cy);
-                cy = Linea(At("ComoCriaturas"), cy, 1.0f, TintaApagado);
-                cy = Linea(At("ComoJefes"), cy, 1.0f, TintaApagado);
-                cy = Linea(At("ComoOleadas"), cy, 1.0f, TintaApagado);
-            }
-
-            // ── EL MUNDO INTERIOR (la puerta cuando las mil están) ──
-            cy += 6f;
-            if (Cabe(cy, 60f, rec))
-            {
-                Titulo(sb, At("MundoTitulo"), pag, cy, out cy);
-                if (global::AethonMod.Content.Systems.SubmundoGrimorio.PuertaAbierta)
-                    cy = Boton(sb, pag, rec, cy, At("MundoPuerta"), TintaOro, out GeoPuerta, clicNuevo,
-                        () => AltarOfrendasUI.ClicEnPuerta());
-                else
-                    cy = Linea(Language.GetTextValue(A + "MundoProgreso",
-                        global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasConsagradas,
-                        global::AethonMod.Content.Systems.SubmundoGrimorio.EsenciasPuerta), cy, 1.05f, Tinta);
+                cy = Linea(At("ComoCriaturas"), cy, 0.84f, TintaApagado);
+                cy = Linea(At("ComoJefes"), cy, 0.84f, TintaApagado);
+                cy = Linea(At("ComoOleadas"), cy, 0.84f, TintaApagado);
             }
 
             // ── EL SELECTOR DE LA OFRENDA: nace DEBAJO del botón CONSAGRAR ──
@@ -1480,10 +1497,20 @@ namespace AethonMod.Content.UI
                     //     más grande y centrado).
                     try
                     {
-                        Texture2D tex = TextureAssets.Item[ra.type].Value;
-                        float esc = Math.Min(48f / tex.Width, 48f / tex.Height);
-                        sb.Draw(tex, s.Center.ToVector2(), null, Color.White, 0f,
-                            tex.Size() * 0.5f, esc, SpriteEffects.None, 0f);
+                        // v6.180 — EL ICONO CARGADO DE VERDAD (la autopsia
+                        // del fantasma eterno: «el slot del trio siempre
+                        // esta en blanco, tienen las armas pero no salen
+                        // sus iconos ESE SIEMPRE HA SIDO EL PROBLEMA»):
+                        // los ítems de las ranuras SOLO viven aquí — su
+                        // textura VANILLA jamás fue pedida al motor y
+                        // TextureAssets.Item[...] daba el PLACEHOLDER
+                        // transparente. Main.GetItemDrawFrame (el camino
+                        // del inventario) CARGA la textura y respeta su
+                        // frame animado — el icono NACE de verdad.
+                        Main.GetItemDrawFrame(ra.type, out Texture2D tex, out Rectangle frame);
+                        float esc = Math.Min(48f / frame.Width, 48f / frame.Height);
+                        sb.Draw(tex, s.Center.ToVector2(), frame, Color.White, 0f,
+                            frame.Size() * 0.5f, esc, SpriteEffects.None, 0f);
                     }
                     catch (System.Exception exIcono)
                     { global::AethonMod.Content.Systems.RegistroSistema.Fallo("LibroTrioIcono", exIcono); }
@@ -1818,7 +1845,7 @@ namespace AethonMod.Content.UI
             string txt = t ?? "";
             // v6.177 — EL BOTÓN GRANDE (el pilar con la misma cura del
             // altar: escala 1.05 · medido con margen de halo · 46 de alto)
-            float esc = LibroLineas.EscalaQueCabe(txt, 1.2f, 202f);
+            float esc = LibroLineas.EscalaQueCabe(txt, 0.95f, 202f);
             Rectangle b = new Rectangle((int)(pag.X + pag.Width / 2f - 113f), (int)cy, 226, 46);
             bool vivo = cy + 46f <= rec.Bottom;
             geo = vivo ? b : Rectangle.Empty;
@@ -1837,12 +1864,16 @@ namespace AethonMod.Content.UI
             //     legibilidad (0.72) el texto no cabe, se RECORTA con
             //     elipsis hasta que quepa. NADA desborda NUNCA — ni con
             //     la fuente mutando, ni con el texto más largo del mundo.
-            while (esc < 1.0f && txt.Length > 4)
+            // v6.180 — EL TEXTO COMPLETO PRIMERO (la letra: «que quepa
+            // completo en el boton»): el piso baja 1.0→0.62 — el texto
+            // entero cabe antes de la elipsis (el mismo contrato del
+            // botón del altar).
+            while (esc < 0.62f && txt.Length > 4)
             {
                 txt = txt.Substring(0, Math.Max(4, txt.Length - 2)) + "…";
-                esc = LibroLineas.EscalaQueCabe(txt, 1.2f, 202f);
+                esc = LibroLineas.EscalaQueCabe(txt, 0.95f, 202f);
             }
-            esc = Math.Max(esc, 1.0f);
+            esc = Math.Max(esc, 0.62f);
             LibroLineas.Texto(sb, txt, new Vector2(b.Center.X, b.Center.Y),
                 apagado ? TintaApagado : Tinta, esc, 0.5f, 0.5f);
             if (hov && clicNuevo) alClic?.Invoke();

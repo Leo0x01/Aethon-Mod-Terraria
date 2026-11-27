@@ -454,11 +454,15 @@ namespace AethonMod.Content.UI
                 {
                     try
                     {
-                        Texture2D tex = TextureAssets.Item[armas[k]].Value;
-                        if (tex == null) continue;
-                        sb.Draw(tex, new Vector2(sx + 9f, fy + 14f), null,
-                            Color.White * 0.92f, 0f, tex.Size() * 0.5f,
-                            MathHelper.Min(18f / tex.Width, 18f / tex.Height),
+                        // v6.180 — EL ICONO CARGADO DE VERDAD (la textura
+                        // vanilla es LAZY: GetItemDrawFrame la carga —
+                        // el camino del inventario, el mismo de las
+                        // ranuras del trío).
+                        Main.GetItemDrawFrame(armas[k], out Texture2D tex, out Rectangle fr);
+                        if (tex == null || fr.Width <= 0) continue;
+                        sb.Draw(tex, new Vector2(sx + 9f, fy + 14f), fr,
+                            Color.White * 0.92f, 0f, fr.Size() * 0.5f,
+                            MathHelper.Min(18f / fr.Width, 18f / fr.Height),
                             SpriteEffects.None, 0f);
                         sx += 20f;
                         mostrados++;

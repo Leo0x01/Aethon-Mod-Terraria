@@ -588,7 +588,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 float techo = 0.94f * 2.02f * rCoronaTecho;   // el interior del anillo íntimo
                 float radioCuna = MathHelper.Lerp(28f, techo, prog)
                     * (1f - 0.55f * contraccion);
-                Vector2 nubeScr = posPantalla;   // EL PUNTO DE NACIMIENTO (donde el haz nacerá)
+                Vector2 nubeScr = posPantalla;   // EL PUNTO DE NACIMIENTO (dondel haz nacerá)
                 // v6.89 — LA MASA DEL LLENADO: los puffs escalan con el
                 //     radio (una nube de 130 px lleva el TRIPLE de masa
                 //     que una de 40) — el interior HIERVE de bruma.
@@ -607,7 +607,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                     alpha: 0.26f + 0.34f * prog + 0.10f * contraccion);
                 // v6.76 — EL VIENTRE DE LA BRUMA (v6.89: ahora ×0,50 —
                 //     el DISCO entero cubierto): la capa interior MÁS
-                //     BLANCA en el punto exacto donde el haz nacerá.
+                //     BLANCA en el punto exacto dondel haz nacerá.
                 BrumaFX.Cloud(nubeScr, radioCuna * 0.50f, new Color(226, 218, 250),
                     semilla + 57, time * 1.25f, puffsVientre,
                     alpha: 0.24f + 0.32f * prog + 0.12f * contraccion);
@@ -681,7 +681,7 @@ namespace AethonMod.Content.Projectiles.Definitivas
                 //     LUMINOSO del ritual — núcleo blanco incandescente
                 //     + manto cálido + halo blanco-violeta, LATIENDO
                 //     (~1 Hz) — creciendo con la carga (6→15 px) en el
-                //     punto EXACTO donde el haz nacerá: la fuente de
+                //     punto EXACTO dondel haz nacerá: la fuente de
                 //     luz que la ceremonia gesta. ===
                 {
                     float lateE = 0.72f + 0.28f * MathF.Sin(time * 6.4f);

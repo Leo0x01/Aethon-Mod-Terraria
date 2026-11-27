@@ -5,7 +5,7 @@
 Con el parser canónico parse_tmod.py: identidad, EOF exacto, blobs, las
 FIRMAS VIVAS de la versión (la cura de los crashes del lote · el gusano
 sellado entero + la barra del cuerpo · el congelado de la aspiradora ·
-la aspiradora reescrita · las tijeras del libro · el arma del Cíclope ·
+la aspiradora reescrita · las tijeras del libro · el arma del plano ·
 la bruma de la base · el azar sembrado), las muertas ausentes, hjson ×3,
 la PARIDAD PERFECTA de claves (1849=1849) y la PURGA del en-US.
 """
@@ -69,10 +69,10 @@ firmas = [
     "HablarAlPortador",           # el asco EN LA MENTE
     # LAS TIJERAS DEL LIBRO (nada desborda el papel)
     "Tijeras",                    # el rasterizador con recorte
-    # EL ARMA DEL CÍCLOPE
-    "ProyeccionDelCiclope",       # el ítem
-    "ProyeccionCiclopeRayo",      # el rayo del ojo
-    "CiclopeEntregado",           # la entrega directa
+    # EL ARMA DEL HAZ
+    "ProyeccionDelel plano",       # el ítem
+    "Proyeccionel planoRayo",      # el rayo del ojo
+    "el planoEntregado",           # la entrega directa
     # LA BRUMA DE LA BASE de los tentáculos
     "BrumaFX",                    # (ya vivía — la base la usa)
     # EL AZAR SEMBRADO (R22)
@@ -80,7 +80,7 @@ firmas = [
     # LO QUE VIVÍA (no-regresión)
     "RegistroSistema", "MotorDeCombate", "DispararVolea",
     "JefeInteriorVoleaProjectile", "ContarSombras",
-    "SakugaDelCielo", "CiclopeProyectado", "EcoProyectado",
+    "SakugaDelCielo", "el haz concentrado", "EcoProyectado",
     "FaroEntregado", "GeoTrio",
 ]
 todas_vivas = True
@@ -101,8 +101,8 @@ print(f"  png LineaDelCielo en el .tmod: {len(png_viejo)} (deben ser 0)")
 todas_muertas = todas_muertas and len(png_viejo) == 0
 
 # === LOS SPRITES NUEVOS DENTRO ===
-sprites = ["CiclopeProyectado.rawimg", "EcoProyectado.rawimg",
-           "ProyeccionDelCiclope.rawimg", "FaroDelEclipse.rawimg"]
+sprites = ["el haz concentrado.rawimg", "EcoProyectado.rawimg",
+           "ProyeccionDelel plano.rawimg", "FaroDelEclipse.rawimg"]
 for s in sprites:
     ok = any(k.endswith(s) for k in bl)
     print(f"  sprite {s}: {'DENTRO' if ok else 'FALTA (MAL)'}")
@@ -112,13 +112,13 @@ for s in sprites:
 hjsons = sorted(k for k in bl if k.endswith(".hjson"))
 print(f"hjson: {len(hjsons)} {hjsons}")
 claves_nuevas = [b"Fallo:", b"Asco:", b"Grito:", b"FaroEntregado",
-                 b"CiclopeEntregado", b"CiclopeProyectado", b"EcoProyectado",
-                 b"ProyeccionDelCiclope", b"BolsaMaestra"]
+                 b"el planoEntregado", b"el haz concentrado", b"EcoProyectado",
+                 b"ProyeccionDelel plano", b"BolsaMaestra"]
 for k in hjsons:
     texto = bl[k]
     es_idioma = "en-US" not in k
     valores = [b"asqueroso", "ME PROYECTO".encode(), "Proyección del C".encode()] if es_idioma \
-        else [b"disgusting", b"PROJECT", b"Cyclops Projection"]
+        else [b"disgusting", b"PROJECT", b"the beam weapon"]
     for c in claves_nuevas + valores:
         ok = c in texto
         print(f"  {os.path.basename(k)} · {c.decode()}: {'VIVE' if ok else 'FALTA (MAL)'}")

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-gen_ciclope_arma_v6176.py — v6.176 — EL SPRITE DEL ARMA DEL CÍCLOPE
-PROYECTADO («Proyección del Cíclope» — la letra: «lo que se tenia que
+gen_el plano_arma_v6176.py — v6.176 — EL SPRITE DEL ARMA DEL HAZ
+PROYECTADO («Proyección del plano» — la letra: «lo que se tenia que
 crear era un arma»).
 
 v5 tras TRES QAs del OJO: el ORDEN DE DIBUJO manda — primero la
@@ -16,8 +16,8 @@ import pathlib
 from PIL import Image
 
 RAIZ = pathlib.Path(__file__).resolve().parent.parent
-DESTINO = RAIZ / "AethonMod" / "Content" / "Weapons" / "Investigaciones" / "ProyeccionDelCiclope.png"
-PREVIEW = pathlib.Path("/tmp") / "ciclope_arma_v6176_preview.png"
+DESTINO = RAIZ / "AethonMod" / "Content" / "Weapons" / "Investigaciones" / "ProyeccionDelel plano.png"
+PREVIEW = pathlib.Path("/tmp") / "el plano_arma_v6176_preview.png"
 
 N = 34
 
@@ -62,7 +62,7 @@ for y in range(12, 33):
                 c = CARNE_SOMBRA
             px(x, y, c)
 
-# LA CEJA DEL CÍCLOPE (la cuenca GRUESA y OSCURA — se LEE de verdad)
+# LA CEJA DEL HAZ (la cuenca GRUESA y OSCURA — se LEE de verdad)
 for x in range(5, 20):
     ox = ((x - 12) / 5.2) ** 2
     for y in (12, 13, 14):
@@ -165,5 +165,5 @@ for x, y in bordes:
 
 img.save(DESTINO)
 img.resize((N * 14, N * 14), Image.NEAREST).save(PREVIEW)
-print(f"✔ ProyeccionDelCiclope.png forjado v5 ({N}×{N}) — {DESTINO}")
+print(f"✔ ProyeccionDelel plano.png forjado v5 ({N}×{N}) — {DESTINO}")
 print(f"  preview: {PREVIEW}")
