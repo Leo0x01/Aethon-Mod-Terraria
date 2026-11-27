@@ -134,19 +134,19 @@ curl -s -X POST \
   -H "Authorization: token $PAT" \
   -H "Content-Type: application/octet-stream" \
   --data-binary @"$TMOD" \
-  "https://uploads.github.com/repos/$REPO/releases/$RELID/assets?name=AethonMod_v6.182.tmod" \
+  "https://uploads.github.com/repos/$REPO/releases/$RELID/assets?name=AethonMod_v6.183.tmod" \
   | python3 -c "import json,sys; a=json.load(sys.stdin); print('asset:', a.get('name'), a.get('size'), 'B ·', a.get('state'))"
 
 echo "[5/6] verificación del CDN…"
 sleep 3
-URL_DL="https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/download/$TAG/AethonMod_v6.182.tmod"
-curl -sL -o /tmp/verif_v6182.tmod "$URL_DL" && md5sum /tmp/verif_v6182.tmod && echo "original: $MD5"
-if [ "$(md5sum /tmp/verif_v6182.tmod | cut -d' ' -f1)" = "$MD5" ]; then
+URL_DL="https://github.com/Leo0x01/Aethon-Mod-Terraria/releases/download/$TAG/AethonMod_v6.183.tmod"
+curl -sL -o /tmp/verif_v6183.tmod "$URL_DL" && md5sum /tmp/verif_v6183.tmod && echo "original: $MD5"
+if [ "$(md5sum /tmp/verif_v6183.tmod | cut -d' ' -f1)" = "$MD5" ]; then
   echo "CDN VERIFICADO byte a byte ✔"
 else
   echo "ADVERTENCIA: el CDN aún propaga (verificar en un rato)"
 fi
 
 echo "[6/6] copia de entrega…"
-cp "$TMOD" "/home/z/my-project/download/AethonMod_v6.182.tmod"
+cp "$TMOD" "/home/z/my-project/download/AethonMod_v6.183.tmod"
 echo "PUBLICADO $TAG · md5 $MD5"
