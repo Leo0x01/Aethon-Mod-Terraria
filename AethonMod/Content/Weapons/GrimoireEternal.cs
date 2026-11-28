@@ -420,7 +420,9 @@ namespace AethonMod.Content.Weapons
             // es EL DE SIEMPRE, los discos día/noche del 931 con sus
             // marcas de FX, naciendo DEL LIBRO cuando está fuera (la
             // cura de «sigue saliendo del jugador»).
-            Item.shoot = 931;              // Nightglow vanilla (el número — como el Equinoccio)
+            // v6.185 — LA ESTRELLA DE LA SINFONÍA PRIMORDIAL es el básico
+            //     (los discos 931 del Equinoccio se retiraron del clic izquierdo).
+            Item.shoot = ModContent.ProjectileType<global::AethonMod.Content.Projectiles.Grimorio.EstrellaGrimorioProjectile>();
             Item.shootSpeed = 12f;
             Item.mana = 0;                 // la regla de la casa — el hambre ES el coste
             Item.noMelee = true;           // el tajo es el proyectil, no el sprite del libro
@@ -531,6 +533,16 @@ namespace AethonMod.Content.Weapons
             //     Mítico +15% … Supremo +25%) — multiplica UNA vez con
             //     todo lo de arriba (nivel/despertar/festín).
             damage *= 1f + PeldanoDe(sl?.Level ?? 1).Dano;
+
+            // v6.185 — EL ATAQUE BASE DE LA ESTRELLA (la letra: «el ataque
+            //     base final del proyectil se debe sumar al daño magico
+            //     final total del grimorio del eterno»): Flat se suma DESPUÉS
+            //     de todos los multiplicadores (StatModifier.ApplyTo =
+            //     (base + Base) · Additive · Multiplicative + Flat — el
+            //     FINAL de verdad). 0 en nivel 0, +1 por nivel, +20 % en los
+            //     hitos 55/75/95/100/120 (DespertarGrimorio.AtaqueBaseEstrella).
+            damage.Flat += Systems.DespertarGrimorio.AtaqueBaseEstrella(
+                Systems.DespertarGrimorio.NivelDe(player));
 
             // v6.51.11 — EL PODER DEVORADO MURIÓ como bonus del libro (la
             //     letra: «las esencias consumidas por el grimorio no
@@ -932,115 +944,71 @@ namespace AethonMod.Content.Weapons
             Estado.TicksSinAtaqueLibro = 0;
 
             // ============================================================
-            //  v6.167 — EL EQUINOCCIO DE SIEMPRE VUELVE (la letra:
-            //  «regresa al ataque basico original del grimorio, el
-            //  ataque ese que era 931 […] regresa a esos commit»):
-            //  el código ES el de la v6.156 — la pareja día/noche, el
-            //  tope que ROTA y el abanico topeado. Lo único nuevo: el
-            //  ORIGEN también mira al LIBRO FLOTANTE (OrigenDelDisparo
-            //  — la regla de la casa v6.50.93).
+            //  v6.185 — LA ESTRELLA DEL GRIMORIO: EL ATAQUE BÁSICO POR NIVEL
+            //  DE DESPERTAR (la letra entera vive en DespertarGrimorio —
+            //  las tablas puras — y en EstrellaGrimorioProjectile — el
+            //  arte de la Sinfonía Primordial vestido por el nivel). Los
+            //  discos 931 del Equinoccio (v6.51.3 · v6.167) se RETIRAN del
+            //  clic izquierdo: el básico del libro ES la estrella.
             // ============================================================
-            // EL ORIGEN: si el espíritu está FUERA, el disparo nace DEL
-            // LIBRO FLOTANTE (la regla del Nervioso: «si el jugador
-            // ataca y el libro esta fuera sus ataques salen del libro»)
             Vector2 pos = OrigenDelDisparo(player, position);
+            Vector2 rumbo = velocity.LengthSquared() > 0.1f
+                ? velocity : (Main.MouseWorld - pos).SafeNormalize(Vector2.UnitX) * 12f;
+            int despertarBasico = Systems.DespertarGrimorio.NivelDe(player);
+            int tipoEstrella = ModContent.ProjectileType
+                <global::AethonMod.Content.Projectiles.Grimorio.EstrellaGrimorioProjectile>();
 
-            // === LA FUENTE DIVIDIDA (la del Equinoccio, EXACTA): la
-            //     velocidad de vanilla (aleatoria, siempre hacia arriba)
-            //     — el día y la noche separándose sobre tu cabeza ===
-            Vector2 baseV = Main.rand.NextVector2Circular(1f, 1f)
-                          + Main.rand.NextVector2CircularEdge(3f, 3f);
-            if (baseV.Y > 0f) baseV.Y *= -1f;
-
-            // ============================================================
-            //  v6.154 — EL TOPE QUE ROTA (la pareja base NACE SIEMPRE;
-            //  los viejos ceden su sitio — el cielo ROTA, no se atasca)
-            // ============================================================
-            const int TOPE_BASICOS = 10;
-            int vivos = 0;
-            for (int i = 0; i < Main.maxProjectiles; i++)
+            // === LA SOMBRA DE LA PÁGINA (119/120 — la letra: «una posibilidad
+            //     del 3 % de que en vez del salir el proyectil […] lo que
+            //     salga sea un Sombra de la pagina con todo el daño acumulado
+            //     base del proyectil y su respectivo calculo con el daño del
+            //     grimorio» · 120: «5 % de que salgan 5 sombras […] con el
+            //     mismo calculo de daño anterior produciendo quemadura del
+            //     vacio que durara 10 segundos mientras que estas sombras
+            //     duran 5 segundos de vida») ===
+            float probSombra = Systems.DespertarGrimorio.ProbabilidadSombra(despertarBasico);
+            if (probSombra > 0f && Main.rand.NextFloat() < probSombra)
             {
-                Projectile pr = Main.projectile[i];
-                if (pr == null || !pr.active || pr.owner != player.whoAmI || pr.type != 931)
-                    continue;
-                float marca = pr.ai[2];
-                if (marca == 9201f || marca == 9202f) vivos++;
-            }
-
-            // LA PAREJA BASE NACE SIEMPRE — y si el cielo está lleno,
-            // los DOS MÁS VIEJOS ceden su sitio
-            if (vivos + 2 > TOPE_BASICOS)
-            {
-                int aCeder = Math.Max(2, vivos + 2 - TOPE_BASICOS);
-                for (int i = 0; i < Main.maxProjectiles && aCeder > 0; i++)
+                int nSombras = Systems.DespertarGrimorio.SombrasDelDisparo(despertarBasico);
+                int vidaSombras = Systems.DespertarGrimorio.VidaDeLasSombras(despertarBasico);
+                int tipoSombra = ModContent.ProjectileType
+                    <global::AethonMod.Content.Projectiles.Sombras.SombraPaginaProjectile>();
+                bool conQuemadura = Systems.DespertarGrimorio.QuemaduraDelVacio(despertarBasico);
+                for (int i = 0; i < nSombras; i++)
                 {
-                    Projectile pr = Main.projectile[i];
-                    if (pr == null || !pr.active || pr.owner != player.whoAmI ||
-                        pr.type != 931) continue;
-                    float marca = pr.ai[2];
-                    if (marca != 9201f && marca != 9202f) continue;
-                    pr.timeLeft = Math.Min(pr.timeLeft, 2);   // se disipa suave
-                    aCeder--;
+                    Vector2 r = rumbo.RotatedBy((i - (nSombras - 1) * 0.5f) * 0.35f);
+                    int idxS = Projectile.NewProjectile(source, pos, r, tipoSombra, damage, knockback,
+                        player.whoAmI, 0, 0);
+                    if (idxS >= 0 && idxS < Main.maxProjectiles &&
+                        Main.projectile[idxS].ModProjectile is
+                            global::AethonMod.Content.Projectiles.Sombras.SombraPaginaProjectile sombra)
+                    {
+                        Main.projectile[idxS].timeLeft = vidaSombras;
+                        sombra.DanoHeredado = damage;             // todo el daño acumulado del disparo
+                        sombra.QuemaduraHeredada = conQuemadura;
+                        Main.projectile[idxS].netUpdate = true;
+                    }
                 }
+                Terraria.Audio.SoundEngine.PlaySound(SoundID.Item122.WithPitchOffset(-0.2f), pos);
+                return false;
             }
 
-            // EL ABANICO TOPEADO AL CUPO REAL
-            int extra = WeaponScaling.ExtraProjectiles(level);
-            int cupo = Math.Max(0, TOPE_BASICOS - vivos);
-            if (extra > 4) extra = 4;   // el abanico digno: máx 4 parejas extra
-
-            LanzarPareja(source, pos, baseV, damage, knockback, player);
-
-            for (int i = 0; i < extra && cupo > 1; i++)
-            {
-                float angulo = (i + 1) * 0.12f * (i % 2 == 0 ? 1f : -1f);
-                LanzarPareja(source, pos, baseV.RotatedBy(angulo), damage, knockback, player);
-                cupo -= 2;
-            }
-
-            return false;   // todos los spawns son nuestros
+            // === LA ESTRELLA (una por disparo — la letra habla de «el
+            //     proyectil»): el nivel de despertar viaja en ai[0] y la
+            //     semilla en ai[1] (el paquete 27 los lleva: cada pantalla
+            //     viste lo mismo) ===
+            Projectile.NewProjectile(source, pos, rumbo, tipoEstrella, damage, knockback,
+                player.whoAmI, despertarBasico, Main.rand.Next(1, 999999), 0f);
+            Terraria.Audio.SoundEngine.PlaySound(SoundID.Item9.WithPitchOffset(0.25f).WithVolumeScale(0.55f), pos);
+            return false;   // el spawn es nuestro
         }
 
         // (v6.167 — _sentidoTajo murió con LA PALABRA CORTADA: el
         //  Equinoccio no tiene vaivén.)
 
-        /// <summary>EL DÍA Y LA NOCHE — LOS DISCOS DEL EQUINOCCIO DE
-        /// SIEMPRE. v6.51.3 — LA VUELTA A CASA (la letra: «ahora los
-        /// proyectiles del grimorio son horribles, necesitamos crear un
-        /// proyectil digno para el grimorio, de momento deja el que ya
-        /// teniamos antes»): la fusión con el Tentáculo del Equinoccio de
-        /// la v6.51.2 MUERE como disparo básico — vuelve EL PROYECTIL DE
-        /// ANTES (el 931 del Equinoccio, los discos día/noche de la
-        /// v6.51.1, con sus marcas 9201/9202 del FX). El tentáculo vive
-        /// en OTROS rincones del Eterno; el disparo básico del libro
-        /// vuelve a ser lo que era. (El proyectil DIGNO queda como el
-        /// pendiente de diseño — las ideas van en el mensaje de la
-        /// versión.)</summary>
-        // ================================================================
-        //  (v6.167 — LANZARPAREJA REVIVE: la letra pidió el regreso del
-        //  básico original «el ataque ese que era 931» — los discos
-        //  día/noche del Equinoccio, tal como vivían en la v6.156. LA
-        //  PALABRA CORTADA queda retirada como ataque básico.)
-        // ================================================================
-        private static void LanzarPareja(EntitySource_ItemUse_WithAmmo source, Vector2 pos,
-            Vector2 vel, int damage, float knockback, Player player)
-        {
-            // EL DORADO — EL DÍA: ai[1] = 0.64 → el render del 931 hace
-            // hslToRgb((hue+0.5)%1) → matiz 0.14 = DORADO de verdad
-            Projectile.NewProjectile(source, pos, vel.RotatedBy(-0.35f),
-                931, damage, knockback, player.whoAmI,
-                -1f,      // ai[0]: sin objetivo aún
-                0.64f,    // ai[1]: EL MATIZ DORADO
-                9201f);   // ai[2]: la marca del FX del sol
-
-            // EL NEGRO — LA NOCHE: ai[1] = 0.28 → matiz 0.78 = VIOLETA
-            // (el rim del eclipse que late en la oscuridad)
-            Projectile.NewProjectile(source, pos, vel.RotatedBy(0.35f),
-                931, damage, knockback, player.whoAmI,
-                -1f,      // ai[0]: sin objetivo aún
-                0.28f,    // ai[1]: el matiz violeta (el rim)
-                9202f);   // ai[2]: la marca del FX del eclipse (SIN bruma)
-        }
+        // (v6.185 — LANZARPAREJA MURIÓ con los discos 931 como básico del
+        //  libro: la estrella de la Sinfonía Primordial ocupa su lugar. El
+        //  arma Equinoccio y EmperatrizFX siguen vivos — nada de eso se tocó.)
 
         // ================================================================
         //  TOOLTIP — v6.50.108 — LA CAJA COMPACTA + LA SEGUNDA VENTANA.
@@ -1728,6 +1696,19 @@ namespace AethonMod.Content.Weapons
                         tooltips.Add(new TooltipLine(Mod, "DespertarReq3",
                             $"[c/{(monedasOK ? colOK : colNo)}:  • {textoMonedas}{(monedasOK ? "  ✓" : "")}]"));
 
+                        // === v6.185 — EL REQUISITO DE LAS ESTRELLAS FUGACES (la
+                        //     letra del ataque básico: «los requisitos de ese
+                        //     nivel de despertar deben incluir cierta cantidad
+                        //     de Estrellas Fugaces») — SOLO en los peldaños que
+                        //     visten a la estrella (1 → 1.000). ===
+                        int estrellasNecesarias = Systems.DespertarGrimorio.EstrellasPara(siguiente);
+                        if (estrellasNecesarias > 0)
+                        {
+                            int comidasEstrellas = almaLista?.OfrendaEstrellas ?? 0;
+                            bool estrellasOK = comidasEstrellas >= estrellasNecesarias;
+                            tooltips.Add(new TooltipLine(Mod, "DespertarReq3b",
+                                $"[c/{(estrellasOK ? colOK : colNo)}:  • Estrellas Fugaces Consagradas: {System.Math.Min(comidasEstrellas, estrellasNecesarias)}/{estrellasNecesarias}{(estrellasOK ? "  ✓" : "")}]"));
+                        }
                         // v6.97 — LA BARRA DEL DESPERTAR SE MUDÓ AL FINAL
                         //     (la letra: «debajo de los requisitos») — su
                         //     viejo sitio entre el dinero y DEVORAR murió.
@@ -1917,6 +1898,26 @@ namespace AethonMod.Content.Weapons
                             tooltips.Add(new TooltipLine(Mod, "DespertarBarra",
                                 "[c/78788C:  • Despertar ]" +
                                 $"[c/{(despertar >= Systems.DespertarGrimorio.NivelMax ? "FFD787" : "C49CFF")}:{barra} {despertar}/{Systems.DespertarGrimorio.NivelMax}]"));
+                        }
+
+                        // === v6.185 — LA ESTRELLA DEL GRIMORIO (la letra del ataque
+                        //     básico por nivel de despertar): la forma ACTUAL (el
+                        //     peldaño más alto alcanzado) y la PRÓXIMA forma.
+                        {
+                            int[] peldanos = Systems.DespertarGrimorio.NivelesDeLaEstrella;
+                            int actual = 0, proximo = -1;
+                            for (int i = 0; i < peldanos.Length; i++)
+                            {
+                                if (despertar >= peldanos[i]) actual = peldanos[i];
+                                else { proximo = peldanos[i]; break; }
+                            }
+                            string txtActual = Language.GetTextValue("Mods.AethonMod.Despertar.Estrella.Actual",
+                                actual, Language.GetTextValue("Mods.AethonMod.Despertar.Estrella.N" + actual));
+                            tooltips.Add(new TooltipLine(Mod, "EstrellaActual", $"[c/FFD087:  {txtActual}]"));
+                            if (proximo > 0)
+                                tooltips.Add(new TooltipLine(Mod, "EstrellaProxima", $"[c/78788C:  {Language.GetTextValue("Mods.AethonMod.Despertar.Estrella.Proxima", proximo, Language.GetTextValue("Mods.AethonMod.Despertar.Estrella.N" + proximo))}]"));
+                            else
+                                tooltips.Add(new TooltipLine(Mod, "EstrellaMaxima", $"[c/FFD787:  {Language.GetTextValue("Mods.AethonMod.Despertar.Estrella.Maxima")}]"));
                         }
 
                         // === PRÓXIMO HITO DEL DESPERTAR (la letra: «X% de

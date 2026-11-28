@@ -99,35 +99,34 @@ namespace AethonMod.Content.Buffs
                 }
 
                 // ============================================================
-                //  v6.151 — EL BRILLO CUADRADO QUE DICE «LISTA» (la letra:
-                //  «el brillo en el icono de buff de la ira es solo un
-                //  circulo plano demasiado grande… seria bueno un pequeño
-                //  brillo cuadrado que sobresalga al menos 1 a 5 pixeles
-                //  del icono» + «si el brillo sale bien el contador no
-                //  hace falta»): el círculo plano MURIÓ. GlowUILib.MarcoLuz
-                //  dibuja el MARCO de luz que SOBRESALE 4 px del icono,
-                //  con SU latido — y mientras carga, el marco APAGADO
-                //  opaca el borde (la Ira se está cocinando: el marco
-                //  crece con el progreso, de 1 px a los 4 de lista).
-                //  EL CONTADOR mm:ss MURIÓ con la letra: el brillo ES el
-                //  reloj (el icono gris→color de siempre + el marco que
-                //  se enciende al llegar).
+                //  v6.185 — LA CELDA DEL BUFF ES SAGRADA (la letra: «los buff
+                //  se siguen solapando… el buff de la ira de un ser exterior
+                //  y el debuff de ahogo»). LA MEDIDA (sim 1:1 de la rejilla
+                //  de vanilla, decompile Main.DrawInterface_Resources_Buffs:
+                //  iconos nativos de 32 px en celdas de 38×50): el marco de
+                //  4 px y SOBRE TODO el anillo del hold (radio 24,6 — la
+                //  media diagonal) DERRAMABAN sobre la celda del vecino (28
+                //  píxeles violetas sobre el icono del Ahogamiento en el
+                //  sim). AHORA: el marco sale 2 px (carga: 1→2) y el anillo
+                //  ABRAZA el icono con radio 18 — TODO dentro de SU celda.
+                //  El resto de buffs del mod no dibuja nada fuera de su icono
+                //  (auditoría v6.185: 18 ModBuff, solo este tenía PreDraw).
                 // ============================================================
                 var rect = new Rectangle((int)pos.X, (int)pos.Y, tex.Width, tex.Height);
                 if (progreso >= 1f)
                 {
-                    // LISTA: el marco entero ARDE — 4 px de salida con el
-                    // latido de la casa y el velo interior iluminando
+                    // LISTA: el marco entero ARDE — 2 px de salida (dentro de
+                    // la celda) con el latido de la casa y el velo interior
                     VFX.GlowUILib.MarcoLuz(sb, rect, new Color(196, 108, 255),
-                        4f, 0.95f, 1f);
+                        2f, 0.95f, 1f);
                     VFX.GlowUILib.Iluminar(sb, rect, new Color(150, 84, 235), 0.35f);
                 }
                 else if (progreso > 0.15f)
                 {
-                    // CARGANDO: el marco NACE con el progreso (1→4 px) y
+                    // CARGANDO: el marco NACE con el progreso (1→2 px) y
                     // a media intensidad — la promesa del estallido
                     VFX.GlowUILib.MarcoLuz(sb, rect, new Color(150, 84, 235),
-                        1f + 3f * progreso, 0.28f + 0.30f * progreso, 0.4f);
+                        1f + 1f * progreso, 0.28f + 0.30f * progreso, 0.4f);
                 }
 
                 // ============================================================
@@ -150,11 +149,14 @@ namespace AethonMod.Content.Buffs
                         // el centro ES EL CENTRO DEL ICONO (la v6.152 le
                         // sumaba +15 px en X e Y — el radio viejo
                         // contaminando el centro) y el radio ABRAZA el
-                        // icono (media diagonal + 2 px de aire).
+                        // icono. v6.185 — RADIO 18 (antes la media diagonal,
+                        // 24,6): el arco abraza el icono SIN cruzar a la celda
+                        // del vecino (sim 1:1: 28 px violetas sobre el
+                        // Ahogamiento → 0).
                         var glowHold = ModContent.Request<Texture2D>(
                             "AethonMod/Content/Effects/Procedural/SoftGlow").Value;
                         Vector2 centro = pos + tex.Size() * 0.5f;
-                        float radio = tex.Size().Length() * 0.5f + 2f;
+                        float radio = 18f;
                         int pasos = 28;
                         for (int k = 0; k < pasos; k++)
                         {

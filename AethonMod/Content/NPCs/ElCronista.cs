@@ -792,6 +792,22 @@ namespace AethonMod.Content.NPCs
                 }
 
                 // ========================================================
+                //  (1b) v6.185 — LAS ESTRELLAS FUGACES CONSAGRADAS (la letra del
+                //  ataque básico: «estas estrellas se pueden comprar a El
+                //  Cronista por 10 esencias del eterno cada estrella»): los
+                //  peldaños que visten a la estrella las exigen (1 → 1.000).
+                //  Se venden SIEMPRE (el portador abastece): un paquete de
+                //  10 por 100 esencias y otro de 100 por 1.000 — el precio
+                //  EXACTO de 10 por estrella en los dos.
+                // ========================================================
+                int tipoEstrella = global::AethonMod.Content.Systems.DespertarGrimorio.TipoEstrellaFugaz();
+                if (tipoEstrella > 0)
+                {
+                    Poner(tipoEstrella, 100L, 10);     // 10 estrellas · 100 esencias
+                    Poner(tipoEstrella, 1000L, 100);   // 100 estrellas · 1.000 esencias
+                }
+
+                // ========================================================
                 //  (2) LAS POCIONES DE MANÁ SINCRONIZADAS CON EL MAGO
                 //  (la letra: «al igual que el mago en el juego estas
                 //  se iran desbloqueando a la par que el NPC Mago en

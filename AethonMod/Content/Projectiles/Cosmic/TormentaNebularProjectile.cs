@@ -58,6 +58,44 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
         private float _age;
 
+        // ================================================================
+        //  v6.185 — LA TORMENTA HEREDADA (la letra del ataque básico del
+        //  grimorio: «al nivel 100 el proyectil al explotar se transforma
+        //  en el proyectil de Cetro de Tormenta Nebular durando unos 2
+        //  segundos» · «al nivel 110 […] sus arcos de rayos se ramifican y
+        //  saltan a enemigos, este cambio usa el mismo sistema» · «al nivel
+        //  115 existe una pequeña posibilidad que del proyectil de Cetro de
+        //  Tormenta Nebular implosione violentamente y se convierta en el
+        //  proyectil del magnetar […] tendra una vida de 3 segundos»).
+        //  · ai[2] = los SALTOS de ramificación que hereda (0 = la tormenta
+        //    de siempre — el Cetro no la pasa).
+        //  · DespertarHeredado viaja por SendExtraAI (para la implosión).
+        // ================================================================
+        /// <summary>El nivel de despertar de la estrella que la parió (-1 =
+        /// la tormenta del Cetro de siempre: nada heredado).</summary>
+        public int DespertarHeredado = -1;
+
+        /// <summary>LOS SALTOS heredados (ai[2]): la tormenta ramifica sus
+        /// descargas a N enemigos nuevos cercanos al punto de impacto.</summary>
+        private int Ramas => (int)Projectile.ai[2];
+
+        private bool Heredada => DespertarHeredado >= 0;
+
+        public override void SendExtraAI(System.IO.BinaryWriter writer)
+        {
+            writer.Write(DespertarHeredado);
+        }
+
+        public override void ReceiveExtraAI(System.IO.BinaryReader reader)
+        {
+            DespertarHeredado = reader.ReadInt32();
+        }
+
+        // las cadenas de la ramificación (el dibujo)
+        private readonly Vector2[] _ramFrom = new Vector2[6];
+        private readonly Vector2[] _ramTo = new Vector2[6];
+        private readonly float[] _ramLife = new float[6];
+
         public override void SetStaticDefaults()
         {
             Main.projFrames[Projectile.type] = 1;
@@ -83,6 +121,8 @@ namespace AethonMod.Content.Projectiles.Cosmic
         public override void AI()
         {
             _age += 1f;
+            for (int c = 0; c < 6; c++)
+                if (_ramLife[c] > 0f) _ramLife[c] -= 1f;
 
             // === EL NACIMIENTO: la tormenta derivation suave (vive) ===
             // (velocidad nula: la tormenta es un LUGAR, pero respira).
@@ -176,7 +216,97 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 Content.Systems.GolpeMotor.Golpear(Projectile, npc, Projectile.damage, 2.5f, true);
                 if (Main.netMode != NetmodeID.MultiplayerClient)
                     try { npc.AddBuff(BuffID.Electrified, 200); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TormentaNebularProjectile", exRegistro); }
+                if (Heredada && global::AethonMod.Content.Systems.DespertarGrimorio.QuemaduraDelVacio(DespertarHeredado))
+                    TormentaQuemadura(npc);
             }
+
+            // === v6.185 — LA RAMIFICACIÓN HEREDADA (110+): el mismo sistema
+            //     de la estrella — el arco salta a N enemigos NUEVOS cercanos
+            //     al punto de impacto, cada uno una vez (35 % del daño). ===
+            if (Ramas > 0 && Main.netMode != NetmodeID.MultiplayerClient)
+            {
+                int golpe = Math.Max(1, (int)(Projectile.damage * 0.35f));
+                Vector2 desde = point;
+                NPC anterior = null;
+                int slot = 0;
+                for (int r = 0; r < Ramas && slot < 6; r++)
+                {
+                    NPC presa = ObjetivoNuevo(desde, 260f, anterior);
+                    if (presa == null) break;
+                    Content.Systems.GolpeMotor.Golpear(Projectile, presa, golpe, 1.5f, true);
+                    try { presa.AddBuff(BuffID.Electrified, 180); } catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TormentaNebularProjectile", exRegistro); }
+                    if (global::AethonMod.Content.Systems.DespertarGrimorio.QuemaduraDelVacio(DespertarHeredado))
+                        TormentaQuemadura(presa);
+                    _ramFrom[slot] = desde;
+                    _ramTo[slot] = presa.Center;
+                    _ramLife[slot] = 9f;
+                    anterior = presa;
+                    desde = presa.Center;
+                    slot++;
+                }
+            }
+        }
+
+        private void TormentaQuemadura(NPC npc)
+        {
+            try
+            {
+                int q = ModContent.BuffType<global::AethonMod.Content.Buffs.QuemaduraVacioExterior>();
+                if (q > 0 && npc != null && npc.active && !npc.HasBuff(q)) npc.AddBuff(q, 600);
+            }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TormentaNebularProjectile", exRegistro); }
+        }
+
+        /// <summary>El enemigo válido más cercano a un punto que NO sea el
+        /// anterior de la cadena (la ramificación busca uno nuevo).</summary>
+        private static NPC ObjetivoNuevo(Vector2 desde, float radio, NPC excluir)
+        {
+            NPC mejor = null;
+            float mejorD = radio * radio;
+            foreach (NPC npc in Main.ActiveNPCs)
+            {
+                if (!VFXCore.EsObjetivo(npc)) continue;
+                if (npc == excluir) continue;
+                float d = (npc.Center - desde).LengthSquared();
+                if (d < mejorD) { mejorD = d; mejor = npc; }
+            }
+            return mejor;
+        }
+
+        /// <summary>v6.185 — LA IMPLOSIÓN (115+): al morir la tormenta
+        /// heredada, con un 15 % colapsa en una ESTRELLA HIJA que persigue
+        /// agresivamente, atraviesa paredes y vive 3 s: el Magnetar (115) ·
+        /// la Enana Blanca (116) · la Estrella Muerta (117, 10 % menos
+        /// seguimiento). Nace en la AUTORIDAD (un proyectil normal).</summary>
+        public override void OnKill(int timeLeft)
+        {
+            try
+            {
+                if (!Heredada || Main.netMode == NetmodeID.MultiplayerClient) return;
+                int cual = global::AethonMod.Content.Systems.DespertarGrimorio.ImplosionDeLaTormenta(DespertarHeredado, Projectile.identity);
+                if (cual <= 0) return;
+
+                int tipo = cual == 1
+                    ? ModContent.ProjectileType<MagnetarProjectile>()
+                    : cual == 2
+                        ? ModContent.ProjectileType<WhiteDwarfProjectile>()
+                        : ModContent.ProjectileType<DeadStarProjectile>();
+                // EL SEGUIMIENTO HEREDADO en ai[2] (la Enana y la Muerta lo
+                // leen): 3,0 px/t — la Estrella Muerta el 10 % menos (2,7).
+                float velHeredada = cual == 3 ? 2.7f : 3.0f;
+                int idx = Projectile.NewProjectile(Projectile.GetSource_FromAI(), Projectile.Center,
+                    Vector2.Zero, tipo, Projectile.damage, 0f, Projectile.owner,
+                    0f, (Projectile.identity % 9973 + 1) * 1f, velHeredada);
+                if (idx >= 0)
+                {
+                    Main.projectile[idx].timeLeft = 180;          // 3 segundos
+                    Main.projectile[idx].tileCollide = false;    // atraviesa paredes
+                    Main.projectile[idx].netUpdate = true;
+                    Terraria.Audio.SoundEngine.PlaySound(
+                        SoundID.Item12.WithPitchOffset(0.42f).WithVolumeScale(0.7f), Projectile.Center);
+                }
+            }
+            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TormentaNebular.Implosion", exRegistro); }
         }
 
         public override bool PreDraw(ref Color lightColor)
@@ -353,6 +483,20 @@ namespace AethonMod.Content.Projectiles.Cosmic
                             }
                         }
                     }
+                }
+
+                // === v6.185 — LAS CADENAS DE LA RAMIFICACIÓN (el mismo dibujo
+                //     de las cadenas de la estrella) ===
+                for (int c = 0; c < 6; c++)
+                {
+                    if (_ramLife[c] <= 0f) continue;
+                    if (!StormLib.IsLit(seed + 61 + c * 37, flick, 0.60f)) continue;
+                    float a = MathHelper.Clamp(_ramLife[c] / 9f, 0f, 1f);
+                    StormLib.ChainBolt(Main.spriteBatch,
+                        _ramFrom[c] - Main.screenPosition, _ramTo[c] - Main.screenPosition,
+                        seed + 61 + c * 37, flick, 4.2f,
+                        Tint(StarBlue, 0.75f * a), Tint(WhiteIncan, 0.9f * a),
+                        1f, 7, 10f);
                 }
 
                 Main.spriteBatch.End();

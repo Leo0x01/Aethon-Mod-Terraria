@@ -40,6 +40,33 @@ namespace AethonMod.Content.Projectiles.Sombras
     /// </summary>
     public class SombraPaginaProjectile : ModProjectile
     {
+        // ================================================================
+        //  v6.185 — LA SOMBRA HEREDADA (la letra del ataque básico del
+        //  grimorio, 119/120): la sombra que nace del disparo de la
+        //  estrella muerde con EL DAÑO DEL DISPARO (todo el ataque base
+        //  acumulado + el cálculo del grimorio — el parámetro `damage` del
+        //  Shoot) y, a los 120, aplica QUEMADURA DEL VACÍO (10 s) con cada
+        //  mordida. La sombra del arma de siempre no los lleva (su
+        //  fórmula GolpeDeLaSombra queda INTACTA). Viajan por SendExtraAI.
+        // ================================================================
+        /// <summary>El daño heredado del disparo (0 = la fórmula de siempre).</summary>
+        public int DanoHeredado;
+
+        /// <summary>¿La mordida aplica Quemadura del Vacío? (120+)</summary>
+        public bool QuemaduraHeredada;
+
+        public override void SendExtraAI(System.IO.BinaryWriter writer)
+        {
+            writer.Write(DanoHeredado);
+            writer.Write(QuemaduraHeredada);
+        }
+
+        public override void ReceiveExtraAI(System.IO.BinaryReader reader)
+        {
+            DanoHeredado = reader.ReadInt32();
+            QuemaduraHeredada = reader.ReadBoolean();
+        }
+
         private const byte FASE_EMERGER = 0;
         private const byte FASE_CAZA = 1;
         private const byte FASE_MORDISCO = 2;
@@ -311,11 +338,28 @@ namespace AethonMod.Content.Projectiles.Sombras
                                 // vidaMax + 1% manáMax) × (1 + sombras
                                 // concentradas — la concentración de la
                                 // v6.153 sigue apretando CON la mordida).
-                                float base_ = global::AethonMod.Content.Projectiles
-                                    .Nervioso.SombraPaginaEterno.GolpeDeLaSombra(
-                                        dueño, dueñoPool);
-                                float quitar = MathF.Max(base_, 25f)
-                                    * (1f + SombrasConcentradas);
+                                // v6.185 — LA SOMBRA HEREDADA muerde con el daño del
+                                //     disparo (sin el piso de 25 ni la concentración:
+                                //     el cálculo ya venía hecho del grimorio).
+                                float base_ = DanoHeredado > 0
+                                    ? DanoHeredado
+                                    : global::AethonMod.Content.Projectiles
+                                        .Nervioso.SombraPaginaEterno.GolpeDeLaSombra(
+                                            dueño, dueñoPool);
+                                float quitar = DanoHeredado > 0
+                                    ? base_
+                                    : MathF.Max(base_, 25f) * (1f + SombrasConcentradas);
+                                // v6.185 — LA QUEMADURA DEL VACÍO (120+): la mordida
+                                //     de cada 6 t la enciende (10 s).
+                                if (QuemaduraHeredada && Main.netMode != NetmodeID.MultiplayerClient)
+                                {
+                                    try
+                                    {
+                                        int q = ModContent.BuffType<global::AethonMod.Content.Buffs.QuemaduraVacioExterior>();
+                                        if (q > 0 && !dueñoPool.HasBuff(q)) dueñoPool.AddBuff(q, 600);
+                                    }
+                                    catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("SombraPagina.Quemadura", exRegistro); }
+                                }
                                 if (dueñoPool.life - quitar <= 1f)
                                 {
                                     // v6.167 — EL JEFE CENA, LA CHUSMA MUERE:

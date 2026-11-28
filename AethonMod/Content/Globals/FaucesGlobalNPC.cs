@@ -94,27 +94,6 @@ namespace AethonMod.Content.Globals
         /// <summary>0 = normal · 1 = DEVORADO (congelado en 1 HP) · 2 = muerte real ya ejecutada · 3 = LA PRIMERA CENA (el festín del primer jefe).</summary>
         public byte DevorarEstado;
 
-        // ================================================================
-        //  v6.180 — EL PEDACITO DEL DEVORAMUNDOS (los campos):
-        //  la aspiradora murió y su congelado muere con ella. El
-        //  pedacito tiene dos vidas: en LA CABEZA (el reloj que espera
-        //  a que la cadena nazca) y en LA COLA (la sección que se
-        //  están comiendo — la bruma del festín la sigue y al final
-        //  muere de verdad, con loot y todo).
-        // ================================================================
-        /// <summary>En LA CABEZA del Devoramundos: los ticks que faltan
-        /// para servir el pedacito (0 = no debe nada). Nace a 150 en el
-        /// OnSpawn de la PRIMERA aparición del portador.</summary>
-        public int PedacitoEspera;
-        /// <summary>En LA COLA comida: la devoración vive (el motor del
-        /// pedacito corre en su PreAI).</summary>
-        public bool PedacitoVivo;
-        /// <summary>En LA COLA comida: el reloj del cine (0→210).</summary>
-        public int PedacitoTick;
-        /// <summary>En LA CABEZA: quién es el portador del festín (para
-        /// hablarle al terminar el pedacito).</summary>
-        public int PedacitoPortador = -1;
-
         /// <summary>3 = sombra de la página (v6.50.72) · 4 = LA PRIMERA CENA de la .110.</summary>
         public byte DevorarEstilo;
         /// <summary>El reloj del festín (el motor lo alimenta en server; el cliente lo cuenta local).</summary>
@@ -341,7 +320,7 @@ namespace AethonMod.Content.Globals
         /// vivo de SU portador (y como fue devorado, cuenta para cuando
         /// llegue su turno: el crédito es retroactivo — JefeYaCaido).
         /// </summary>
-        private static bool PrimeraCenaPendiente(NPC jefe, out Player portador)
+        private static bool PrimeraCenaPendiente(NPC jefe, out Player portador, bool soloPrimeraVez = false)
         {
             portador = null;
             // === v6.50.115 — EL GUARDIÁN DE LA MAZMORRA NO PASA POR
@@ -364,7 +343,11 @@ namespace AethonMod.Content.Globals
             {
                 Player p = Main.player[i];
                 if (p == null || !p.active || p.dead) continue;
-                if (!jefe.playerInteraction[i]) continue;       // el que lo peleó
+                // v6.185 — EL GUSANO SE PELEA EN CADENA: el portador golpeó la
+                //     CABEZA y la cena se sirve sobre la COLA — la interacción
+                //     se lee en CUALQUIER pieza del mismo gusano (los demás
+                //     jefes conservan su playerInteraction de siempre).
+                if (!InteractuoConElPreso(p, jefe)) continue;   // el que lo peleó
                 if (!TieneEternoVisible(p)) continue;           // con el libro a mano
                 var sp = p.GetModPlayer<Players.ShardPlayer>();
                 if (sp == null) continue;
@@ -385,13 +368,48 @@ namespace AethonMod.Content.Globals
                 //     (2) LAS REPETICIONES SON DEL CHECKLIST (v6.97) — un
                 //     jefe ya devorado SOLO repite cena si es la presa
                 //     viva del peldaño actual de ESTE despertar.
-                bool yaDevorado = sp.JefesDevorados.Contains(jefe.type);
-                bool enChecklist = JefeEnElChecklistActual(p, jefe.type);
+                // v6.185 — EL TIPO CANÓNICO: la cabeza del gusano si es una
+                //     pieza (el mismo registro de ArrancarPrimeraCena) — el
+                //     «ya devorado» y el checklist miran al JEFE, no a la
+                //     sección que cena.
+                int tipoCanonico = jefe.type;
+                if (EsSegmentoDeGusano(jefe))
+                    tipoCanonico = EsSegmentoDelDevoramundo(jefe)
+                        ? NPCID.EaterofWorldsHead : NPCID.TheDestroyer;
+                bool yaDevorado = sp.JefesDevorados.Contains(tipoCanonico);
+                bool enChecklist = JefeEnElChecklistActual(p, tipoCanonico);
                 if (yaDevorado && !enChecklist) continue;
+                // v6.185 — EL PRIMER GOLPE DEL DEVORAMUNDO ES SOLO LA
+                //     PRIMERA VEZ del portador (sin cadenas de secciones).
+                if (soloPrimeraVez && yaDevorado) continue;
                 portador = p;
                 return true;
             }
             return false;
+        }
+
+        /// <summary>v6.185 — ¿ESTE jugador peleó contra ESTE preso? Los
+        /// cuerpos únicos: su playerInteraction de siempre. Las piezas del
+        /// Devoramundo: la interacción de CUALQUIER segmento del mismo
+        /// gusano (≤ 2600 px de la pieza que cena — la misma ventana de la
+        /// cadena).</summary>
+        private static bool InteractuoConElPreso(Player p, NPC preso)
+        {
+            try
+            {
+                if (p == null || preso == null) return false;
+                if (preso.playerInteraction[p.whoAmI]) return true;
+                if (!EsSegmentoDelDevoramundo(preso)) return false;
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    NPC n = Main.npc[i];
+                    if (n == null || !n.active || !EsSegmentoDelDevoramundo(n)) continue;
+                    if (n.Center.DistanceSQ(preso.Center) > 2600f * 2600f) continue;
+                    if (n.playerInteraction[p.whoAmI]) return true;
+                }
+                return false;
+            }
+            catch { return false; }
         }
 
         /// <summary>
@@ -500,14 +518,63 @@ namespace AethonMod.Content.Globals
             try
             {
                 if (npc == null || !npc.active) return false;
-                if (!EsSegmentoDeGusano(npc) &&
-                    npc.type != NPCID.EaterofWorldsHead && npc.type != NPCID.TheDestroyer)
-                    return false;
-                // v6.177 — SIN SELLO TAMBIÉN: la devoración normal del
-                // Devorador está muerta EN TODOS los mundos (la letra:
-                // «el grimorio toma a todo el Devoramundos… solo la
-                // segunda vez que sea invocado»)
-                return true;
+                // v6.185 — EL DEVORAMUNDO VUELVE A LA MESA (la letra: «copia
+                //     exactamente el festín de otros jefes para el
+                //     Devoramundo»): la exclusión de la v6.175/.177 (todo
+                //     gusano fuera del festín, en todos los mundos) queda
+                //     SOLO para el DESTRUCTOR mecánico — nadie lo reclamó.
+                //     El Eater of Worlds cena como los demás, con SU gatillo
+                //     (el <99 % del primer golpe — abajo, en el PreAI).
+                return npc.type == NPCID.TheDestroyer ||
+                       npc.type == NPCID.TheDestroyerBody ||
+                       npc.type == NPCID.TheDestroyerTail;
+            }
+            catch { return false; }
+        }
+
+        /// <summary>v6.185 — ¿Es una pieza del DEVORAMUNDO (Eater of Worlds)?
+        /// El gusano de la Corruption — el único con el gatillo del primer
+        /// golpe.</summary>
+        public static bool EsSegmentoDelDevoramundo(NPC npc)
+        {
+            if (npc == null || !npc.active) return false;
+            return npc.type == NPCID.EaterofWorldsHead ||
+                   npc.type == NPCID.EaterofWorldsBody ||
+                   npc.type == NPCID.EaterofWorldsTail;
+        }
+
+        /// <summary>v6.185 — ¿Algún segmento de ESTE Devoramundo ya recibió
+        /// su primer golpe (vida < 99 % de la máxima)? La letra: «cuando
+        /// mate el primer segmento tenga menos del 99% de vida». Se miran
+        /// las piezas del mismo gusano (≤ 2600 px de la cabeza, la misma
+        /// ventana de UltimaSeccionDelGusano).</summary>
+        private static bool HaySegmentoDelDevoramundoDanado(NPC pieza)
+        {
+            try
+            {
+                if (pieza == null) return false;
+                NPC cabeza = pieza.type == NPCID.EaterofWorldsHead ? pieza : null;
+                if (cabeza == null)
+                {
+                    float mejor = 2600f * 2600f;
+                    for (int i = 0; i < Main.maxNPCs; i++)
+                    {
+                        NPC n = Main.npc[i];
+                        if (n == null || !n.active || n.type != NPCID.EaterofWorldsHead) continue;
+                        float d = n.Center.DistanceSQ(pieza.Center);
+                        if (d < mejor) { mejor = d; cabeza = n; }
+                    }
+                }
+                if (cabeza == null) return false;
+                for (int i = 0; i < Main.maxNPCs; i++)
+                {
+                    NPC n = Main.npc[i];
+                    if (n == null || !n.active || !EsSegmentoDelDevoramundo(n)) continue;
+                    if (n.lifeMax <= 0) continue;
+                    if (n.Center.DistanceSQ(cabeza.Center) > 2600f * 2600f) continue;   // otro gusano
+                    if (n.life > 0 && n.life < n.lifeMax * 0.99f) return true;
+                }
+                return false;
             }
             catch { return false; }
         }
@@ -517,7 +584,7 @@ namespace AethonMod.Content.Globals
         /// a cualquier jefe, toda actividad del jefe cese» + «todos los
         /// jefes devorados mientras son devorados deben callar en todos
         /// los sentidos»): al ARRANCAR cualquier devoración (cena ·
-        /// festín · pedacito), los proyectiles hostiles que vuelan a
+        /// festín), los proyectiles hostiles que vuelan a
         /// menos de `radio` del preso SE APAGAN con una mota — nada del
         /// jefe sigue volando mientras el libro come.
         /// v6.184 — LA PURGA NO SE COME AL FESTÍN (LA AUTOPSIA v4 del
@@ -549,74 +616,6 @@ namespace AethonMod.Content.Globals
                     }
                     p.Kill();
                 }
-            }
-            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FaucesGlobalNPC", exRegistro); }
-        }
-
-        // ================================================================
-        //  v6.180 — EL PEDACITO: EL MOTOR (en el PreAI de la cabeza y
-        //  de la cola). La cabeza ESPERA a que la cadena nazca y sirve
-        //  el festín sobre LA COLA; la cola muere de verdad al final
-        //  del cine y el grimorio dice lo que piensa.
-        // ================================================================
-        private void ServirElPedacito(NPC cabeza)
-        {
-            try
-            {
-                if (cabeza == null || !cabeza.active) return;
-                NPC cola = UltimaSeccionDelGusano(cabeza);
-                if (cola == null || !cola.active || cola.whoAmI == cabeza.whoAmI) cola = cabeza;
-                if (!cola.TryGetGlobalNPC<FaucesGlobalNPC>(out var gCola)) return;
-                gCola.PedacitoVivo = true;
-                gCola.PedacitoTick = 0;
-                gCola.PedacitoPortador = PedacitoPortador;
-                // v6.184 — LA PURGA PRIMERO, LA BOCA DESPUÉS (la lección del
-                // banco: el clásico purga ANTES de parir la bruma — el
-                // pedacito purgaba DESPUÉS y mataba a su propia animación)
-                PurgarProyectilesDelJefe(cola, 700f);
-                // LA ANIMACIÓN ANTERIOR: la bruma del festín de siempre
-                // (el tentáculo que sale del portador y traga la elipse
-                // del preso — estilo 3, La Sombra de la Página).
-                int owner = Math.Max(0, PedacitoPortador);
-                int idx = Projectile.NewProjectile(cola.GetSource_FromAI(),
-                    cola.Center, Vector2.Zero,
-                    ModContent.ProjectileType
-                        <global::AethonMod.Content.Projectiles.Sombras.FauceDevoradorProjectile>(),
-                    0, 0f, owner, cola.whoAmI, 3f);
-                if (idx >= 0)
-                {
-                    Main.projectile[idx].timeLeft = 340;
-                    Main.projectile[idx].localAI[0] = owner;
-                }
-                Terraria.Audio.SoundEngine.PlaySound(
-                    SoundID.Item122.WithPitchOffset(-0.5f).WithVolumeScale(0.75f), cola.Center);
-                cola.netUpdate = true;
-            }
-            catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FaucesGlobalNPC", exRegistro); }
-        }
-
-        /// <summary>EL CIERRE del pedacito: la sección muere DE VERDAD
-        /// (loot, banderas — la muerte normal de una sección) y el
-        /// grimorio dice lo que piensa: «un pedacito es suficiente».</summary>
-        private void TerminarElPedacito(NPC cola)
-        {
-            try
-            {
-                PedacitoVivo = false;
-                PedacitoTick = 0;
-                cola.dontTakeDamage = false;
-                cola.netUpdate = true;
-                // LA PALABRA: lo que piensa del Devorador + el pedacito
-                Player portador = PedacitoPortador >= 0 && PedacitoPortador < Main.maxPlayers
-                    ? Main.player[PedacitoPortador] : null;
-                if (portador != null && portador.active)
-                    global::AethonMod.Content.Systems.EcoRed.HablarAlPortador(portador,
-                        "Mods.AethonMod.Devorador.Pedacito",
-                        new Color(196, 138, 255));
-                PedacitoPortador = -1;
-                // LA MUERTE REAL: la sección cae con SU muerte normal
-                cola.life = 0;
-                cola.checkDead();
             }
             catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FaucesGlobalNPC", exRegistro); }
         }
@@ -820,6 +819,14 @@ namespace AethonMod.Content.Globals
                     return true;
                 }
                 NPC dueñoCena = DueñoDelPool(npc);
+                // v6.185 — EL DEVORAMUNDO, POR LA COLA también en la muerte
+                //     de un solo golpe (la regla v6.154: la cena se sirve
+                //     sobre la ÚLTIMA sección viva de la cadena).
+                if (dueñoCena != null && EsSegmentoDelDevoramundo(dueñoCena))
+                {
+                    NPC ultima = UltimaSeccionDelGusano(dueñoCena);
+                    if (ultima != null && ultima.active && ultima.life > 0) dueñoCena = ultima;
+                }
                 if (dueñoCena != null && dueñoCena.active &&
                     PrimeraCenaPendiente(dueñoCena, out Player portadorCena))
                 {
@@ -955,31 +962,6 @@ namespace AethonMod.Content.Globals
                 npc.netUpdate = true;
             }
 
-            // ============================================================
-            //  v6.180 — EL PEDACITO DEL DEVORAMUNDOS (la cabeza espera y
-            //  sirve; la cola se deja comer). La cabeza NO se congela:
-            //  el gusano PELEA mientras la bruma se lleva su cola — el
-            //  cine de la sección es el de siempre (FauceDevorador
-            //  sigue a su preso a donde corra).
-            // ============================================================
-            if (PedacitoVivo && npc.active)
-            {
-                // la sección comida: ni golpea ni recibe — la bruma manda
-                npc.damage = 0;
-                npc.dontTakeDamage = true;
-                if (npc.lifeRegen < 0) npc.lifeRegen = 0;
-                if (++PedacitoTick >= LargoFestin) TerminarElPedacito(npc);
-                return true;   // la IA sigue: el gusano huye con su herida
-            }
-            if (PedacitoEspera > 0 && npc.active)
-            {
-                if (--PedacitoEspera == 0)
-                {
-                    ServirElPedacito(npc);
-                    PedacitoEspera = 0;
-                }
-            }
-
             // === v6.50.115 — EL GUARDIÁN DE LA MAZMORRA NO CRUZA (el
             //     easter egg de la letra: «en su fase de guardián… el
             //     guardia intenta atacar al jugador pero antes de que
@@ -1016,14 +998,36 @@ namespace AethonMod.Content.Globals
                 // no sobre la primera que recibió el golpe.
                 if (dueñoPool != null && EsSegmentoDeGusano(dueñoPool))
                     dueñoPool = UltimaSeccionDelGusano(dueñoPool);
-                if (dueñoPool != null && dueñoPool.active && dueñoPool.life > 0 &&
-                    dueñoPool.life <= VidaUmbralPrimeraCena &&
-                    dueñoPool.TryGetGlobalNPC<FaucesGlobalNPC>(out var gPool) &&
-                    gPool.DevorarEstado == 0 &&
-                    PrimeraCenaPendiente(dueñoPool, out Player portador))
+                if (dueñoPool == null || !dueñoPool.active || dueñoPool.life <= 0) { /* nada */ }
+                else if (dueñoPool.TryGetGlobalNPC<FaucesGlobalNPC>(out var gPool) && gPool.DevorarEstado == 0)
                 {
-                    ArrancarPrimeraCena(dueñoPool, portador);
+                // ============================================================
+                //  v6.185 — EL DEVORAMUNDO CENA AL PRIMER GOLPE (la letra:
+                //  «tienes que asegurarte de que esta vez si haga la
+                //  animacion, cuando mate el primer segmento tenga menos del
+                //  99% de vida y que esto solo funcione con el
+                //  Devoramundo»): para el Eater of Worlds el umbral NO es
+                //  «100 de vida» sino «CUALQUIER segmento por debajo del
+                //  99 %» — el primer golpe enciende la cena, servida sobre
+                //  la ÚLTIMA sección (la regla de la casa v6.154, la misma
+                //  de los demás gusanos). El cine es EL MISMO de los demás
+                //  jefes (ArrancarPrimeraCena: sello · contracción ·
+                //  elevación · presentación · la sombra de la página · el
+                //  trago · muerte real con loot). SOLO LA PRIMERA VEZ del
+                //  portador: las repeticiones (el checklist) vuelven al
+                //  umbral de los 100 — sin cadenas de secciones.
+                // ============================================================
+                if (dueñoPool.life <= VidaUmbralPrimeraCena)
+                {
+                    if (PrimeraCenaPendiente(dueñoPool, out Player portador))
+                        ArrancarPrimeraCena(dueñoPool, portador);
                 }
+                else if (EsSegmentoDelDevoramundo(dueñoPool) && HaySegmentoDelDevoramundoDanado(dueñoPool) &&
+                    PrimeraCenaPendiente(dueñoPool, out Player portadorGolpe, soloPrimeraVez: true))
+                {
+                    ArrancarPrimeraCena(dueñoPool, portadorGolpe);
+                }
+                }   // fin del else-if del umbral (los 100 o el primer golpe)
                 }   // fin del else del gusano invocado
             }
 
@@ -1197,108 +1201,6 @@ namespace AethonMod.Content.Globals
         {
             try
             {
-                // ============================================================
-                //  v6.180 — EL PEDACITO DEL DEVORAMUNDOS (la letra: «la
-                //  animacion con el Devoramundos nunca ocurre asi que es
-                //  mejor mantener la animacion anterior donde solo comia
-                //  una seccion, que ocurra la primera vez que aparece el
-                //  Devoramundos y que al igual que los demas jefes su
-                //  festin se reinicie con la pagina en blanco, y bueno
-                //  que se coma solo una seccion, luego diga su dialogo
-                //  de lo que piensa, y que añade que un pedacito es
-                //  suficiente»).
-                //
-                //  LA AUTOPSIA de la aspiradora: el reloj de la 2ª
-                //  invocación EXACTA («== 2») dependía de una marca que
-                //  nacía solo de la llamada del portador (ítem en la
-                //  mano · pilar) — y en la práctica JAMÁS caía. MUERE
-                //  entera (proyectil, congelado y contador incluidos).
-                //
-                //  EL PEDACITO (la animación ANTERIOR, la de siempre):
-                //  la PRIMERA vez que el Devoramundos APARECE (una vez
-                //  por portador — la Página en Blanco lo devuelve a la
-                //  mesa), el grimorio se come UNA SOLA SECCIÓN: LA
-                //  COLA (la regla de la casa v6.154: «el grimorio solo
-                //  come la ultima») con la bruma del festín de siempre
-                //  (FauceDevoradorProjectile), la sección muere de
-                //  verdad (loot normal) y el grimorio dice lo que
-                //  piensa — «un pedacito es suficiente». El resto del
-                //  gusano pelea normal: el festín clásico sigue
-                //  EXCLUYÉNDOLO (EsGusanoInvocado).
-                // ============================================================
-                if (npc.type == NPCID.EaterofWorldsHead)
-                {
-                    if (Main.netMode == NetmodeID.MultiplayerClient) return;
-                    // ========================================================
-                    //  v6.182 — LA AUTOPSIA DEL FESTÍN QUE NO INICIABA (la
-                    //  letra: «la animacion de festin de devorar del
-                    //  grimorio no inicio con el Devoramundos»): LA
-                    //  v6.180 armaba el pedacito con LA PRIMERA cabeza de
-                    //  Devorador que naciera CERCA del portador — y LAS
-                    //  OLEADAS DE HAMBRE también paren cabezas de
-                    //  Devorador (GrimorioFuriaSistema.LosSeis: el
-                    //  Devorador es UNO de los seis guardianes, y nacen
-                    //  FUERA DE PANTALLA): el primer guardián de oleada
-                    //  SE COMÍA la marca (el pedacito servido en la
-                    //  bruma, lejos de la vista — y el diálogo
-                    //  «asqueroso» sonando en plena oleada) y cuando el
-                    //  portador invocaba al Devoramundos DE VERDAD, su
-                    //  marca ya estaba gastada: NADA.
-                    //
-                    //  LA CURA — LA MARCA DE LA LLAMADA (el patrón R26 de
-                    //  la v6.179, hecho derecha): el pedacito SOLO se
-                    //  arma con la cabeza nacida de UNA INVOCACIÓN
-                    //  REAL del portador (el pilar · la comida de gusano
-                    //  dentro del interior · la comida de gusano del
-                    //  mundo real — InteriorInvocaGlobalItem marca la
-                    //  llamada ANTES de parir la cabeza; PrismaInteriorUI
-                    //  también). Las oleadas, los orbes rotos y cualquier
-                    //  otro nacimiento JAMÁS queman la marca.
-                    // ========================================================
-                    // v6.183 — LA APARICIÓN ES LA LLAVE (la letra:
-                    // «podrias hacer que a penas aparezca el
-                    // Devoramundo el grimorio del eterno arranque una
-                    // seccion y se la coma cumpliendo asi el evento de
-                    // Festin»). LA MARCA DE LA LLAMADA MUERE: dependía
-                    // del CAMINO de invocación (pilar · comida de gusano)
-                    // y los cerrojos quemados en la era v6.180/.181 por
-                    // los guardianes de oleada dejaron el festín muerto
-                    // para siempre. AHORA: la PRIMERA VEZ que el
-                    // Devoramundo APARECE a ≤2600 px de un portador CON
-                    // EL LIBRO, el pedacito se sirve — el evento es LA
-                    // APARICIÓN. (El ancla del pilar nace a 100 tiles =
-                    // 1600 px del pilar: dentro. La comida de gusano y
-                    // los orbes rotos: al lado del portador: dentro.)
-                    // El cerrojo de una-vez-por-portador sigue vivo (la
-                    // Página en Blanco lo devuelve a la mesa) y LOS
-                    // GUARDIANES DE OLEADA VETAN la mesa el mismo tick
-                    // en que nacen (abajo, en GrimorioFuriaSistema).
-                    Player portador = null;
-                    float mejorD = 2600f * 2600f;
-                    for (int i = 0; i < Main.maxPlayers; i++)
-                    {
-                        Player p = Main.player[i];
-                        if (p == null || !p.active || p.dead) continue;
-                        if (!TieneEternoEnInventario(p)) continue;   // el festín es del LIBRO: sin libro no hay festín
-                        float d = p.Center.DistanceSQ(npc.Center);
-                        if (d < mejorD) { mejorD = d; portador = p; }
-                    }
-                    if (portador != null && npc.TryGetGlobalNPC<FaucesGlobalNPC>(out var gPedacito))
-                    {
-                        var spPedacito = portador.GetModPlayer<Players.ShardPlayer>();
-                        if (spPedacito != null && !spPedacito.DevoramundosPedacito)
-                        {
-                            // el festín se SIRVE una sola vez por
-                            // portador (la Página en Blanco la borra con
-                            // el olvido)
-                            spPedacito.DevoramundosPedacito = true;
-                            gPedacito.PedacitoEspera = 150;   // ~2,5 s: que la cadena nazca
-                            gPedacito.PedacitoPortador = portador.whoAmI;
-                            npc.netUpdate = true;
-                        }
-                    }
-                    return;   // la cabeza del gusano no sigue por el guardián
-                }
 
                 if (npc.type != NPCID.DungeonGuardian) return;         // solo la puerta de la mazmorra
                 if (Main.netMode == NetmodeID.MultiplayerClient) return;   // la autoridad decide
@@ -1336,7 +1238,6 @@ namespace AethonMod.Content.Globals
             }
             catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("FaucesGlobalNPC", exRegistro); }
         }
-
 
         /// <summary>
         /// EL EASTEREGG DEL GUARDIÁN (v6.50.115): el Guardián de la
@@ -1552,6 +1453,17 @@ namespace AethonMod.Content.Globals
             //     loot completo, bestiario, banners, downed* ===
             if (t >= LargoPrimeraCena)
             {
+                // v6.185 — LA PALABRA DEL DEVORAMUNDO (la letra aprobada en
+                //     la ronda del pedacito, conservada): al cerrar la cena
+                //     del Eater of Worlds el grimorio dice lo que piensa de
+                //     él — «un pedacito es suficiente».
+                if (EsSegmentoDelDevoramundo(npc) && _cenaPortador >= 0 && _cenaPortador < Main.maxPlayers)
+                {
+                    Player portadorCena = Main.player[_cenaPortador];
+                    if (portadorCena != null && portadorCena.active)
+                        global::AethonMod.Content.Systems.EcoRed.HablarAlPortador(portadorCena,
+                            "Mods.AethonMod.Devorador.Pedacito", new Color(196, 138, 255));
+                }
                 DevorarEstado = 2;
                 _cenaActiva = -1;
                 _cenaPortador = -1;
@@ -1671,9 +1583,6 @@ namespace AethonMod.Content.Globals
         {
             if (DevorarEstado == 1 && FaseFestin >= 2) return false;
             if (DevorarEstado == ESTADO_PRIMERA_CENA && DevorarTick >= 260) return false;
-            // v6.180 — EL PEDACITO: la sección comida se RETIRA cuando
-            // la bruma ya la cubre (el mismo compás del festín clásico)
-            if (PedacitoVivo && PedacitoTick >= 60) return false;
             return true;
         }
 

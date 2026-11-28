@@ -60,6 +60,21 @@ namespace AethonMod.Content.Projectiles.Cosmetic
 
         private float _edad;    // el compás del mini-estallido
         private int _curas;     // el tope de gratitud (5 × 1%)
+
+        /// <summary>v6.185 — EL INICIO DEL ESTALLIDO: 45 ticks de recogida
+        /// (el contrato de la mascota)… o 0 en el modo NACIMIENTO INMEDIATO
+        /// (ai[1] = -3 — la letra del Rayo de Prueba C: «al momento de
+        /// aparecer en la base use una explosión de luz»: sin telegrafo,
+        /// la luz estalla EN el tick de nacer). Estático en su punto (no
+        /// cabalga ninguna fuente) y con la escala abierta de ai[2].</summary>
+        private float Inicio => Projectile.ai[1] == -3f ? 0f : 45f;
+
+        public override void OnSpawn(Terraria.DataStructures.IEntitySource source)
+        {
+            // el modo inmediato vive lo que dura su espectáculo (12 de
+            // crecimiento + 50 de ardor + 70 de disolución + margen)
+            if (Projectile.ai[1] == -3f) Projectile.timeLeft = 140;
+        }
         // v6.156 — EL BARRIDO DE LA MANIFESTACIÓN: el frente de la onda
         // de aberración cromática (px de radio — crece a GRAN velocidad
         // barriendo la pantalla; -1 = todavía no nació).
@@ -128,10 +143,10 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 }
             }
 
-            if (_edad <= 45f)
+            if (_edad < Inicio)
             {
                 // === LA RECOGIDA: la luz crece y las motas caen al centro ===
-                float c = _edad / 45f;
+                float c = _edad / MathF.Max(1f, Inicio);
                 Lighting.AddLight(Projectile.Center,
                     0.40f + 0.75f * c, 0.34f + 0.64f * c, 0.22f + 0.42f * c);
 
@@ -150,7 +165,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
             else
             {
                 // === EL ESTALLIDO: la ventana de la onda y el espectáculo ===
-                float tB = _edad - 45f;
+                float tB = _edad - Inicio;
 
                 // el daño VIVE solo en la ventana de la onda (8 t) — después
                 // el cuerpo es puro espectáculo (la regla de la .53).
@@ -249,7 +264,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
         /// </summary>
         public override void ModifyDamageHitbox(ref Rectangle hitbox)
         {
-            if (_edad > 45f && _edad <= 53f)
+            if (_edad > Inicio && _edad <= Inicio + 8f)
             {
                 const int inflar = 250; // 20 → 270 px de onda (radio 135)
                 hitbox.X -= inflar / 2;
@@ -314,11 +329,11 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 Vector2 pos = Projectile.Center - Main.screenPosition;
 
                 // === FASE 1 — LOS QUADS (coords de MUNDO) ===
-                if (_edad <= 45f)
+                if (_edad < Inicio)
                 {
                     // LA RECOGIDA: el núcleo que se llena y LAS 6 AGUJAS
                     // convergiendo (la .53 a escala de bolsillo).
-                    float c = _edad / 45f;
+                    float c = _edad / MathF.Max(1f, Inicio);
                     VFXCore.Quad(Projectile.Center, OroGrimorio * (0.20f + 0.25f * c),
                         new Vector2((30f + 34f * c) * escDios, (30f + 34f * c) * escDios));
                     for (int i = 0; i < 6; i++)
@@ -333,7 +348,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 }
                 else
                 {
-                    float tB = _edad - 45f;
+                    float tB = _edad - Inicio;
                     // EL TEMPO del jefe: crece (12 t), ARDE (50) y se disuelve.
                     float crec = Math.Min(1f, tB / 12f);
                     float fade = tB < 50f ? 1f : Math.Max(0f, 1f - (tB - 50f) / 70f);
@@ -400,13 +415,13 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                     SamplerState.LinearClamp, DepthStencilState.None, RasterizerState.CullNone,
                     null, Main.GameViewMatrix.TransformationMatrix);
 
-                if (_edad <= 45f)
+                if (_edad < Inicio)
                 {
                     // LA RECOGIDA: v6.50.56 — EL ARO DEL LÍMITE MURIÓ (la
                     // letra: «quitalo, solo debe estar el brillo»): queda el
                     // NÚCLEO que se llena (las agujas convergentes viven en
                     // la FASE 1 — son líneas, no aros).
-                    float c = _edad / 45f;
+                    float c = _edad / MathF.Max(1f, Inicio);
                     LumenLib.Bloom(Main.spriteBatch, pos, (22f + 26f * c) * escDios,
                         OroGrimorio, 0.35f + 0.35f * c, 3);
 
@@ -453,7 +468,7 @@ namespace AethonMod.Content.Projectiles.Cosmetic
                 }
                 else
                 {
-                    float tB = _edad - 45f;
+                    float tB = _edad - Inicio;
                     float crecS = Math.Min(1f, tB / 14f);
                     float fadeS = tB < 50f ? 1f : Math.Max(0f, 1f - (tB - 50f) / 70f);
                     float respira = 0.95f + 0.05f * MathF.Sin(t * 4.2f);

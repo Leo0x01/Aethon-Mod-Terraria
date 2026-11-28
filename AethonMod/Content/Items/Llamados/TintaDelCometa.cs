@@ -105,6 +105,11 @@ namespace AethonMod.Content.Items.Llamados
                         EcoRed.AnunciarAlPortador(player,
                             "Mods.AethonMod.Caida.TintaEnVuelo", TinteCaida);
                         break;
+                    case 3:
+                        // v6.185 — quien ya porta el Eterno no fuerza el cielo.
+                        EcoRed.AnunciarAlPortador(player,
+                            "Mods.AethonMod.Caida.TintaConGrimorio", TinteCaida);
+                        break;
                 }
             }
             catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("TintaDelCometa", exRegistro); }

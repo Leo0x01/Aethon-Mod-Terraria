@@ -1203,27 +1203,6 @@ namespace AethonMod.Content.Systems
                 if (jefe.TryGetGlobalNPC<OleadaNPC>(out var selloJuicio))
                     selloJuicio.Marcar(jefe, 11, jefe: true, especial: true);
                 jefe.netUpdate = true;
-                // v6.183 — EL VETO DEL GUARDIÁN DE OLEADA (la letra del
-                // festín: «a penas aparezca el Devoramundo»): si ESTA
-                // cabeza de Devorador prendió la mesa del pedacito al
-                // nacer (apareció cerca de un portador), el Juicio la
-                // APAGA el mismo tick: los guardianes de oleada nacen en
-                // el BORDE DEL CUADRO y JAMÁS son el Devoramundo del
-                // festín — el cerrojo vuelve a la mesa y la espera muere
-                // sin servir nada.
-                if (tipo == NPCID.EaterofWorldsHead &&
-                    jefe.TryGetGlobalNPC<Globals.FaucesGlobalNPC>(out var gVeto) &&
-                    gVeto.PedacitoEspera > 0)
-                {
-                    gVeto.PedacitoEspera = 0;
-                    if (gVeto.PedacitoPortador >= 0 && gVeto.PedacitoPortador < Main.maxPlayers)
-                    {
-                        var spVeto = Main.player[gVeto.PedacitoPortador]?
-                            .GetModPlayer<Players.ShardPlayer>();
-                        if (spVeto != null) spVeto.DevoramundosPedacito = false;
-                    }
-                    gVeto.PedacitoPortador = -1;
-                }
 
                 _spawneados++;
 
@@ -1609,27 +1588,6 @@ namespace AethonMod.Content.Systems
                 if (jefe.TryGetGlobalNPC<OleadaNPC>(out var selloGuardian))
                     selloGuardian.Marcar(jefe, _oleadaActual, jefe: true, nivel: _nivelFuria);
                 jefe.netUpdate = true;
-                // v6.183 — EL VETO DEL GUARDIÁN DE OLEADA (la letra del
-                // festín: «a penas aparezca el Devoramundo»): si ESTA
-                // cabeza de Devorador prendió la mesa del pedacito al
-                // nacer (apareció cerca de un portador), el Juicio la
-                // APAGA el mismo tick: los guardianes de oleada nacen en
-                // el BORDE DEL CUADRO y JAMÁS son el Devoramundo del
-                // festín — el cerrojo vuelve a la mesa y la espera muere
-                // sin servir nada.
-                if (tipo == NPCID.EaterofWorldsHead &&
-                    jefe.TryGetGlobalNPC<Globals.FaucesGlobalNPC>(out var gVeto) &&
-                    gVeto.PedacitoEspera > 0)
-                {
-                    gVeto.PedacitoEspera = 0;
-                    if (gVeto.PedacitoPortador >= 0 && gVeto.PedacitoPortador < Main.maxPlayers)
-                    {
-                        var spVeto = Main.player[gVeto.PedacitoPortador]?
-                            .GetModPlayer<Players.ShardPlayer>();
-                        if (spVeto != null) spVeto.DevoramundosPedacito = false;
-                    }
-                    gVeto.PedacitoPortador = -1;
-                }
                 // v6.50.72 — LA REGLA DE LOS ÚLTIMOS DOS: el guardián que
                 // acaba de nacer queda VETADO para las DOS oleadas que
                 // siguen (el sorteo lo excluye; la historia se desplaza)

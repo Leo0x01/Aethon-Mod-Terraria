@@ -419,6 +419,17 @@ namespace AethonMod.Content.Systems
                         // «un grimorio por alma» vive donde siempre vivió:
                         // en LA TOMA (el gate del grimorio murió en la
                         // .121 — TomarElLibro rechaza al portador).
+                        // v6.185 — LA LLEGADA ES DEL QUE NO TIENE EL GRIMORIO
+                        //     (la letra: «asegurate de que solo suceda solo
+                        //     si el jugador no tiene el grimorio y solo si
+                        //     nunca a visto el evento de la llegada en ese
+                        //     mundo especifico»): quien ya porta el Eterno
+                        //     NUNCA ve el evento — el gate de la .121 había
+                        //     muerto para el kit de pruebas, y el usuario veía
+                        //     la llegada REPETIRSE mundo tras mundo con el
+                        //     libro encima. El cometa es para quien aún no
+                        //     tiene libro; el que ya lo tiene, no lo ve.
+                        if (TieneGrimorio(p)) continue;
                         if (_cayoEnEsteMundo.Contains(p.name)) continue;
                         if (YaEsperaLibro(p.name)) continue;
                         // v6.50.126 — ni cometa YA en vuelo: los TRES
@@ -456,6 +467,8 @@ namespace AethonMod.Content.Systems
                     {
                         Player p = Main.player[i];
                         if (p == null || !p.active || p.dead) continue;
+                        // v6.185 — la misma regla del grimorio en el failsafe.
+                        if (TieneGrimorio(p)) continue;
                         if (_cayoEnEsteMundo.Contains(p.name)) continue;
                         if (YaEsperaLibro(p.name)) continue;
                         if (LlegadaEnMarcha(i)) continue;
@@ -548,6 +561,11 @@ namespace AethonMod.Content.Systems
                 if (global::AethonMod.Content.Systems.SubmundoGrimorio.Activo) return -1;
                 if (p == null || !p.active || p.dead || string.IsNullOrEmpty(p.name)) return -1;
 
+                // v6.185 — LA TINTA TAMBIÉN RESPETA EL LIBRO (la letra: la
+                //     llegada solo es de quien NO tiene el grimorio): quien
+                //     ya porta el Eterno no puede forzar el cielo — la tinta
+                //     le explica por qué (código 3).
+                if (TieneGrimorio(p)) return 3;
                 if (YaEsperaLibro(p.name)) return 1;
                 if (LlegadaEnMarcha(p.whoAmI)) return 2;
 

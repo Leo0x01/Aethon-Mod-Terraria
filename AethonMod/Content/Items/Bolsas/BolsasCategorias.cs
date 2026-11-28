@@ -258,12 +258,10 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Weapons.Cosmic.DecretoEclipseStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.Cosmic.CometaErranteStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.Cosmic.NovaEncadenadaStaff>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Cosmic.VozCuasarStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.Cosmic.TelarConstelacionesStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.Cosmic.LluviaMeteorosStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.Cosmic.AbrazoNebulosaStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.Cosmic.FiloHorizonteStaff>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Cosmic.RayoGammaStaff>(), 1));
             return l;
         }
     }
@@ -290,7 +288,6 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Weapons.Cosmic.LanzaAlbaStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.Cosmic.EclipsePrimordialStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.Cosmic.StormRuneStaff>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Cosmic.DesgarroRealityStaff>(), 1));
             // v6.50.18 — EL CETRO DEL TRUENO PERLIN: el séptimo concierto
             // (la librería nueva de rayos por ruido de Perlin).
             l.Add((ModContent.ItemType<Weapons.Cosmic.TruenoPerlinStaff>(), 1));
@@ -314,7 +311,6 @@ namespace AethonMod.Content.Items.Bolsas
             l.Add((ModContent.ItemType<Weapons.Cosmic.EnjambrePrismaticoStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.Cosmic.PenduloJuicioStaff>(), 1));
             l.Add((ModContent.ItemType<Weapons.Cosmic.CoroEspectralStaff>(), 1));
-            l.Add((ModContent.ItemType<Weapons.Cosmic.OcasoAethonStaff>(), 1));
             return l;
         }
     }
@@ -426,7 +422,6 @@ namespace AethonMod.Content.Items.Bolsas
         protected override List<(int tipo, int pila)> Contenido()
         {
             var l = new List<(int, int)>();
-            l.Add((ModContent.ItemType<DesgarroRealityStaff>(), 1));
             l.Add((ModContent.ItemType<SuturaCuanticaStaff>(), 1));
             l.Add((ModContent.ItemType<PortalDimensionalStaff>(), 1));
             l.Add((ModContent.ItemType<PliegueEspacioStaff>(), 1));

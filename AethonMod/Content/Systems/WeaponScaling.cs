@@ -233,6 +233,12 @@ namespace AethonMod.Content.Systems
             d *= 1f + Players.ShardPlayer.BonusDanoEsencias(p) *
                 Content.Globals.AlmaEternoGlobalItem.FactorDelLibro(p);
 
+            // v6.185 — EL ATAQUE BASE DE LA ESTRELLA AL 70 % (la letra: «el
+            //     70 % de ese ataque base final se suma al daño de
+            //     invocacion final»): se SUMA al final, después de todos
+            //     los multiplicadores del ojo.
+            d += 0.70f * Content.Systems.DespertarGrimorio.AtaqueBaseEstrella(despertar);
+
             // 6) v6.90 — LA CIMA YA NO SE HORNEA (la auditoría de las
             //    stats de la letra: «asegurate de que todas las
             //    estadisticas del grimorio del eterno se cumplan»): el

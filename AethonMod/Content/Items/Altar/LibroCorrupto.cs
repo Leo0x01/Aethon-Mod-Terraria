@@ -25,14 +25,19 @@ namespace AethonMod.Content.Items.Altar
     //  el requisito del despertar el nivel 20 sera marcado como valido
     //  sin importar en que nivel este su despertar actual».
     //
-    //  LAS TRES FUENTES DE LA LETRA:
+    //  LAS FUENTES DE LA LETRA:
+    //   · v6.185 — 50% AL VENCER CUALQUIER JEFE (CazaJefesGlobalNPC): la
+    //     fuente principal — una tirada por jefe (la ÚLTIMA pieza de los
+    //     jefes de varios cuerpos), y NUNCA si el cazador ya lleva el libro
+    //     en el inventario o ya lo consumió.
     //   · 1% rompiendo LIBROS de la mazmorra (LibrosDeLaMazmorraTile,
     //     aquí mismo — el GlobalTile de los TileID.Books en la mazmorra).
     //   · 1% abriendo COFRES (LaRuletaDeLosCofres — vive en
     //     DespertarGrimorioSistema, el pulso de la casa).
-    //   · 50% la MURALLA DE CARNE lo suelta directo (CazaJefesGlobalNPC).
-    //  EL SELLO DEL UNO POR CAZADOR: OnPickup — quien ya levantó el
-    //  suyo NO puede levantar otro (return false: el libro rebota).
+    //  EL SELLO DEL INVENTARIO (v6.185, la letra: «si ya esta en el
+    //  inventario del jugador este no sale»): OnPickup rebota el libro a
+    //  quien ya lleva uno o ya consumió el suyo; quien lo perdió vuelve a
+    //  tener derecho (ElLibroPuedeCaerle).
     // ======================================================================
     public class LibroCorrupto : ModItem
     {
@@ -90,10 +95,13 @@ namespace AethonMod.Content.Items.Altar
                 bool esDueno = !string.IsNullOrEmpty(RecibidoPor) &&
                     RecibidoPor == player.name;
 
-                // v6.97 — SOLO PARA QUIEN NO LO HA CONSUMIDO NI LO HA
-                //     RECIBIDO (el dueño recoge el suyo del suelo).
-                if (!esDueno && cazador != null &&
-                    (cazador.LibroUsado || cazador.LibroRecibido))
+                // v6.185 — LA REGLA DEL INVENTARIO (la letra: «si ya esta
+                //     en el inventario del jugador este no sale»): quien
+                //     ya consumió el suyo tampoco lo levanta; el sello del
+                //     «recibido» YA NO BLOQUEA la recogida (los jefes son
+                //     la fuente principal: quien perdió su libro vuelve a
+                //     tener derecho). El dueño recoge el suyo del suelo.
+                if (!esDueno && cazador != null && cazador.LibroUsado)
                     return false;
 
                 // LA ÚNICA CAÍDA queda sellada con la recogida.
@@ -196,10 +204,10 @@ namespace AethonMod.Content.Items.Altar
             return false;
         }
 
-        /// <summary>v6.97 — ¿Hay UN cazador cerca que TODAVÍA no recibió
-        /// su libro? (la única caída de la letra: si todos los presentes
-        /// ya recibieron o consumieron el suyo, el libro NO cae — solo
-        /// aparece para quien aún no lo ha consumido).</summary>
+        /// <summary>v6.185 — ¿Hay UN cazador cerca al que el libro le
+        /// PUEDE caer? (la regla del INVENTARIO de la letra: quien ya lo
+        /// lleva encima o ya lo consumió no lo recibe; quien lo perdió,
+        /// sí). Si todos los presentes ya lo llevan, el libro NO cae.</summary>
         private static bool AlgunCazadorHambriento(int i, int j)
         {
             Vector2 pos = new Vector2(i * 16f + 8f, j * 16f + 8f);
@@ -210,7 +218,7 @@ namespace AethonMod.Content.Items.Altar
                 if (pl.Center.DistanceSQ(pos) > 700f * 700f) continue;
                 var cazador = pl.GetModPlayer<Players.CazaJefesPlayer>();
                 if (cazador == null) continue;
-                if (!cazador.LibroUsado && !cazador.LibroRecibido) return true;
+                if (Systems.DespertarGrimorioSistema.ElLibroPuedeCaerle(pl, cazador)) return true;
             }
             return false;
         }

@@ -82,15 +82,21 @@ namespace AethonMod.Content.Projectiles.Cosmic
 
             // === LA DERIVA LENTA: la enana CAMINA, no persigue ===
             Projectile.velocity *= 0.985f;
-            NPC prey = FindNearestEnemy(420f);
+            // v6.185 — EL SEGUIMIENTO HEREDADO (ai[2] > 0: la velocidad de
+            //     caza que presta la estrella del grimorio — «seguira
+            //     agresivamente a los enemigos»): 600 px de caza y un empuje
+            //     firme; sin ai[2], la deriva de siempre.
+            bool heredada = Projectile.ai[2] > 0f;
+            NPC prey = FindNearestEnemy(heredada ? 600f : 420f);
             if (prey != null)
             {
                 Vector2 toPrey = prey.Center - Projectile.Center;
                 float len = toPrey.Length();
                 if (len > 80f && len > 0.01f)
-                    Projectile.velocity += toPrey / len * 0.25f;
-                if (Projectile.velocity.Length() > 1.5f)
-                    Projectile.velocity = Vector2.Normalize(Projectile.velocity) * 1.5f;
+                    Projectile.velocity += toPrey / len * (heredada ? 0.80f : 0.25f);
+                float tope = heredada ? Projectile.ai[2] : 1.5f;
+                if (Projectile.velocity.Length() > tope)
+                    Projectile.velocity = Vector2.Normalize(Projectile.velocity) * tope;
             }
 
             // === ¿ESTÁ ACRECIENDO? (un enemigo a <150 px enciende el disco) ===

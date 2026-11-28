@@ -191,7 +191,12 @@ namespace AethonMod.Content.Systems
                     //     nivel de despertar de 20 o superior es que dejan
                     //     de salir»): mientras no haya usado el suyo, la
                     //     ruleta SIGUE viva para él.
-                    if (ElLibroYaNoLeToca(p, cazador)) continue;
+                    // v6.185 — LA REGLA DEL INVENTARIO (la letra: «si ya esta
+                    //     en el inventario del jugador este no sale"): las
+                    //     fuentes del mundo (cofres, criaturas, jefes) miran
+                    //     el INVENTARIO y el consumo — no el sello de la
+                    //     víspera (que sigue siendo UNA por cazador).
+                    if (!ElLibroPuedeCaerle(p, cazador)) continue;
 
                     if (!_cofresRuletados.TryGetValue(i, out var hechos))
                     { hechos = new HashSet<int>(); _cofresRuletados[i] = hechos; }
@@ -234,10 +239,9 @@ namespace AethonMod.Content.Systems
 
                     var cazador = p.GetModPlayer<Players.CazaJefesPlayer>();
                     if (cazador == null) return;
-                    // v6.91 — la misma computa nueva: sin usar (o con el
-                    //     grimorio bajo el 20), las criaturas SIGUEN
-                    //     tirando la carta del libro.
-                    if (ElLibroYaNoLeToca(p, cazador)) return;
+                    // v6.185 — la misma regla del inventario para la carta
+                    //     de las criaturas.
+                    if (!ElLibroPuedeCaerle(p, cazador)) return;
 
                     // LA TIRADA: 2% en la mazmorra · 1% en el resto.
                     int caras = p.ZoneDungeon ? 50 : 100;
@@ -390,6 +394,31 @@ namespace AethonMod.Content.Systems
                                 mordisco = true;
                             }
                         }
+                    }
+                    // === 2b) LAS ESTRELLAS FUGACES CONSAGRADAS (v6.185 — la letra
+                    //     del ataque básico: «los requisitos de ese nivel de
+                    //     despertar deben incluir cierta cantidad de Estrellas
+                    //     Fugaces… el grimorio solo comera las estrellas
+                    //     consagradas»): SOLO si el peldaño vivo las exige y
+                    //     SOLO LAS QUE FALTAN (la regla de los 30 de 50). Si
+                    //     el peldaño no las pide, la estrella queda en el suelo
+                    //     (no es «fuera de la lista»: es de OTRO peldaño).
+                    else if (drop.type == global::AethonMod.Content.Systems
+                        .DespertarGrimorio.TipoEstrellaFugaz())
+                    {
+                        int faltaEstrellas = DespertarGrimorio.EstrellasPara(siguiente) - alma.OfrendaEstrellas;
+                        if (faltaEstrellas <= 0) continue;
+                        int comeEst = System.Math.Min(faltaEstrellas, drop.stack);
+                        AnimarElBocado(p, drop, 1f);   // el festín chico — el oro (1) de las monedas: la estrella es de oro
+                        alma.OfrendaEstrellas += comeEst;
+                        drop.stack -= comeEst;
+                        if (drop.stack <= 0) drop.TurnToAir();
+                        SincronizarDrop(d);
+                        PolvosDelBocado(p, comeEst);
+                        EcoRed.AnunciarAlPortador(p, "Mods.AethonMod.Despertar.BocadoEstrellas",
+                            new Color(255, 208, 96), comeEst, alma.OfrendaEstrellas,
+                            DespertarGrimorio.EstrellasPara(siguiente));
+                        mordisco = true;
                     }
                     // === 3) SOLO LO LISTADO (v6.97 — la letra nueva: «asegurate
                     //     de que el grimorio coma solo lo que este listado en
@@ -551,6 +580,9 @@ namespace AethonMod.Content.Systems
             if (global::AethonMod.Content.Globals.AlmaEternoGlobalItem
                 .BancoMonedasDisponibles(alma) <
                 DespertarGrimorio.MonedasPara(siguiente)) return false;
+            // v6.185 — LAS ESTRELLAS FUGACES del peldaño que viste a la
+            //     estrella: sin ellas la mesa no está completa.
+            if (alma.OfrendaEstrellas < DespertarGrimorio.EstrellasPara(siguiente)) return false;
             // v6.144 — EL DEVORAR VIVE ARRIBA DEL CIEN (la letra:
             // «despues del nivel 100 dice que devore armas o materiales
             // para despertar, pero no hay nada para devorar, asi que pon
@@ -646,6 +678,29 @@ namespace AethonMod.Content.Systems
                 return false;   // sin recibir: el suyo PUEDE caer (la única vez).
             }
             catch { return true; }
+        }
+
+        /// <summary>v6.185 — ¿El libro PUEDE caerle a este cazador desde las
+        /// FUENTES DEL MUNDO (jefes al 50 %, criaturas, cofres, libros de
+        /// la mazmorra)? LA LETRA NUEVA: «si ya esta en el inventario del
+        /// jugador este no sale» — la regla es el INVENTARIO: quien lleva
+        /// el libro encima no recibe otro; quien ya lo CONSUMIÓ tampoco
+        /// (su puerta del 20 nació paga: el libro ya no le sirve). Quien lo
+        /// recibió y lo perdió (o lo dejó caer para el grimorio) VUELVE a
+        /// tener derecho: los jefes son la fuente principal ahora. El
+        /// sello de la víspera (LibroRecibido, una entrega garantizada por
+        /// cazador) NO se mira aquí — vive en ElLibroYaNoLeToca.</summary>
+        public static bool ElLibroPuedeCaerle(Player p, Players.CazaJefesPlayer cazador)
+        {
+            try
+            {
+                if (p == null || !p.active) return false;
+                if (cazador == null) return false;
+                if (LlevaElLibro(p)) return false;       // ya lo lleva encima
+                if (cazador.LibroUsado) return false;    // ya consumió el suyo
+                return true;
+            }
+            catch { return false; }
         }
 
         /// <summary>El ALMA (el despertar) del grimorio que ESTE jugador
@@ -969,6 +1024,7 @@ namespace AethonMod.Content.Systems
                 // (el banco la entierra): los contadores se limpian por
                 // compatibilidad de los saves, ya nadie los lee.
                 alma.OfrendaEsencias = 0;
+                alma.OfrendaEstrellas = 0;   // v6.185 — las estrellas del peldaño pagado renacen
                 alma.OfrendaMonedas = 0L;
                 alma.OfrendaMineral = 0;
                 alma.OfrendaMineralGrupo = -1;   // v6.89 — la mesa nueva SIN material bloqueado

@@ -169,7 +169,18 @@ def medir():
             clave = kk.group(1)
             if clave.startswith('Mods.AethonMod.'):
                 pedidas.add(clave[len('Mods.AethonMod.'):])
-    m['claves_faltantes_es'] = sorted(p for p in pedidas if p not in es)
+    # v6.185 — LAS BASES DINÁMICAS CONOCIDAS: el código ARMA claves
+    # concatenando («Base.» + nombre · «N» + nivel) y la regex solo ve el
+    # prefijo — no es una clave muerta, es una BASE viva (el Guardián de las
+    # Llaves las resuelve con sus 19 bases dinámicas). El loop las excluye.
+    BASES_DINAMICAS = {
+        'Altar.', 'Armas.DagaInvocada', 'Armas.EscuadronMejora', 'Cronista.LoreHabla',
+        'Duende.Burla', 'Duende.Miedo', 'Hambre.', 'Hambre.Nervioso.', 'Items.',
+        'Items.AuraDeJuicio2Item.', 'Items.CetroDagasEterno.', 'Items.FormaEternaItem.',
+        'Items.MundoInteriorEternoItem.', 'Items.TrioAlbedrio', 'Pergamino.', 'PilarInterior.IraSellado',
+        'Despertar.Estrella.N',   # v6.185 — la forma de la estrella por nivel (N0…N120)
+    }
+    m['claves_faltantes_es'] = sorted(p for p in pedidas if p not in es and p not in BASES_DINAMICAS)
     m['claves_faltantes_es_n'] = len(m['claves_faltantes_es'])
 
     # PNGs

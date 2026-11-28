@@ -418,21 +418,43 @@ namespace AethonMod.Content.Projectiles.Definitivas
         //  mascota de luz Pequeño Recuerdo de Aethon»): al NACER el haz,
         //  SU BASE estalla con la explosión canónica de la casa — la
         //  MISMA de la mascota (MiniEstallidoPet), a escala del arma,
-        //  estática en el punto de nacimiento (ai[1] = -1: no cabalga
-        //  ninguna fuente). La ira (EsIra) no la lleva: la luz de
-        //  nacimiento es del RAYO DE PRUEBA C.
+        //  estática en el punto de nacimiento. La ira (EsIra) no la
+        //  lleva: la luz de nacimiento es del RAYO DE PRUEBA C.
+        //
+        //  v6.185 — LA CURA DE LAS DOS CAUSAS por las que el usuario NO
+        //  LA VEÍA: (1) LA GUARDIA AL REVÉS — el OnSpawn de un proyectil
+        //  de JUGADOR corre SOLO en el cliente del dueño (decompile
+        //  Projectile.NewProjectile: OnSpawn va tras ApplyStatsFromSource
+        //  y el servidor recibe el proyectil por el cable SIN OnSpawn):
+        //  la guardia «netMode == MultiplayerClient → return» mataba al
+        //  ÚNICO que podía parirla. Ahora el patrón de la casa:
+        //  owner == Main.myPlayer (SP y el cliente dueño; netImportant lo
+        //  sincroniza al resto). (2) LOS 45 TICKS DE RECOGIDA — el
+        //  estallido de la mascota TELEGRAFIA 45 t antes de estallar: «al
+        //  momento de aparecer» no se veía NADA hasta 0,75 s después, en
+        //  plena carga del haz. El modo NACIMIENTO INMEDIATO (ai[1] = -3)
+        //  estalla EN el tick 0. Nace en LA BASE del haz (la mano que
+        //  la IA clava en MountedCenter + (13·dir, −20)), a ×1,5.
         // ================================================================
         public override void OnSpawn(Terraria.DataStructures.IEntitySource source)
         {
             try
             {
-                if (EsIra) return;   // solo el rayo de prueba C
-                if (Main.netMode == Terraria.ID.NetmodeID.MultiplayerClient) return;
-                Projectile.NewProjectile(source, Projectile.Center, Microsoft.Xna.Framework.Vector2.Zero,
+                if (EsIra) return;                                  // solo el rayo de prueba C
+                if (Projectile.owner < 0 || Projectile.owner >= Main.maxPlayers) return;
+                if (Projectile.owner != Main.myPlayer) return;    // el cliente del dueño la pare (y la sincroniza)
+
+                Player dueno = Main.player[Projectile.owner];
+                if (dueno == null || !dueno.active) return;
+                int dir = dueno.direction != 0 ? dueno.direction : 1;
+                Vector2 laBase = dueno.MountedCenter + new Vector2(13 * dir, -20f);
+
+                int idx = Projectile.NewProjectile(source, laBase, Microsoft.Xna.Framework.Vector2.Zero,
                     ModContent.ProjectileType
                         <global::AethonMod.Content.Projectiles.Cosmetic.MiniEstallidoPet>(),
                     0, 0f, Projectile.owner,
-                    Projectile.whoAmI * 31f, -1f, 1.30f);
+                    Projectile.whoAmI * 31f + 7f, -3f, 1.5f);
+                if (idx >= 0) Main.projectile[idx].netUpdate = true;
             }
             catch (System.Exception exRegistro)
             { global::AethonMod.Content.Systems.RegistroSistema.Fallo("RayosPrueba.Nacimiento", exRegistro); }

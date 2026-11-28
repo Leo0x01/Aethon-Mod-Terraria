@@ -26,10 +26,22 @@ Items: {
 		Tooltip:
 			'''
 			✦ Un libro con la misma forma que los de la mazmorra… pero NEGRO.
-			· Se consigue: 1% rompiendo libros en la mazmorra · 1% abriendo sus cofres · 50% la Muralla de Carne
-			· Solo 1 en el inventario — y el grimorio lo quiere EN EL SUELO
+			· Se consigue: 50% al vencer CUALQUIER JEFE · 1% rompiendo libros en la mazmorra · 1% abriendo sus cofres
+			· Si ya llevas uno en el inventario, no sale — y el grimorio lo quiere EN EL SUELO
 			· Sin usarlo te pueden caer más — dejan de salir cuando lo USAS y tu grimorio llega al despertar 20
 			· Devorado por debajo del despertar 20: la puerta del 20 queda paga PARA SIEMPRE
+			'''
+	}
+
+	EstrellaFugazConsagrada: {
+		DisplayName: Consecrated Falling Star
+		Tooltip:
+			'''
+			Terraria's falling star wearing a solar glow: consecrated for the Eternal.
+			· Bought from the Chronicler (10 Essences of the Eternal each)
+			· The steps that dress the Grimoire's Star demand it (1 → 1,000)
+			· THROW it on the ground: the grimoire only eats the ones the step still needs
+			· Never vanishes with daylight
 			'''
 	}
 
@@ -529,18 +541,7 @@ Items: {
 			'''
 	}
 
-	OcasoAethonStaff: {
-		DisplayName: Bastón del Ocaso de Aethon
-		Tooltip:
-			'''
-			El arma suprema del medidor: carga → estallido → bloqueo.
-			Cada impacto de un fragmento carga el aro de tu cabeza.
-			Aro lleno: CLIC DERECHO enciende EL OCASO (8 s de muertes de estrella ×3).
-			Bajo el 50% de vida del objetivo, la muerte EJECUTA.
-			Después: 2 s de sobrecalentada. Sin maná.
-			'''
-	}
-
+	// v6.185 — LA EXTIRPACIÓN: OcasoAethonStaff murió con su arma (la letra: «borra las siguientes armas»).
 	TestMagicRing: {
 		DisplayName: Anillo Mágico de Prueba
 		Tooltip: The house's test ring
@@ -1083,19 +1084,7 @@ Items: {
 			'''
 	}
 
-	DesgarroRealityStaff: {
-		// v6.26 — The new arsenal: the reality tear, the real stars,
-		// the stellar life cycle and the five creative staves
-		DisplayName: Bastón del Desgarro en la Realidad
-		Tooltip:
-			'''
-			Dispara un DESGARRO en la realidad.
-			La grieta atraviesa paredes y daña con su línea.
-			Al cerrarse deja una grieta persistente que drena.
-			Mientras vive, el mundo se oscurece herido.
-			'''
-	}
-
+	// v6.185 — LA EXTIRPACIÓN: DesgarroRealityStaff murió con su arma (la letra: «borra las siguientes armas»).
 	SembradorCementeralStaff: {
 		// v6.31 — THE SOWER: the anchoring pulsar of the stellar graveyard
 		DisplayName: Sembrador del Cementerio Estelar
@@ -1166,16 +1155,7 @@ Items: {
 			'''
 	}
 
-	VozCuasarStaff: {
-		DisplayName: La Voz del Cuásar
-		Tooltip:
-			'''
-			Invoca un cuásar que carga 40 ticks y suelta un HAZ CONTINUO de 460 px.
-			El haz PERFORA TODO · DOPPLER: el borde delantero azul, la cola roja.
-			Rebota una vez en las paredes · muere con un destello.
-			'''
-	}
-
+	// v6.185 — LA EXTIRPACIÓN: VozCuasarStaff murió con su arma (la letra: «borra las siguientes armas»).
 	TelarConstelacionesStaff: {
 		DisplayName: El Telar de Constelaciones
 		Tooltip:
@@ -1219,17 +1199,7 @@ Items: {
 			'''
 	}
 
-	RayoGammaStaff: {
-		DisplayName: El Rayo Gamma
-		Tooltip:
-			'''
-			Un haz fino de 700 px cruza TODO al instante... pero aún no hace daño.
-			Cada enemigo tocado queda marcado con un contorno brillante.
-			Tras 30 ticks, todas las marcas liquidan a la vez:
-			clang, destello, daño ×1.0 y quemadura cósmica 5 s.
-			'''
-	}
-
+	// v6.185 — LA EXTIRPACIÓN: RayoGammaStaff murió con su arma (la letra: «borra las siguientes armas»).
 	NeutronStarStaff: {
 		DisplayName: Bastón de la Estrella de Neutrones
 		Tooltip:
@@ -2890,6 +2860,7 @@ Caida: {
 	Devorandose: (el libro tiembla… algo lo está devorando — ya no puede hablar)
 	TintaYaEspera: ✦ El cielo no insiste: TU GRIMORIO YA TE ESPERA entre la bruma.
 	TintaEnVuelo: ✦ TU BRUMA YA NACE frente a ti — espera a que se disipe.
+	TintaConGrimorio: ✦ (the ink dries in the air) The Eternal already walks with you, bearer: THE ARRIVAL belongs to those who do not yet carry the grimoire — and this world has already seen its own. There is no second sky for you.
 	// v6.50.128 — THE DEVOURING ALTAR (the eat-items mechanic)
 	DevoradoSabor1: Mmm. Sabe a casi nada. Aire con forma de recuerdo. Aún así: tragona.
 	DevoradoSabor2: Pasable. Un fondo a lo que fue. La corrupción le da un regusto… interesante.
@@ -2936,6 +2907,38 @@ Despertar: {
 	// eaten becomes 1 gold coin).
 	Migracion: ✦ El despertar y el festín ahora viven EN ESTE grimorio (cada libro, su propia escalera).
 	BocadoEsencias: ✦ El Eterno come {0} esencias del suelo ({1}/{2} del peldaño).
+	BocadoEstrellas: ✦ The Eternal devours {0} Consecrated Falling Star(s) from the ground ({1}/{2} of the step).
+
+	Estrella: {
+		Actual: ★ Grimoire Star (Awakening {0}): {1}
+		Proxima: ★ Next form — Awakening {0}: {1}
+		Maxima: ★ THE COMPLETE STAR — the Eternal's basic attack at 120
+		N0: the BLACK star — no explosion: it fades on walls or enemies
+		N2: slight homing (10 %)
+		N5: the MULTICOLOR star: black · gold · purple · red
+		N10: the small black-hole runic ring
+		N15: the ring changes color (same palette, different order)
+		N20: the small light beams at every tip
+		N25: the beams turn multicolor (another order)
+		N30: EXPLODES — the Symphony's explosion, reduced
+		N35: the COMPLETE Symphony explosion, unchanged
+		N40: homing 20 %
+		N45: homing 30 %
+		N50: homing 40 %
+		N55: +20 % base attack · the SECOND runic ring
+		N75: both rings spin opposite ways · +20 % · homing 60 %
+		N95: each ring's electric arc (counter-rotating) · +20 % · homing 80 %
+		N100: on exploding it becomes the Nebula Storm (2 s) · +20 % · passes through walls
+		N105: the arcs strike nearby foes and jump to new ones (+1 every 3 levels)
+		N110: the Storm also branches its arcs
+		N115: the Storm may implode into the Magnetar (3 s, chases and passes walls)
+		N116: … or into the White Dwarf (same behavior)
+		N117: … or into the Dead Star (10 % less homing)
+		N118: EVERYTHING applies Void Burn
+		N119: 3 %: one Page Shadow carrying all your damage (2 s)
+		N120: 5 %: five Shadows (5 s, burn 10 s) · +20 %
+	}
+
 	BocadoMonedas: ✦ El Eterno devora las monedas del suelo (+{0} al banco del despertar).
 	BocadoMineral: ✦ El Eterno come {0} del material del suelo ({1}/{2} de la opción).
 	BocadoArma: ✦ ¡El Eterno devora EL ARMA del peldaño!
@@ -3050,7 +3053,7 @@ Despertar: {
 	LibroEnInventario: (el libro se estremece) ESO lo conozco. Un LIBRO CONSAGRADO… déjalo caer al suelo, portador. QUIERO probarlo.
 	// v6.86 — THE CORRUPT BOOK (the gate of 20).
 	LibroDevorado: (páginas que se lamen) El LIBRO CONSAGRADO ya es mío: la puerta del despertar 20 NACE PAGA. Para siempre.
-	PuertaLibro: ✦ La mesa está completa… pero la puerta del 20 exige su LIBRO CONSAGRADO: consíguelo (1% rompiendo libros o abriendo cofres en la mazmorra · 50% la Muralla — o espera: al llegar al 19, el Eterno te lo ENTREGA) y déjalo caer delante de mí.
+	PuertaLibro: ✦ La mesa está completa… pero la puerta del 20 exige su LIBRO CONSAGRADO: consíguelo (50% al vencer cualquier jefe · 1% rompiendo libros o abriendo cofres en la mazmorra — o espera: al llegar al 19, el Eterno te lo ENTREGA) y déjalo caer delante de mí.
 	ReqLibroDevorado: Libro Consagrado: DEVORADO
 	ReqLibroPendiente: Libro Consagrado: consíguelo y déjalo caer delante del grimorio
 	LibroEntregado: ✦ (las páginas se abren solas) Toma, portador: MI LIBRO CONSAGRADO. La puerta del 20 lo exige — déjalo caer delante de mí cuando la mesa esté lista.
@@ -3080,6 +3083,7 @@ Despertar: {
 	CieloEsencias: esencias {0}/{1}
 	CieloMonedas: dinero: falta {0}
 	CieloMonedasPagadas: dinero pagado ✓
+	CieloEstrellas: falling stars {0}/{1}
 	CieloPuertaDeCaza: la puerta de la caza
 }
 
@@ -4220,11 +4224,7 @@ Buffs: {
 		Description: Mods.AethonMod.Buffs.NebulaJellyfishBuff.Description
 	}
 
-	OcasoActivoBuff: {
-		DisplayName: Ocaso Activo Buff
-		Description: Mods.AethonMod.Buffs.OcasoActivoBuff.Description
-	}
-
+	// v6.185 — LA EXTIRPACIÓN: OcasoActivoBuff murió con su arma (la letra: «borra las siguientes armas»).
 	OjoEternoBuff: {
 		DisplayName: Ojo Eterno Buff
 		Description: Mods.AethonMod.Buffs.OjoEternoBuff.Description
@@ -4240,11 +4240,7 @@ Buffs: {
 		Description: Mods.AethonMod.Buffs.QuemaduraVacioExterior.Description
 	}
 
-	SobrecalentadoBuff: {
-		DisplayName: Sobrecalentado Buff
-		Description: Mods.AethonMod.Buffs.SobrecalentadoBuff.Description
-	}
-
+	// v6.185 — LA EXTIRPACIÓN: SobrecalentadoBuff murió con su arma (la letra: «borra las siguientes armas»).
 	StellarCometBuff: {
 		DisplayName: Stellar Comet Buff
 		Description: Mods.AethonMod.Buffs.StellarCometBuff.Description
@@ -4445,6 +4441,7 @@ Projectiles: {
 	RayoSolarSelladoProjectile.DisplayName: Rayo Solar Sellado Projectile
 	EstallidoSelladoProjectile.DisplayName: Estallido Sellado Projectile
 	ParejaSelladoProjectile.DisplayName: Pareja Sellado Projectile
+	EstrellaGrimorioProjectile.DisplayName: Grimoire Star
 }
 
 Registro: {

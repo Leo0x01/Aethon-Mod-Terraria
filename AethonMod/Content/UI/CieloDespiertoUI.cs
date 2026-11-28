@@ -543,6 +543,19 @@ namespace AethonMod.Content.UI
                 Utils.DrawBorderString(sb, txtMo,
                     new Vector2(panel.Right - 128f, fy + 2f),
                     monedasOk ? TintaVerde : TintaTexto, 0.78f, 0f, 0.4f);
+
+                // v6.185 — LAS ESTRELLAS FUGACES del peldaño que viste a la
+                //     estrella (solo si las exige): bajo el dinero.
+                int estrellasNecesarias = Systems.DespertarGrimorio.EstrellasPara(n);
+                if (estrellasNecesarias > 0)
+                {
+                    bool estrellasOk = alma.OfrendaEstrellas >= estrellasNecesarias;
+                    string txtEs2 = string.Format(Language.GetTextValue(Clave("CieloEstrellas")),
+                        alma.OfrendaEstrellas, estrellasNecesarias);
+                    Utils.DrawBorderString(sb, (estrellasOk ? "[✓] " : "[•] ") + txtEs2,
+                        new Vector2(panel.Right - 210f, fy + 18f),
+                        estrellasOk ? TintaVerde : new Color(255, 208, 96), 0.78f, 0f, 0.4f);
+                }
             }
         }
 

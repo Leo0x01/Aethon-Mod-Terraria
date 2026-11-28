@@ -1366,37 +1366,6 @@ namespace AethonMod.Content.Players
             return idx >= 0 ? MuertesInteriorCuenta[idx] : 0;
         }
 
-        // ================================================================
-        // ================================================================
-        //  v6.180 — EL PEDACITO DEL DEVORAMUNDOS (la letra: «que ocurra
-        //  la primera vez que aparece el Devoramundos y que al igual que
-        //  los demas jefes su festin se reinicie con la pagina en
-        //  blanco»): la marca vive con el portador — la PRIMERA
-        //  aparición sirve el pedacito (UNA sección, la cola) y la
-        //  Página en Blanco la devuelve a la mesa. El contador de la
-        //  2ª invocación y su llamada pendiente MURIERON con la
-        //  aspiradora (la animación que nunca ocurría).
-        //  v6.182 — LA MARCA DE LA LLAMADA (la autopsia del festín que
-        //  no iniciaba): la v6.180 armaba el pedacito con CUALQUIER
-        //  cabeza de Devorador nacida cerca — y LOS GUARDIANES DE LAS
-        //  OLEADAS también son Devoradores (LosSeis): el primer
-        //  guardián de oleada se comía la marca sin que el portador
-        //  viera NADA. AHORA el pedacito solo se sirve con la cabeza
-        //  nacida de UNA INVOCACIÓN REAL del portador: el pilar y la
-        //  comida de gusano (dentro y fuera del interior) la MARCAN
-        //  aquí, y OnSpawn la consume al nacer la cabeza.
-        // ================================================================
-        public bool DevoramundosPedacito;
-
-        /// <summary>v6.183 — LA MIGRACIÓN ÚNICA del cerrojo quemado por
-        /// las oleadas de la era v6.180/.181 (ver OnEnterWorld).</summary>
-        public bool DevoramundosPedacitoMigrado;
-
-        // (v6.183 — LA MARCA DE LA LLAMADA MURIÓ ENTERA, campo incluido:
-        // la aparición del Devoramundo es la llave del festín ahora —
-        // OnSpawn la sirve sin intermediarios. La era de la marca
-        // v6.179-v6.182 queda contada en el CHANGES de esta versión.)
-
         /// <summary>v6.180 — LA PRIMERA VEZ CON EL CRONISTA (la letra:
         /// «hay que dejar claro que el lore lo escribió el mismo
         /// cronista y eso se hace la primera vez que el jugador habla
@@ -1563,21 +1532,6 @@ namespace AethonMod.Content.Players
             if (Player.whoAmI == Main.myPlayer && !Main.dedServ)
                 EntregarRegaloDePruebas();
 
-            // v6.183 — LA MIGRACIÓN DEL CERROJO QUEMADO (la letra:
-            // «la animacion para devorar al Devoramundos SIGUE sin
-            // activarse»): la era v6.180/.181 dejó cerrojos
-            // DevoramundosPedacito quemados por guardianes de OLEADA
-            // (el pedacito servido en la bruma, lejos de la vista —
-            // nadie lo vio) y v6.182 curó el futuro pero no el pasado:
-            // el cerrojo muerto vivía en el .plr para siempre. UNA
-            // sola vez por portador, el cerrojo viejo VUELVE A LA MESA
-            // — la aparición del Devoramundo (v6.183) lo quemará de
-            // verdad, a la vista de todos.
-            if (DevoramundosPedacito && !DevoramundosPedacitoMigrado)
-            {
-                DevoramundosPedacito = false;
-                DevoramundosPedacitoMigrado = true;
-            }
         }
 
         // ================================================================
@@ -1809,15 +1763,6 @@ namespace AethonMod.Content.Players
                 // por jefe — el poder +25% por muerte persiste).
                 tag["muertesInteriorTipos"] = MuertesInteriorTipos;
                 tag["muertesInteriorCuenta"] = MuertesInteriorCuenta;
-                // v6.175 — LAS INVOCACIONES DEL PILAR (la segunda llamada
-                // del Devorador desata la ASPIRADORA del grimorio)
-                tag["devoramundosPedacito"] = DevoramundosPedacito;
-                tag["devoramundosPedacitoMigrado"] = DevoramundosPedacitoMigrado;
-                // v6.182 — LA MIGRACIÓN DEL FÓSIL DEL FESTÍN: los
-                // guardados de la era v6.180-v6.181 pudieron quemar la
-                // marca con un GUARDIÁN DE OLEADA (la autopsia del festín
-                // que no iniciaba) — la mecánica cambió: se revive UNA vez
-                tag["pedacitoV2"] = true;
                 tag["primeraVezCronista"] = PrimeraVezCronista;
                 // v6.50.115 — EL FESTÍN DEL GUARDIÁN (el easter egg de la
                 // Mazmorra: una vez por portador)
@@ -1889,15 +1834,6 @@ namespace AethonMod.Content.Players
                 LoreDesbloqueado = tag.GetInt("loreDesbloqueado");
                 MuertesInteriorTipos = new System.Collections.Generic.List<int>(tag.GetList<int>("muertesInteriorTipos"));
                 MuertesInteriorCuenta = new System.Collections.Generic.List<int>(tag.GetList<int>("muertesInteriorCuenta"));
-                // v6.175 — LAS INVOCACIONES DEL PILAR (ausente = lista
-                // vacía: los guardados viejos estrenan su Devorador)
-                DevoramundosPedacito = tag.GetBool("devoramundosPedacito");
-                DevoramundosPedacitoMigrado = tag.GetBool("devoramundosPedacitoMigrado");
-                // v6.182 — LA MIGRACIÓN DEL FÓSIL: los guardados de la era
-                // v6.180-v6.181 traen la marca quemada por el agujero de
-                // las oleadas — la mecánica NUEVA la revive una única vez
-                if (!tag.ContainsKey("pedacitoV2"))
-                    DevoramundosPedacito = false;
                 PrimeraVezCronista = tag.GetBool("primeraVezCronista");
                 // v6.50.115 — EL FESTÍN DEL GUARDIÁN (ausente = false: aún
                 // no ocurrió — el guardado viejo estrena el easter egg)

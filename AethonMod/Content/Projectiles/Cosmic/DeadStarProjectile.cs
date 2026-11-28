@@ -94,6 +94,23 @@ namespace AethonMod.Content.Projectiles.Cosmic
             Projectile.velocity += new Vector2(wobX, wobY) * 0.05f;
             if (Projectile.velocity.Length() > 0.8f)
                 Projectile.velocity = Vector2.Normalize(Projectile.velocity) * 0.8f;
+            // v6.185 — EL SEGUIMIENTO HEREDADO (ai[2] > 0: la velocidad de
+            //     caza que presta la estrella del grimorio — «seguira
+            //     agresivamente a los enemigos», 10 % menos que sus
+            //     hermanas): 600 px de caza y un empuje firme; sin ai[2],
+            //     el vagar del cadáver de siempre.
+            if (Projectile.ai[2] > 0f)
+            {
+                NPC presa = FindNearestEnemy(600f);
+                if (presa != null)
+                {
+                    Vector2 hacia = presa.Center - Projectile.Center;
+                    float l = hacia.Length();
+                    if (l > 0.01f) Projectile.velocity += hacia / l * 0.80f;
+                    if (Projectile.velocity.Length() > Projectile.ai[2])
+                        Projectile.velocity = Vector2.Normalize(Projectile.velocity) * Projectile.ai[2];
+                }
+            }
 
             // === EL DAÑO DE ENTROPÍA: 8 p/s — daño BAJO y FRECUENTE
             //     (v6.50 — GolpeMotor, el cauce del motor: cada 15 ticks,
@@ -133,6 +150,21 @@ namespace AethonMod.Content.Projectiles.Cosmic
                 d.noGravity = false;   // las brasas CAEN (frías y muertas)
                 d.fadeIn = 0f;
             }
+        }
+
+        /// <summary>v6.185 — LA PRESA más cercana en un radio (el
+        /// seguimiento heredado de la estrella del grimorio).</summary>
+        private NPC FindNearestEnemy(float maxRange)
+        {
+            NPC best = null;
+            float bestDist = maxRange;
+            foreach (NPC npc in Main.ActiveNPCs)
+            {
+                if (!VFXCore.EsObjetivo(npc)) continue;
+                float dist = (npc.Center - Projectile.Center).Length();
+                if (dist < bestDist) { bestDist = dist; best = npc; }
+            }
+            return best;
         }
 
         public override bool PreDraw(ref Color lightColor)

@@ -149,6 +149,171 @@ namespace AethonMod.Content.Systems
         }
 
         // ================================================================
+        //  v6.185 — LA ESTRELLA DEL GRIMORIO: EL ATAQUE BÁSICO POR NIVEL DE
+        //  DESPERTAR (0-120). La letra entera vive en el proyectil
+        //  (Projectiles/Grimorio/EstrellaGrimorioProjectile); AQUÍ viven
+        //  las TABLAS puras — una sola fuente de verdad para el arma, la
+        //  mesa, los textos y los gates.
+        //
+        //  BASE: el proyectil del Bastón de Sinfonía Primordial (la
+        //  estrellita + los haces en cada punta + el anillo rúnico del
+        //  agujero negro + los arcos entre runas + LA EXPLOSIÓN, que es
+        //  INMUTABLE). El nivel de despertar lo VISTE pieza a pieza:
+        //    0  → SOLO la estrella, NEGRA, SIN explosión (se esfuma al
+        //         chocar con pared o enemigo)
+        //    2  → seguimiento leve (10 %)
+        //    5  → la estrella MULTICOLOR (negro · dorado · morado · rojo)
+        //    10 → el anillo rúnico del agujero negro
+        //    15 → el anillo cambia de color (misma paleta, otro orden)
+        //    20 → los haces de luz en cada punta
+        //    25 → los haces multicolor (otro orden)
+        //    30 → EXPLOSA (la original, versión reducida ×0,55)
+        //    35 → la explosión COMPLETA (la original, sin cambios)
+        //    40/45/50 → seguimiento 20 % · 30 % · 40 %
+        //    55 → +20 % ataque base · SEGUNDO anillo rúnico
+        //    75 → los 2 anillos giran en sentidos opuestos · +20 % · seg 60 %
+        //    95 → +20 % · cada anillo con SU arco eléctrico (contrarrotante) · seg 80 %
+        //   100 → al explotar se vuelve CETRO DE TORMENTA NEBULAR (2 s) · +20 % · atraviesa paredes
+        //   105 → los arcos atacan a los cercanos · +1 salto por cada 3 niveles
+        //   110 → la Tormenta también ramifica sus arcos (el mismo sistema)
+        //   115/116/117 → la Tormenta implosiona → MAGNETAR · ENANA BLANCA · ESTRELLA MUERTA (3 s)
+        //   118 → TODO aplica QUEMADURA DEL VACÍO
+        //   119 → 3 %: una SOMBRA DE LA PÁGINA (2 s) con el daño acumulado
+        //   120 → 5 %: CINCO sombras (5 s, quemadura 10 s) · +20 %
+        // ================================================================
+
+        /// <summary>LOS NIVELES QUE VISTEN A LA ESTRELLA — cada uno exige
+        /// sus Estrellas Fugaces consagradas en la mesa del despertar.</summary>
+        public static readonly int[] NivelesDeLaEstrella =
+        {
+            2, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 75, 95, 100,
+            105, 110, 115, 116, 117, 118, 119, 120,
+        };
+
+        /// <summary>v6.185 — ¿ESTE nivel viste a la estrella?</summary>
+        public static bool EsNivelDeLaEstrella(int nivel)
+            => System.Array.IndexOf(NivelesDeLaEstrella, nivel) >= 0;
+
+        /// <summary>LA TABLA DE ESTRELLAS FUGACES por nivel (la letra: «la
+        /// cantidad de estrellas fugaces que seran requerida iran de 1 a
+        /// 1000, siendo 1000 las necesarias para el nivel 120»): curva
+        /// geométrica suave sobre los 23 peldaños de la estrella — barata
+        /// al principio, digna al final. Total del camino: 9.008 estrellas
+        /// (90.080 esencias del Eterno — el precio de un arma que
+        /// despierta hasta la cima).</summary>
+        public static readonly int[] EstrellasPorPeldano =
+        {
+            1, 2, 4, 7, 12, 20, 32, 50, 75, 110, 160, 230, 330, 450, 560,
+            660, 750, 830, 880, 920, 950, 975, 1000,
+        };
+
+        /// <summary>v6.185 — LAS ESTRELLAS FUGACES que exige el nivel N
+        /// (0 si el nivel no viste a la estrella).</summary>
+        /// <summary>El tipo del ítem Estrella Fugaz Consagrada (cacheado —
+        /// la mesa y la tienda lo preguntan cada pulso).</summary>
+        private static int _tipoEstrella = -1;
+
+        public static int TipoEstrellaFugaz()
+        {
+            if (_tipoEstrella < 0)
+                _tipoEstrella = ModContent.ItemType
+                    <global::AethonMod.Content.Items.EstrellaFugazConsagrada>();
+            return _tipoEstrella;
+        }
+
+        public static int EstrellasPara(int nivel)
+        {
+            int i = System.Array.IndexOf(NivelesDeLaEstrella, nivel);
+            return i >= 0 ? EstrellasPorPeldano[i] : 0;
+        }
+
+        /// <summary>El ATAQUE BASE de la estrella (la letra: «el ataque base
+        /// del proyectil es 0 en nivel 0 de despertar, pero por cada nivel
+        /// de despertar el ataque base del proyectil aumenta en 1 punto […]
+        /// la suma de todos los aumentos de daño conseguidos mediante el
+        /// despertar como los aumentos de 20 % en nivel de despertar 55,
+        /// 75, 95, 100, y 120»): base = nivel · (1 + 0,20 × hitos
+        /// alcanzados). A los 120: 120 × 2,0 = 240. Se SUMA al daño mágico
+        /// final del grimorio (GrimoireEternal.ModifyWeaponDamage: Flat)
+        /// y el 70 % al daño de invocación final (DanoOjosDelEterno).</summary>
+        public static readonly int[] HitoMasVeinte = { 55, 75, 95, 100, 120 };
+
+        public static int HitosDeVeinteAlcanzados(int despertar)
+        {
+            int k = 0;
+            for (int i = 0; i < HitoMasVeinte.Length; i++)
+                if (despertar >= HitoMasVeinte[i]) k++;
+            return k;
+        }
+
+        public static int AtaqueBaseEstrella(int despertar)
+        {
+            int n = System.Math.Clamp(despertar, 0, NivelMax);
+            float base_ = n * (1f + 0.20f * HitosDeVeinteAlcanzados(n));
+            return (int)System.Math.Round(base_);
+        }
+
+        /// <summary>EL SEGUIMIENTO de la estrella (0..1): la fracción del
+        /// giro máximo (0,08 rad/t) que la estrella corrige hacia su presa
+        /// cada tick. Los peldaños de la letra (10/20/30/40/60/80 %) y
+        /// las cimas intermedias: 55 → 50 % (entre el 40 del 50 y el 60
+        /// del 75), 100 → 80 % (no baja al llegar a la cima).</summary>
+        public static float SeguimientoEstrella(int despertar)
+        {
+            if (despertar >= 95) return 0.80f;
+            if (despertar >= 75) return 0.60f;
+            if (despertar >= 55) return 0.50f;
+            if (despertar >= 50) return 0.40f;
+            if (despertar >= 45) return 0.30f;
+            if (despertar >= 40) return 0.20f;
+            if (despertar >= 2) return 0.10f;
+            return 0f;
+        }
+
+        /// <summary>LOS SALTOS de los arcos (105+): 1 objetivo al 105 y +1
+        /// por cada 3 niveles (108 → 2 … 120 → 6). Antes del 105: 0 (los
+        /// arcos no atacan).</summary>
+        public static int SaltosDeLosArcos(int despertar)
+        {
+            if (despertar < 105) return 0;
+            return 1 + (despertar - 105) / 3;
+        }
+
+        /// <summary>La TORMENTA NEBULAR (100+): ¿nace al explotar?</summary>
+        public static bool TormentaAlExplotar(int despertar) => despertar >= 100;
+
+        /// <summary>La Tormenta también ramifica sus arcos (110+).</summary>
+        public static bool TormentaRamifica(int despertar) => despertar >= 110;
+
+        /// <summary>v6.185 — ¿La Tormenta implosiona en una estrella hija
+        /// (115+)? La probabilidad (15 % — «una pequeña posibilidad») y
+        /// LAS TRES: 115 → Magnetar · 116 → + Enana Blanca · 117 → + Estrella
+        /// Muerta. Devuelve 0 = nada · 1 Magnetar · 2 Enana Blanca · 3 Estrella
+        /// Muerta (sortea entre las desbloqueadas).</summary>
+        public static int ImplosionDeLaTormenta(int despertar, int semilla)
+        {
+            if (despertar < 115) return 0;
+            int v = (int)(global::AethonMod.Content.VFX.VFXCore.Hash01(semilla, 6185, despertar) * 1000f);
+            // 15 %: el sorteo de la semilla cae en la ventana
+            if (v >= 150) return 0;
+            int desbloqueadas = despertar >= 117 ? 3 : despertar >= 116 ? 2 : 1;
+            int dado = (int)(global::AethonMod.Content.VFX.VFXCore.Hash01(semilla, 117, despertar) * desbloqueadas);
+            return System.Math.Clamp(dado, 1, desbloqueadas);
+        }
+
+        /// <summary>v6.185 — ¿Todo aplica QUEMADURA DEL VACÍO? (118+).</summary>
+        public static bool QuemaduraDelVacio(int despertar) => despertar >= 118;
+
+        /// <summary>El porcentaje de SOMBRA DE LA PÁGINA: 119 → 3 % (una, 2 s) ·
+        /// 120 → 5 % (cinco, 5 s, quemadura 10 s).</summary>
+        public static float ProbabilidadSombra(int despertar)
+            => despertar >= 120 ? 0.05f : despertar >= 119 ? 0.03f : 0f;
+
+        public static int SombrasDelDisparo(int despertar) => despertar >= 120 ? 5 : 1;
+
+        public static int VidaDeLasSombras(int despertar) => despertar >= 120 ? 300 : 120;
+
+        // ================================================================
         //  LAS OFRENDAS DEL NIVEL N (esencias · dinero · arma del peldaño)
         // ================================================================
 

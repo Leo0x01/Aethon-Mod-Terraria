@@ -77,6 +77,9 @@ namespace AethonMod.Content.Globals
                         global::AethonMod.Content.Globals.AlmaEternoGlobalItem
                             .BancoMonedasDisponibles(almaReq) >=
                         Systems.DespertarGrimorio.MonedasPara(siguiente),
+                    // v6.185 — LAS ESTRELLAS FUGACES del peldaño (la mesa las come).
+                    "DespertarReq3b" => almaReq != null &&
+                        almaReq.OfrendaEstrellas >= Systems.DespertarGrimorio.EstrellasPara(siguiente),
                     // v6.51.11 — EL REQUISITO DEL ARMA: v6.89 — el
                     //     arma de magia/invocador SIN corrupción (la
                     //     mesa devora UNA de las alternativas).

@@ -151,6 +151,12 @@ namespace AethonMod.Content.Globals
         /// <summary>Las esencias corruptas ya comidas de ESTE peldaño.</summary>
         public int OfrendaEsencias = 0;
 
+        /// <summary>v6.185 — LAS ESTRELLAS FUGACES CONSAGRADAS ya comidas de
+        /// ESTE peldaño (la letra: «el grimorio solo comera las estrellas
+        /// fugaces consagradas» — el peldaño que viste a la estrella las
+        /// exige: DespertarGrimorio.EstrellasPara).</summary>
+        public int OfrendaEstrellas = 0;
+
         /// <summary>El dinero ya comido de ESTE peldaño (en cobre).</summary>
         public long OfrendaMonedas = 0L;
 
@@ -875,6 +881,8 @@ namespace AethonMod.Content.Globals
                 // parciales del peldaño vivo: la comida se sirve en el
                 // suelo y el libro come solo lo que le falta).
                 if (OfrendaEsencias > 0) tag["almaOfrendaEsencias"] = OfrendaEsencias;
+                // v6.185 — LAS ESTRELLAS FUGACES del peldaño (tope 1.000).
+                if (OfrendaEstrellas > 0) tag["almaOfrendaEstrellas"] = OfrendaEstrellas;
                 if (OfrendaMonedas > 0L) tag["almaOfrendaMonedas"] = OfrendaMonedas;
                 if (OfrendaMineral > 0) tag["almaOfrendaMineral"] = OfrendaMineral;
                 // v6.89 — LA MESA NUEVA: el grupo bloqueado (-1 = aún
@@ -937,6 +945,9 @@ namespace AethonMod.Content.Globals
                 DevoracionPoder = System.Math.Max(0, System.Math.Min(999999, tag.GetInt("almaPoder")));
                 // v6.51.11 — LA MESA DEL DESPERTAR (contadores parciales).
                 OfrendaEsencias = System.Math.Max(0, System.Math.Min(9999, tag.GetInt("almaOfrendaEsencias")));
+                // v6.185 — LAS ESTRELLAS FUGACES (ausente = 0: el guardado viejo
+                //     estrena su peldaño sin estrellas comidas).
+                OfrendaEstrellas = System.Math.Max(0, System.Math.Min(9999, tag.GetInt("almaOfrendaEstrellas")));
                 OfrendaMonedas = System.Math.Max(0L, System.Math.Min(9_999_999L, tag.GetLong("almaOfrendaMonedas")));
                 OfrendaMineral = System.Math.Max(0, System.Math.Min(9999, tag.GetInt("almaOfrendaMineral")));
                 // v6.89 — LA MIGRACIÓN DE LA MESA: saves VIEJOS (sin la
@@ -998,6 +1009,7 @@ namespace AethonMod.Content.Globals
                 PetDelDespertar = false;
                 DevoracionPoder = 0;
                 OfrendaEsencias = 0;
+                OfrendaEstrellas = 0;
                 OfrendaMonedas = 0L;
                 OfrendaMineral = 0;
                 OfrendaArma = false;
@@ -1040,6 +1052,7 @@ namespace AethonMod.Content.Globals
                 // v6.51.11 — LA MESA DEL DESPERTAR (contadores parciales
                 // del peldaño vivo — los tooltips del portador los leen).
                 writer.Write(OfrendaEsencias);
+                writer.Write(OfrendaEstrellas);   // v6.185 — las estrellas del peldaño
                 writer.Write(OfrendaMonedas);
                 writer.Write(OfrendaMineral);
                 writer.Write(OfrendaArma);
@@ -1097,6 +1110,7 @@ namespace AethonMod.Content.Globals
                 {
                     // v6.51.11 — LA MESA DEL DESPERTAR.
                     OfrendaEsencias = System.Math.Max(0, reader.ReadInt32());
+                    OfrendaEstrellas = System.Math.Max(0, reader.ReadInt32());   // v6.185
                     OfrendaMonedas = System.Math.Max(0L, reader.ReadInt64());
                     OfrendaMineral = System.Math.Max(0, reader.ReadInt32());
                     OfrendaArma = reader.ReadBoolean();

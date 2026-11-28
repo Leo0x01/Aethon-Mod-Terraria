@@ -31,11 +31,11 @@ namespace AethonMod.Content.Items
     ///   probar el evento las veces que haga falta — si ya hay un libro
     ///   dormido esperándolo en un cráter, ESO no se borra: el evento ya
     ///   está servido, solo hay que ir por él).
-    /// · v6.50.125 — Y TAMBIÉN EL CIELO DE ESTE MUNDO: la página borra la
-    ///   memoria del MUNDO (los nombres que ya vivieron su caída aquí —
-    ///   _cayoEnEsteMundo, el silenciador por-mundo de la .125): el
-    ///   probador puede re-estrenar LA CAÍDA EN EL MISMO MUNDO sin abrir
-    ///   uno nuevo cada vez.
+    /// · v6.185 — EL CIELO DEL MUNDO YA NO SE BORRA: la memoria del mundo
+    ///   (_cayoEnEsteMundo) queda intacta — La Llegada es UNA por mundo por
+    ///   jugador (la letra) y la página ya no la re-estrena. Para probarla
+    ///   de nuevo: otro mundo (o la Tinta del Cometa, si aún no se porta el
+    ///   grimorio).
     /// · Sin receta: llega con la Bolsa Probador (el kit de pruebas).
     /// </summary>
     public class PaginaEnBlanco : ModItem
@@ -88,11 +88,10 @@ namespace AethonMod.Content.Items
                 sp.GuardianMazmorraDevorado = false;
                 // v6.180 — EL FESTÍN DEL DEVORAMUNDOS SE REINICIA (la
                 //     letra: «al igual que los demas jefes su festin se
-                //     reinicie con la pagina en blanco»): el pedacito
+                //     reinicie con la pagina en blanco»): el festín del Devoramundo
                 //     vuelve a la mesa — la PRÓXIMA vez que el
                 //     Devoramundos aparezca, el grimorio vuelve a
                 //     comerse UNA sección y a decir su pensamiento.
-                sp.DevoramundosPedacito = false;
                 // v6.50.121 — LA MARCA DE LA CAÍDA también se borra: el
                 //     cielo vuelve a estar en blanco y el cometa cruzará
                 //     la primera noche del portador otra vez (las
@@ -104,12 +103,13 @@ namespace AethonMod.Content.Items
                     sp.CaidaRecibida = false;
                     borraCaida = true;
                 }
-                // v6.50.125 — EL CIELO DE ESTE MUNDO TAMBIÉN QUEDA EN BLANCO:
-                // la página borra la memoria del mundo (los nombres que ya
-                // vivieron su caída aquí) — el probador re-estrena LA CAÍDA
-                // en el mismo mundo, sin abrir uno nuevo.
-                if (LaCaidaSistema.OlvidarCaidaDelMundo(player.name))
-                    borraCaida = true;
+                // v6.185 — EL CIELO DEL MUNDO YA NO SE OLVIDA (la letra:
+                //     «solo si nunca a visto el evento de la llegada en ese
+                //     mundo especifico […] que sea algo que siempre suceda
+                //     en un mundo nuevo por jugador»): la memoria del MUNDO
+                //     (_cayoEnEsteMundo) queda INTACTA — La Llegada es el
+                //     origen, una vez por mundo por jugador, punto. La página
+                //     sigue borrando los festines y los tríos.
             }
 
             // LA VOZ del olvido (en la pantalla del portador): cuántos

@@ -119,31 +119,34 @@ namespace AethonMod.Content.Globals
                 catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CazaJefesGlobalNPC", exRegistro); }
 
                 // ============================================================
-                //  v6.86 — LA MURALLA SUELTA EL LIBRO (la letra del
-                //  peldaño 20): «o que directamente lo suelte la muralla
-                //  de carne con una probabilidad del 50%» — el LIBRO
-                //  CORRUPTO cae al suelo del mundo (lo levanta quien no
-                //  tenga el suyo: CanPickup filtra al resto — 1 por
-                //  cazador, para siempre).
-                //  v6.97 — LA ÚNICA CAÍDA: la Muralla solo escupe el
-                //  libro si quien la VENCIÓ todavía no recibió ni
-                //  consumió el suyo (la letra: «el libro consagrado solo
-                //  debe caer 1 vez»).
+                //  v6.185 — TODO JEFE SUELTA EL LIBRO (la letra: «asegurate
+                //  de que cada jefe tenga una probabilidad del 50% de
+                //  soltar el Libro Consagrado, pero si ya esta en el
+                //  inventario del jugador este no sale»). La Muralla
+                //  (v6.86) deja de ser la única: CUALQUIER jefe — vanilla
+                //  o del mod — tira UNA VEZ por jefe vencido.
+                //
+                //  UNA TIRADA POR JEFE, NO POR SEGMENTO: los gusanos y los
+                //  jefes de varios cuerpos matan a cada pieza por separado
+                //  (y en vanilla los segmentos del Devoramundo NI LLEVAN
+                //  boss=true — decompile NPC.SetDefaults: solo la cabeza
+                //  cuenta en ShouldBeCountedAsBoss). La tirada espera a la
+                //  ÚLTIMA pieza de la familia: mientras quede una viva
+                //  (excluyendo la que muere ahora), el jefe aún no cayó.
+                //  Los pilares lunares y el Dios de las Antorchas (también
+                //  boss=true en vanilla) NO son jefes de este botín.
+                //
+                //  LA REGLA DEL INVENTARIO (la letra): si el cazador que lo
+                //  venció YA lleva el libro encima, o ya lo consumió, el
+                //  libro NO sale. Lo recoge quien no lo lleve (OnPickup).
                 // ============================================================
-                if (npc.type == NPCID.WallofFlesh && Main.rand.NextBool(2))
+                if (EsJefeConBotin(npc) && EsLaUltimaPieza(npc))
                 {
-                    int kLibro = npc.lastInteraction;
-                    bool cazadorHambriento = false;
-                    if (kLibro >= 0 && kLibro < Main.maxPlayers)
-                    {
-                        Player pjLibro = Main.player[kLibro];
-                        var cazadorLibro = pjLibro != null && pjLibro.active
-                            ? pjLibro.GetModPlayer<Players.CazaJefesPlayer>() : null;
-                        if (cazadorLibro != null && !cazadorLibro.LibroUsado &&
-                            !cazadorLibro.LibroRecibido)
-                            cazadorHambriento = true;
-                    }
-                    if (cazadorHambriento)
+                    Player pjLibro = ElCazadorDe(npc);
+                    var cazadorLibro = pjLibro != null
+                        ? pjLibro.GetModPlayer<Players.CazaJefesPlayer>() : null;
+                    if (cazadorLibro != null && Systems.DespertarGrimorioSistema.ElLibroPuedeCaerle(pjLibro, cazadorLibro)
+                        && Main.rand.NextBool(2))
                     {
                         int idx = Item.NewItem(npc.GetSource_Loot(), npc.Hitbox,
                             ModContent.ItemType<Items.Altar.LibroCorrupto>(), 1);
@@ -153,6 +156,86 @@ namespace AethonMod.Content.Globals
                 }
             }
             catch (System.Exception exRegistro) { global::AethonMod.Content.Systems.RegistroSistema.Fallo("CazaJefesGlobalNPC", exRegistro); }
+        }
+
+        /// <summary>v6.185 — ¿ESTE NPC es un JEFE con derecho al botín del
+        /// libro? Todo jefe de vanilla y del mod (boss=true), el Devoramundo
+        /// (sus segmentos entran por la familia), y FUERA los pilares
+        /// lunares y el Dios de las Antorchas (boss=true en vanilla pero
+        /// no son jefes que se venzan por el botín).</summary>
+        private static bool EsJefeConBotin(NPC npc)
+        {
+            if (npc == null) return false;
+            if (npc.type == NPCID.TorchGod) return false;
+            if (npc.type == NPCID.LunarTowerSolar || npc.type == NPCID.LunarTowerVortex ||
+                npc.type == NPCID.LunarTowerNebula || npc.type == NPCID.LunarTowerStardust)
+                return false;
+            return npc.boss || NPCID.Sets.ShouldBeCountedAsBoss[npc.type] || FamiliaDelJefe(npc.type) > 0;
+        }
+
+        /// <summary>v6.185 — LA FAMILIA del jefe (0 = cuerpo único): los
+        /// jefes que vanilla parte en varios NPC y que mueren EN CADENA.
+        /// La tirada del libro espera a que no quede NINGUNO vivo.</summary>
+        private static int FamiliaDelJefe(int tipo)
+        {
+            return tipo switch
+            {
+                NPCID.EaterofWorldsHead or NPCID.EaterofWorldsBody or NPCID.EaterofWorldsTail => 1,
+                NPCID.TheDestroyer or NPCID.TheDestroyerBody or NPCID.TheDestroyerTail => 2,
+                NPCID.MoonLordHead or NPCID.MoonLordHand or NPCID.MoonLordCore => 3,
+                NPCID.SkeletronHead or NPCID.SkeletronHand => 4,
+                NPCID.Golem or NPCID.GolemHead or NPCID.GolemFistLeft or NPCID.GolemFistRight => 5,
+                NPCID.WallofFlesh or NPCID.WallofFleshEye => 6,
+                NPCID.SkeletronPrime or NPCID.PrimeCannon or NPCID.PrimeSaw or NPCID.PrimeVice or NPCID.PrimeLaser => 7,
+                NPCID.MartianSaucerCore or NPCID.MartianSaucerTurret or NPCID.MartianSaucerCannon => 8,
+                _ => 0,
+            };
+        }
+
+        /// <summary>v6.185 — ¿Es ESTA la última pieza de su jefe? Para los
+        /// cuerpos únicos, siempre. Para las familias: mientras quede OTRA
+        /// pieza viva del mismo jefe (que no sea la que muere ahora), el
+        /// jefe sigue en pie y la tirada espera. OnKill corre con el NPC
+        /// aún «active»: se excluye por whoAmI.</summary>
+        private static bool EsLaUltimaPieza(NPC npc)
+        {
+            int familia = FamiliaDelJefe(npc.type);
+            if (familia == 0) return true;
+            for (int i = 0; i < Main.maxNPCs; i++)
+            {
+                NPC otro = Main.npc[i];
+                if (otro == null || !otro.active || i == npc.whoAmI) continue;
+                if (FamiliaDelJefe(otro.type) == familia) return false;
+            }
+            return true;
+        }
+
+        /// <summary>v6.185 — EL CAZADOR que venció al jefe (quien decide si
+        /// el libro sale o no): el último jugador que lo golpeó; si la
+        /// interacción no sirve (un jefe muerto por el entorno, una
+        /// trampa), el jugador vivo más cercano.</summary>
+        private static Player ElCazadorDe(NPC npc)
+        {
+            try
+            {
+                int k = npc.lastInteraction;
+                if (k >= 0 && k < Main.maxPlayers)
+                {
+                    Player p = Main.player[k];
+                    if (p != null && p.active) return p;
+                }
+                Player mejor = null;
+                float mejorD = float.MaxValue;
+                for (int i = 0; i < Main.maxPlayers; i++)
+                {
+                    Player p = Main.player[i];
+                    if (p == null || !p.active) continue;
+                    float d = p.Center.DistanceSQ(npc.Center);
+                    if (d < mejorD) { mejorD = d; mejor = p; }
+                }
+                return mejor;
+            }
+            catch { return null; }
         }
 
         /// <summary>LA PUERTA QUE PAGA ESTE NPC (0 = ninguno de la
