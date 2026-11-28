@@ -1,6 +1,6 @@
 # SNAPSHOT ESTABLE — v6.185 — LA ESTRELLA DEL GRIMORIO, EL FESTÍN POR LA CENA Y LAS CUATRO ARMAS EXTIRPADAS
 
-> **PUBLICADA — release de GitHub 461165625 · md5 15c9176fbbe834921cd045bd3dd13e20 (CDN verificado byte a byte) · AethonMod_v6.184.tmod · tML 2026.09.3.1**
+> **PUBLICADA — release de GitHub 461325743 — md5 bf299b34237a9d84f4866096f5d3bd7b (CDN verificado byte a byte) — AethonMod_v6.185.tmod · tML 2026.09.3.1**
 
 ## LOS NUEVE PUNTOS DE LA SESIÓN 37 (v6.185)
 
